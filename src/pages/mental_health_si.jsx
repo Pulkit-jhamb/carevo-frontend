@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ReactMarkdown from 'react-markdown';
+import { API_ENDPOINTS } from '../config';
 
 const BOT_AVATAR = (
   <span className="w-10 h-10 rounded-full bg-black flex items-center justify-center text-white font-bold text-lg shadow">
@@ -39,7 +40,7 @@ export default function MentalHealthChatbot() {
 
     try {
       const email = localStorage.getItem("userEmail");
-      const res = await fetch("http://localhost:5001/mental_health_chat", {
+      const res = await fetch(API_ENDPOINTS.MENTAL_HEALTH_CHAT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: input, email }),

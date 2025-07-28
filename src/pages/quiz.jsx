@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_ENDPOINTS } from '../config';
 
 
 const quizSections = [
@@ -394,7 +395,7 @@ ${qaPairs
 `;
 
     try {
-      const res = await fetch("http://localhost:5001/ai", {
+      const res = await fetch(API_ENDPOINTS.AI, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ prompt }),
@@ -408,7 +409,7 @@ ${qaPairs
       const recommendationTitles = extractRecommendationTitles(recommendations);
       const email = localStorage.getItem("userEmail");
 
-      await fetch("http://localhost:5001/user/update", {
+      await fetch(API_ENDPOINTS.USER_UPDATE, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, conclusion, recommendations: recommendationTitles }),

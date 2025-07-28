@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import carevoLogo from "../assets/carevo_logo_clean.png";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { API_ENDPOINTS } from "../config";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -18,7 +19,7 @@ export default function Login() {
     }
 
     try {
-      const res = await axios.post("http://localhost:5001/login", {
+      const res = await axios.post(API_ENDPOINTS.LOGIN, {
         email,
         password,
       });

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import carevoLogo from "../assets/carevo_logo_clean.png";
 import { useNavigate } from "react-router-dom";
+import { API_ENDPOINTS } from "../config";
 
 
 
@@ -76,7 +77,7 @@ export default function Signup() {
 
 
    try {
-     const response = await fetch("http://localhost:5001/signup", {
+     const response = await fetch(API_ENDPOINTS.SIGNUP, {
        method: "POST",
        headers: {
          "Content-Type": "application/json",

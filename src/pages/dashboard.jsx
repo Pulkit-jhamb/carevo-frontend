@@ -8,6 +8,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
+import { API_ENDPOINTS } from "../config";
 
 export default function StudentDashboard() {
   const [user, setUser] = useState(null);
@@ -19,7 +20,7 @@ export default function StudentDashboard() {
     const email = localStorage.getItem("userEmail");
     if (!email) return;
 
-        fetch(`http://localhost:5001/user?email=${encodeURIComponent(email)}`)
+        fetch(`${API_ENDPOINTS.USER}?email=${encodeURIComponent(email)}`)
       .then((res) => res.json())
       .then((data) => {
         setUser(data);
