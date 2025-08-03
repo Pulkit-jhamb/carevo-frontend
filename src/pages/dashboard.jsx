@@ -1,170 +1,365 @@
 import React, { useEffect, useState } from "react";
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-} from "recharts";
+import { useLocation, useNavigate } from "react-router-dom";
 import { API_ENDPOINTS } from "../config";
+import axios from "axios";
 
 export default function StudentDashboard() {
   const [user, setUser] = useState(null);
-  const [conclusion, setConclusion] = useState("");
-  const [recommendations, setRecommendations] = useState([]);
-  const [qualities, setQualities] = useState([]);
+  const [userName, setUserName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const email = localStorage.getItem("userEmail");
     if (!email) return;
 
-        fetch(`${API_ENDPOINTS.USER}?email=${encodeURIComponent(email)}`)
+    fetch(`${API_ENDPOINTS.USER}?email=${encodeURIComponent(email)}`)
       .then((res) => res.json())
       .then((data) => {
         setUser(data);
-        setConclusion(data.conclusion || "");
-        setRecommendations(data.recommendations || []);
-        setQualities(data.qualities ? [...data.qualities].sort((a, b) => b.value - a.value) : []);
       })
       .catch((err) => console.error("Error fetching user:", err));
   }, []);
 
+  useEffect(() => {
+    const getUserInfo = async () => {
+      try {
+        const response = await axios.get(API_ENDPOINTS.AUTH_STATUS, {
+          withCredentials: true
+        });
+        if (response.data.authenticated && response.data.user) {
+          setUserName(response.data.user.name || "User");
+          setUserEmail(response.data.user.email);
+        }
+      } catch (error) {
+        console.error("Failed to get user info:", error);
+      }
+    };
+    getUserInfo();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await axios.post(API_ENDPOINTS.LOGOUT, {}, {
+        withCredentials: true
+      });
+      localStorage.removeItem("userEmail");
+      localStorage.removeItem("userName");
+      localStorage.removeItem("userType");
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      navigate("/login");
+    }
+  };
+
+  const navItems = [
+    {
+      label: "Dashboard",
+      href: "/dashboard",
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
+        </svg>
+      )
+    },
+    {
+      label: "Quiz",
+      href: "/quiz",
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+      )
+    },
+    {
+      label: "AI Assistant",
+      href: "/chat",
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+      )
+    }
+  ];
+
+  // Sample data for the dashboard
+  const cgpaData = [
+    { year: "Year 1", value: 9.1 },
+    { year: "Year 2", value: 8.77 },
+    { year: "Year 3", value: 8.00 }
+  ];
+
+  const projects = [
+    "Machine Learning Project",
+    "Web Development Portfolio",
+    "Data Analysis Research",
+    "Mobile App Development"
+  ];
+
+  const experiences = [
+    { role: "Software Engineering Intern", description: "Developed full-stack applications using React and Node.js" },
+    { role: "Research Assistant", description: "Conducted research on AI and machine learning algorithms" },
+    { role: "Teaching Assistant", description: "Assisted professors in computer science courses" },
+    { role: "Freelance Developer", description: "Built custom solutions for various clients" }
+  ];
+
+  const certifications = [
+    "AWS Certified Solutions Architect",
+    "Google Cloud Professional Developer",
+    "Microsoft Azure Fundamentals",
+    "Certified Scrum Master (CSM)"
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f7f9fb] via-[#e0e7ef] to-[#c7d2fe] text-black font-sans">
-      <div className="animate-dashboard-fade-in">
-        <h1 className="text-3xl md:text-4xl font-extrabold text-left px-8 pt-8 mb-6">
-          Dashboard
-        </h1>
+    <div className="flex min-h-screen bg-gray-50">
+      {/* Sidebar */}
+      <div className="w-64 bg-white border-r border-gray-200 flex flex-col h-screen">
+        {/* Logo */}
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
+              <span className="text-white font-bold text-sm">C</span>
+            </div>
+            <span className="text-xl font-bold text-black">Carevo</span>
+          </div>
+        </div>
 
-        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8 p-6">
-          {/* LEFT: User Details */}
-          <div className="border border-gray-200 rounded-2xl p-6 flex flex-col items-center text-center bg-white shadow animate-dashboard-block-fade-in delay-0">
-            <div className="w-32 h-32 rounded-full border-2 border-black flex items-center justify-center text-4xl font-bold bg-gray-100 mb-2">
-              <svg width="60" height="60" viewBox="0 0 100 100" fill="none">
-                <circle cx="50" cy="38" r="20" stroke="#22223B" strokeWidth="2" />
-                <rect x="25" y="60" width="50" height="25" rx="10" stroke="#22223B" strokeWidth="2" />
+        {/* Navigation */}
+        <nav className="flex-1 p-4">
+          <div className="space-y-2">
+            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Navigation</div>
+            {navItems.map((item) => {
+              const isActive = location.pathname === item.href;
+              return (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                    isActive
+                      ? 'bg-gray-100 text-black'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                >
+                  {item.icon}
+                  {item.label}
+                </a>
+              );
+            })}
+          </div>
+
+          <div className="mt-8 space-y-2">
+            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Settings & Help</div>
+            <a href="#" className="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-            </div>
-            <h2 className="mt-4 text-xl font-semibold">
-              {user?.name || "Student Name"}
-            </h2>
-            <div className="mt-2 text-sm text-gray-700 space-y-1">
-              {user?.studentType === "school" && (
-                <>
-                  <p className="font-medium">Class: {user?.class}</p>
-                  <p>School: {user?.institute}</p>
-                </>
-              )}
-              {user?.studentType === "college" && (
-                <>
-                  <p className="font-medium">Major: {user?.major}</p>
-                  <p>Year: {user?.year}</p>
-                  <p>Institute: {user?.institute}</p>
-                </>
-              )}
-            </div>
+              Settings
+            </a>
+            <a href="#" className="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Help
+            </a>
           </div>
+        </nav>
 
-          {/* CONCLUSION */}
-          <div className="md:col-span-2 border border-gray-200 rounded-2xl p-6 bg-white shadow animate-dashboard-block-fade-in delay-1">
-            <h3 className="text-lg font-semibold mb-4">Conclusion</h3>
-            <p className="text-sm text-gray-800 whitespace-pre-line">
-              {conclusion || (
-                <span className="italic text-gray-500">
-                  Take the test to gain access to our insights.
-                </span>
-              )}
-            </p>
-          </div>
-
-          {/* CAREER + QUALITIES */}
-          <div className="md:col-span-3 flex flex-col md:flex-row gap-8 mt-8">
-            {/* Recommendations */}
-            <div className="flex-1 border border-gray-200 rounded-2xl p-6 bg-white shadow mb-8 md:mb-0 animate-dashboard-block-fade-in delay-2">
-              <h3 className="text-lg font-semibold mb-2">Recommended Career Path</h3>
-              {recommendations.length === 0 ? (
-                <p className="text-sm text-gray-500 italic">
-                  Take the test to gain access to our insights.
-                </p>
-              ) : (
-                <ul className="list-disc pl-6 space-y-2 text-sm text-gray-800">
-                  {recommendations.map((job, idx) => (
-                    <li key={idx}>
-                      <strong>{job}</strong>
-                    </li>
-                  ))}
-                </ul>
-              )}
+        {/* User Profile */}
+        <div className="p-4 border-t border-gray-200">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
+              <span className="text-gray-600 font-semibold">{userName.charAt(0).toUpperCase()}</span>
             </div>
-
-            {/* Qualities - Bar Chart */}
-            <div className="flex-1 border border-gray-200 rounded-2xl p-6 bg-white shadow flex flex-col items-center animate-dashboard-block-fade-in delay-3">
-              <h3 className="text-lg font-semibold mb-2">Qualities</h3>
-              {qualities.length === 0 ? (
-                <p className="text-sm text-gray-500 italic text-center mt-[70px]">
-                  Take the test to gain access to our insights.
-                </p>
-              ) : (
-                <ResponsiveContainer width="100%" height={180}>
-                  <BarChart
-                    data={qualities}
-                    layout="vertical"
-                    margin={{ top: 10, right: 30, left: 40, bottom: 10 }}
-                    barCategoryGap={32}
-                  >
-                    <XAxis type="number" domain={[0, 100]} hide />
-                    <YAxis
-                      dataKey="name"
-                      type="category"
-                      tick={{ fill: "#22223B", fontWeight: 600 }}
-                      width={120}
-                    />
-                    <Tooltip />
-                    <Bar dataKey="value" radius={[8, 8, 8, 8]} barSize={28}>
-                      {qualities.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={["#22223B", "#44446B", "#66668B"][index % 3]}
-                        />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-gray-900 truncate">{userName}</p>
+              <p className="text-xs text-gray-500 truncate">{userEmail}</p>
             </div>
           </div>
         </div>
       </div>
-      <style>{`
-        .animate-dashboard-fade-in {
-          opacity: 0;
-          transform: translateY(30px) scale(0.98);
-          animation: dashboardFadeIn 0.8s cubic-bezier(0.4,0,0.2,1) 0.1s forwards;
-        }
-        @keyframes dashboardFadeIn {
-          to {
-            opacity: 1;
-            transform: none;
-          }
-        }
-        .animate-dashboard-block-fade-in {
-          opacity: 0;
-          transform: translateY(30px) scale(0.98);
-          animation: dashboardBlockFadeIn 0.7s cubic-bezier(0.4,0,0.2,1) forwards;
-        }
-        .delay-0 { animation-delay: 0.15s; }
-        .delay-1 { animation-delay: 0.35s; }
-        .delay-2 { animation-delay: 0.55s; }
-        .delay-3 { animation-delay: 0.75s; }
-        @keyframes dashboardBlockFadeIn {
-          to {
-            opacity: 1;
-            transform: none;
-          }
-        }
-      `}</style>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col">
+        {/* Top Header */}
+        <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={handleLogout}
+              className="px-4 py-2 text-sm font-medium text-white bg-black rounded-lg hover:bg-gray-800 flex items-center gap-2"
+            >
+              LOGOUT
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* Dashboard Content */}
+        <div className="flex-1 p-6 overflow-y-auto bg-gray-50">
+          <div className="max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              
+              {/* About Section */}
+              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-900 mb-4">About</h2>
+                <div className="flex items-start space-x-4">
+                  <div className="w-24 h-24 bg-gray-300 rounded-full flex items-center justify-center">
+                    <svg className="w-12 h-12 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-900 mb-1">
+                      {user?.name || "Pulkit Jhamb"}
+                    </h3>
+                    <p className="text-gray-700 font-medium mb-1">
+                      {user?.institute || "THAPAR INSTITUTE"}
+                    </p>
+                    <p className="text-gray-600 mb-3">
+                      {user?.year ? `Year ${user.year}` : "SEM 5"}
+                    </p>
+                    <div className="space-y-1">
+                      <div className="h-2 bg-gray-200 rounded w-full"></div>
+                      <div className="h-2 bg-gray-200 rounded w-3/4"></div>
+                      <div className="h-2 bg-gray-200 rounded w-5/6"></div>
+                      <div className="h-2 bg-gray-200 rounded w-2/3"></div>
+                      <div className="h-2 bg-gray-200 rounded w-4/5"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* CGPA Section */}
+              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-gray-900">CGPA</h2>
+                  <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
+                    View Report
+                  </button>
+                </div>
+                
+                {/* Donut Chart */}
+                <div className="flex justify-center mb-4">
+                  <div className="relative w-32 h-32">
+                    <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 36 36">
+                      <path
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="#e5e7eb"
+                        strokeWidth="2"
+                      />
+                      <path
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="#374151"
+                        strokeWidth="2"
+                        strokeDasharray="60, 100"
+                        strokeDashoffset="0"
+                      />
+                      <path
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="#6b7280"
+                        strokeWidth="2"
+                        strokeDasharray="25, 100"
+                        strokeDashoffset="-60"
+                      />
+                      <path
+                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                        fill="none"
+                        stroke="#9ca3af"
+                        strokeWidth="2"
+                        strokeDasharray="15, 100"
+                        strokeDashoffset="-85"
+                      />
+                    </svg>
+                  </div>
+                </div>
+                
+                {/* CGPA Data */}
+                <div className="flex justify-between">
+                  {cgpaData.map((item, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-black rounded-full"></div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{item.year}</p>
+                        <p className="text-sm text-gray-600">{item.value}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Project Section */}
+              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <h2 className="text-lg font-semibold text-gray-900 mb-2">Project</h2>
+                <p className="text-sm text-gray-600 mb-4">
+                  Below are the student's highest scoring subjects
+                </p>
+                <div className="space-y-3">
+                  {projects.map((project, index) => (
+                    <div key={index} className="flex items-center space-x-3">
+                      <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
+                      <span className="text-sm text-gray-700">{project}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Experiences Section */}
+              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+                <div className="flex items-center justify-between mb-2">
+                  <h2 className="text-lg font-semibold text-gray-900">Experiences</h2>
+                  <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
+                    Upload
+                  </button>
+                </div>
+                <p className="text-sm text-gray-600 mb-4">
+                  The following are the career paths mentioned
+                </p>
+                <div className="space-y-3">
+                  {experiences.map((exp, index) => (
+                    <div key={index} className="flex items-start space-x-3">
+                      <div className="w-3 h-3 bg-gray-300 rounded-full mt-1"></div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{exp.role}</p>
+                        <p className="text-xs text-gray-600">{exp.description}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Certifications Section */}
+              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 lg:col-span-2">
+                <div className="flex items-center justify-between mb-2">
+                  <h2 className="text-lg font-semibold text-gray-900">Certifications</h2>
+                  <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
+                    Upload
+                  </button>
+                </div>
+                <p className="text-sm text-gray-600 mb-4">
+                  The following are the career paths mentioned
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {certifications.map((cert, index) => (
+                    <div key={index} className="flex items-center space-x-3">
+                      <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
+                      <span className="text-sm text-gray-700">{cert}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

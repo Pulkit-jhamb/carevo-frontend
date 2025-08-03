@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://carevo.com/sitemap.xml
+
+# Disallow private routes
+Disallow: /api/
+Disallow: /admin/
+Disallow: /private/
+
+# Allow important pages
+Allow: /
+Allow: /login
+Allow: /signup
+Allow: /chat
+Allow: /dashboard
+Allow: /quiz 

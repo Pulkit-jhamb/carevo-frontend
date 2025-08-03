@@ -89,7 +89,7 @@ export default function Signup() {
        setError(data.message || "Signup failed.");
      } else {
        setSuccess("Signed up successfully!");
-       setTimeout(() => navigate("/login"), 1500);
+       setTimeout(() => navigate("/login", { replace: true }), 1500);
      }
    } catch (err) {
      setError("Server error. Please try again later.");

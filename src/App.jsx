@@ -1,12 +1,15 @@
-import { BrowserRouter as Router, Routes, Route, Outlet } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Outlet, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import Landing_page from './pages/landing_page';
 import Quiz from './pages/quiz';
 import Dashboard from './pages/dashboard';
 import Login from './pages/login';
 import Signup from './pages/signup';
 import MentalHealthChatbot from './pages/mental_health_si';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from './pages/sidebar';
+import axios from 'axios';
+import { API_ENDPOINTS } from './config';
+import { useAuthRedirect } from './hooks/useAuthRedirect';
 
 function UserIcon() {
   return (
@@ -36,26 +39,158 @@ function MainLayout() {
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <div className="flex-1 ml-72">
+      <div className="flex-1 ml-64">
         <Outlet />
       </div>
     </div>
   );
 }
 
+// Protected Route Component
+function ProtectedRoute({ children }) {
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await axios.get(API_ENDPOINTS.AUTH_STATUS, {
+          withCredentials: true
+        });
+        setIsAuthenticated(response.data.authenticated);
+      } catch (error) {
+        setIsAuthenticated(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  // Prevent going back to login page when authenticated
+  useEffect(() => {
+    if (isAuthenticated && (location.pathname === '/login' || location.pathname === '/signup')) {
+      navigate('/chat', { replace: true });
+    }
+  }, [isAuthenticated, location.pathname, navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#f7f9fb] via-[#e0e7ef] to-[#c7d2fe]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+}
+
+// Public Route Component - redirects authenticated users to chat
+function PublicRoute({ children }) {
+  const [isAuthenticated, setIsAuthenticated] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await axios.get(API_ENDPOINTS.AUTH_STATUS, {
+          withCredentials: true
+        });
+        setIsAuthenticated(response.data.authenticated);
+        
+        // If authenticated, redirect to chat
+        if (response.data.authenticated) {
+          navigate('/chat', { replace: true });
+        }
+      } catch (error) {
+        setIsAuthenticated(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, [navigate]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#f7f9fb] via-[#e0e7ef] to-[#c7d2fe]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  return children;
+}
+
 export default function App() {
   return (
     <Router>
-      <Routes>
-        <Route path="/" element={<Landing_page />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route element={<MainLayout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/quiz" element={<Quiz />} />
-          <Route path="/chat" element={<MentalHealthChatbot />} />
-        </Route>
-      </Routes>
+      <AppRoutes />
     </Router>
+  );
+}
+
+function AppRoutes() {
+  useAuthRedirect(); // Use the custom hook for auth redirects
+  
+  return (
+    <Routes>
+      <Route path="/" element={<Landing_page />} />
+      
+      {/* Public routes - redirect authenticated users to chat */}
+      <Route path="/login" element={
+        <PublicRoute>
+          <Login />
+        </PublicRoute>
+      } />
+      <Route path="/signup" element={
+        <PublicRoute>
+          <Signup />
+        </PublicRoute>
+      } />
+      
+      {/* Dashboard route - has its own sidebar */}
+      <Route path="/dashboard" element={
+        <ProtectedRoute>
+          <Dashboard />
+        </ProtectedRoute>
+      } />
+      
+      {/* Quiz route - has its own sidebar */}
+      <Route path="/quiz" element={
+        <ProtectedRoute>
+          <Quiz />
+        </ProtectedRoute>
+      } />
+      
+      {/* Chat route without MainLayout since it has its own sidebar */}
+      <Route path="/chat" element={
+        <ProtectedRoute>
+          <MentalHealthChatbot />
+        </ProtectedRoute>
+      } />
+      
+      {/* Catch all route - redirect to chat for authenticated users */}
+      <Route path="*" element={
+        <ProtectedRoute>
+          <Navigate to="/chat" replace />
+        </ProtectedRoute>
+      } />
+    </Routes>
   );
 } 

@@ -45,37 +45,34 @@ const benefits = [
     icon: (
       <span className="inline-flex items-center justify-center w-16 h-16 bg-black rounded-xl mb-6">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 20c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8z" />
-          <path d="M15.5 11.5a3.5 3.5 0 01-7 0" />
+          <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
         </svg>
       </span>
     ),
-    title: "Personalized Career Plans",
-    desc: "Get AI-generated career roadmaps tailored to your interests, skills, and academic performance.",
+    title: "AI-Powered Academic Counseling",
+    desc: "Get personalized academic guidance and career advice through intelligent conversations with our AI counselor that understands your goals.",
   },
   {
     icon: (
       <span className="inline-flex items-center justify-center w-16 h-16 bg-black rounded-xl mb-6">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="3" y="3" width="18" height="18" rx="4" />
-          <path d="M8 17v-6M12 17v-2M16 17v-4" />
+          <path d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
         </svg>
       </span>
     ),
-    title: "Real-Time Academic Dashboard",
-    desc: "Track your progress, identify weak areas, and get personalized study recommendations.",
+    title: "Psychometric Testing",
+    desc: "Discover your strengths, interests, and learning style through comprehensive psychometric assessments designed to guide your academic choices.",
   },
   {
     icon: (
       <span className="inline-flex items-center justify-center w-16 h-16 bg-black rounded-xl mb-6">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <rect x="4" y="4" width="16" height="16" rx="8" />
-          <path d="M12 8.5c-1.5 0-2.5 1.2-2.5 2.5 0 2 2.5 4.5 2.5 4.5s2.5-2.5 2.5-4.5c0-1.3-1-2.5-2.5-2.5z" />
+          <path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
         </svg>
       </span>
     ),
-    title: "Mental Health Support During Exams",
-    desc: "Access stress management tools, meditation guides, and counseling support when you need it most.",
+    title: "Customized Learning Plans",
+    desc: "Receive personalized academic roadmaps and study strategies tailored to your unique learning style and career aspirations.",
   },
 ];
 
@@ -83,12 +80,12 @@ const testimonials = [
   {
     name: "Aarav S.",
     quote:
-      "Carevo helped me choose the right stream after 10th. The dashboard kept me motivated throughout the year.",
+      "Carevo's AI counselor helped me discover my true potential through psychometric tests and guided me to the perfect career path.",
   },
   {
     name: "Priya M.",
     quote:
-      "The mental health support was a lifesaver during my board exams. I felt heard and supported.",
+      "The personalized academic plans and career guidance were exactly what I needed to excel in my studies and plan my future.",
   },
 ];
 
@@ -152,16 +149,16 @@ function Landing_page() {
         <div className="flex flex-col items-center justify-center w-full max-w-xl gap-6">
 <br />
           <h1 className="text-center text-4xl md:text-6xl font-extrabold leading-[1.1] mb-4 text-black">
-            Confused About Your Future? We're Here to Guide You.
+            Your AI Career & Academic Counselor - Guiding Your Journey
           </h1>
           <p className="text-lg md:text-2xl font-normal text-gray-600 mb-6 max-w-lg">
-            Carevo helps students in India make smarter academic and career decisions with AI-powered counseling.
+            Carevo is your personalized AI counselor that helps you navigate your academic journey through psychometric tests, builds customized plans, and adapts to your unique needs.
           </p>
           <div className="flex flex-row gap-4 mb-8 w-full justify-center">
             
             <a href="/login">
               <button className="flex items-center bg-black text-white px-6 py-4 rounded-lg font-semibold text-base hover:bg-gray-900 transition w-fit">
-                Get Started
+                Start Your Journey
                 <span className="ml-2">
                   <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round"/></svg>
                 </span>
@@ -179,8 +176,8 @@ function Landing_page() {
       <section id="product" className="w-full bg-[#f7f9fb] py-20 px-4">
         <br /><br />
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-5xl font-extrabold text-center mb-4">Everything You Need to Succeed</h2>
-          <p className="text-lg md:text-xl text-gray-500 text-center mb-14 max-w-2xl mx-auto">Our AI-powered platform provides comprehensive support for your academic and career journey.</p>
+          <h2 className="text-3xl md:text-5xl font-extrabold text-center mb-4">Your Academic Success Partner</h2>
+          <p className="text-lg md:text-xl text-gray-500 text-center mb-14 max-w-2xl mx-auto">Our AI-powered academic counselor provides personalized guidance, psychometric testing, and customized learning plans to help you excel in your educational journey.</p>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {benefits.map((b) => (
               <div key={b.title} className="bg-white rounded-2xl shadow-md flex flex-col items-center px-8 py-10 text-center">

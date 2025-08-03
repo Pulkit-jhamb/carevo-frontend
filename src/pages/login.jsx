@@ -22,12 +22,17 @@ export default function Login() {
       const res = await axios.post(API_ENDPOINTS.LOGIN, {
         email,
         password,
+      }, {
+        withCredentials: true // Important for cookies
       });
 
       if (res.status === 200) {
         localStorage.setItem("userEmail", email);
+        localStorage.setItem("userName", res.data.user?.name || "");
+        localStorage.setItem("userType", res.data.user?.studentType || "");
         setError("");
-        navigate("/dashboard");
+        // Replace the current history entry to prevent back button issues
+        navigate("/chat", { replace: true });
       }
     } catch (err) {
       setError(err.response?.data?.message || "Login failed. Try again.");

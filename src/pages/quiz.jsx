@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { API_ENDPOINTS } from '../config';
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 
 const quizSections = [
@@ -357,12 +359,28 @@ export default function Quiz() {
   const [answers, setAnswers] = useState({});
   const [report, setReport] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleChange = (sectionIdx, qIdx, value) => {
     setAnswers(prev => ({
       ...prev,
       [`${sectionIdx}-${qIdx}`]: value,
     }));
+  };
+
+  const handleLogout = async () => {
+    try {
+      await axios.post(API_ENDPOINTS.LOGOUT, {}, {
+        withCredentials: true
+      });
+      localStorage.removeItem("userEmail");
+      localStorage.removeItem("userName");
+      localStorage.removeItem("userType");
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+      navigate("/login");
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -425,101 +443,101 @@ ${qaPairs
   const { conclusion, recommendations } = parseReport(report);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#f7f9fb] via-[#e0e7ef] to-[#c7d2fe] flex flex-col items-center justify-center">
-      <div className="w-full max-w-4xl p-0 flex flex-col items-center justify-center relative z-10">
-        <h1 className="text-3xl md:text-4xl font-extrabold text-center mb-8 mt-8">Career Quiz</h1>
+    <div className="flex-1 flex flex-col bg-gray-50">
+      {/* Top Header */}
+      <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900">Career Quiz</h1>
+        <div className="flex items-center gap-3">
+          <button 
+            onClick={handleLogout}
+            className="px-4 py-2 text-sm font-medium text-white bg-black rounded-lg hover:bg-gray-800 flex items-center gap-2"
+          >
+            Logout
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+            </svg>
+          </button>
+        </div>
+      </div>
 
-        <form onSubmit={handleSubmit} className="space-y-10 w-full max-w-4xl mx-auto px-4 pb-12">
-          {(() => {
-            let globalIdx = 0;
-            return quizSections.map((section, sectionIdx) => (
-              <div key={section.title}>
-                <h3 className="font-bold text-lg text-gray-700 mb-4">{section.title}</h3>
-                <div className="space-y-8">
-                  {section.questions.map((q, qIdx) => {
-                    globalIdx++;
-                    const key = `${sectionIdx}-${qIdx}`;
-                    return (
-                      <div key={q.q}>
-                        <div className="font-semibold mb-2 flex items-center">
-                          <span className="mr-2 text-gray-500">{globalIdx}.</span> {q.q}
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {q.options.map((opt) => {
-                            const isSelected = answers[key] === opt;
-                            return (
-                              <label
-                                key={opt}
-                                className={`flex items-center rounded-lg px-4 py-2 cursor-pointer border-2 transition ${
-                                  isSelected
-                                    ? "bg-black text-white border-black"
-                                    : "bg-gray-50 text-gray-800 border-gray-200 hover:border-black"
-                                }`}
-                                onClick={() =>
-                                  isSelected
-                                    ? setAnswers((prev) => {
-                                        const newAnswers = { ...prev };
-                                        delete newAnswers[key];
-                                        return newAnswers;
-                                      })
-                                    : handleChange(sectionIdx, qIdx, opt)
-                                }
-                              >
-                                <span>{opt}</span>
-                              </label>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            ));
-          })()}
-
-          <div className="flex justify-center mt-8">
-            <button
-              type="submit"
-              className="bg-black text-white font-bold px-8 py-3 rounded-full text-lg shadow transition"
-              disabled={loading}
-            >
-              {loading ? "Analyzing..." : "Submit"}
-            </button>
-          </div>
-        </form>
-
-        {report && (
-          <div className="mt-10 w-full max-w-3xl mx-auto space-y-6">
-            {conclusion && (
-              <div className="bg-blue-50 border border-blue-300 rounded-xl shadow p-6">
-                <h2 className="text-xl font-bold text-blue-900 mb-2">Conclusion</h2>
-                <p className="text-gray-800 whitespace-pre-wrap leading-relaxed">{conclusion}</p>
-              </div>
-            )}
-
-            {recommendations && (
-              <div className="bg-purple-50 border border-purple-300 rounded-xl shadow p-6">
-                <h2 className="text-xl font-bold text-purple-900 mb-2">Career Recommendations</h2>
-                <ul className="list-disc pl-6 text-gray-800 whitespace-pre-wrap space-y-2">
-                  {recommendations
-                    .split("\n")
-                    .filter((r) => r.trim() !== "")
-                    .map((line, idx) => {
-                      const cleaned = line.replace(/\*\*/g, "").trim();
-                      const [titlePart, ...rest] = cleaned.split(":");
-                      if (!rest.length) return <li key={idx}>{cleaned}</li>;
+      {/* Quiz Content */}
+      <div className="flex-1 p-6 overflow-y-auto">
+        <div className="max-w-4xl mx-auto">
+          <form onSubmit={handleSubmit} className="space-y-10 w-full">
+            {(() => {
+              let globalIdx = 0;
+              return quizSections.map((section, sectionIdx) => (
+                <div key={section.title} className="bg-white rounded-lg border border-gray-200 p-6">
+                  <h3 className="font-bold text-lg text-gray-700 mb-4">{section.title}</h3>
+                  <div className="space-y-8">
+                    {section.questions.map((q, qIdx) => {
+                      globalIdx++;
+                      const key = `${sectionIdx}-${qIdx}`;
                       return (
-                        <li key={idx}>
-                          <strong>{titlePart.trim()}:</strong> {rest.join(":").trim()}
-                        </li>
+                        <div key={q.q}>
+                          <div className="font-semibold mb-2 flex items-center">
+                            <span className="mr-2 text-gray-500">{globalIdx}.</span> {q.q}
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {q.options.map((opt) => {
+                              const isSelected = answers[key] === opt;
+                              return (
+                                <label
+                                  key={opt}
+                                  className={`flex items-center rounded-lg px-4 py-2 cursor-pointer border-2 transition ${
+                                    isSelected
+                                      ? "bg-black text-white border-black"
+                                      : "bg-white text-black border-gray-200 hover:border-black"
+                                  }`}
+                                >
+                                  <input
+                                    type="radio"
+                                    name={key}
+                                    value={opt}
+                                    checked={isSelected}
+                                    onChange={() => handleChange(sectionIdx, qIdx, opt)}
+                                    className="sr-only"
+                                  />
+                                  <span className="text-sm">{opt}</span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        </div>
                       );
                     })}
-                </ul>
+                  </div>
+                </div>
+              ));
+            })()}
+
+            <div className="flex justify-center">
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-8 py-3 bg-black text-white rounded-lg font-semibold hover:bg-gray-800 transition disabled:opacity-50"
+              >
+                {loading ? "Analyzing..." : "Submit Quiz"}
+              </button>
+            </div>
+          </form>
+
+          {report && (
+            <div className="mt-8 bg-white rounded-lg border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold mb-4">Your Results</h3>
+              <div className="prose max-w-none">
+                <div className="mb-6">
+                  <h4 className="text-md font-semibold mb-2">Conclusion</h4>
+                  <p className="text-gray-700">{conclusion}</p>
+                </div>
+                <div>
+                  <h4 className="text-md font-semibold mb-2">Career Recommendations</h4>
+                  <div className="text-gray-700">{recommendations}</div>
+                </div>
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
