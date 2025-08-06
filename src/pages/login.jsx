@@ -30,9 +30,10 @@ export default function Login() {
         localStorage.setItem("userEmail", email);
         localStorage.setItem("userName", res.data.user?.name || "");
         localStorage.setItem("userType", res.data.user?.studentType || "");
+        console.log("Login - Setting userType:", res.data.user?.studentType);
         setError("");
         // Replace the current history entry to prevent back button issues
-        navigate("/chat", { replace: true });
+        navigate("/dashboard", { replace: true });
       }
     } catch (err) {
       setError(err.response?.data?.message || "Login failed. Try again.");

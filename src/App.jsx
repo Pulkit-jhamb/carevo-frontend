@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Outlet, Navigate, useLocation, 
 import Landing_page from './pages/landing_page';
 import Quiz from './pages/quiz';
 import Dashboard from './pages/dashboard';
+import StudentDashboard from './pages/student_dashboard';
 import Login from './pages/login';
 import Signup from './pages/signup';
 import MentalHealthChatbot from './pages/mental_health_si';
@@ -73,7 +74,7 @@ function ProtectedRoute({ children }) {
   // Prevent going back to login page when authenticated
   useEffect(() => {
     if (isAuthenticated && (location.pathname === '/login' || location.pathname === '/signup')) {
-      navigate('/chat', { replace: true });
+      navigate('/dashboard', { replace: true });
     }
   }, [isAuthenticated, location.pathname, navigate]);
 
@@ -95,6 +96,38 @@ function ProtectedRoute({ children }) {
   return children;
 }
 
+// Dashboard Selector Component
+function DashboardSelector() {
+  const [userType, setUserType] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const type = localStorage.getItem("userType");
+    console.log("DashboardSelector - userType from localStorage:", type);
+    setUserType(type);
+    setLoading(false);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#f7f9fb] via-[#e0e7ef] to-[#c7d2fe]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show student dashboard for school students, college dashboard for college students
+  console.log("UserType detected:", userType); // Debug log
+  if (userType === "school") {
+    return <StudentDashboard />;
+  } else {
+    return <Dashboard />;
+  }
+}
+
 // Public Route Component - redirects authenticated users to chat
 function PublicRoute({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
@@ -109,9 +142,9 @@ function PublicRoute({ children }) {
         });
         setIsAuthenticated(response.data.authenticated);
         
-        // If authenticated, redirect to chat
+        // If authenticated, redirect to dashboard
         if (response.data.authenticated) {
-          navigate('/chat', { replace: true });
+          navigate('/dashboard', { replace: true });
         }
       } catch (error) {
         setIsAuthenticated(false);
@@ -167,7 +200,7 @@ function AppRoutes() {
       {/* Dashboard route - has its own sidebar */}
       <Route path="/dashboard" element={
         <ProtectedRoute>
-          <Dashboard />
+          <DashboardSelector />
         </ProtectedRoute>
       } />
       
@@ -185,10 +218,10 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       
-      {/* Catch all route - redirect to chat for authenticated users */}
+      {/* Catch all route - redirect to dashboard for authenticated users */}
       <Route path="*" element={
         <ProtectedRoute>
-          <Navigate to="/chat" replace />
+          <Navigate to="/dashboard" replace />
         </ProtectedRoute>
       } />
     </Routes>

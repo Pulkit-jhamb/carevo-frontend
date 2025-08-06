@@ -14,10 +14,10 @@ export const useAuthRedirect = () => {
           withCredentials: true
         });
         
-        // If authenticated and on public routes, redirect to chat
+        // If authenticated and on public routes, redirect to dashboard
         if (response.data.authenticated && 
             (location.pathname === '/login' || location.pathname === '/signup' || location.pathname === '/')) {
-          navigate('/chat', { replace: true });
+          navigate('/dashboard', { replace: true });
         }
       } catch (error) {
         // If not authenticated and on protected routes, redirect to login
@@ -40,7 +40,7 @@ export const useAuthRedirect = () => {
         
         if (response.data.authenticated && 
             (location.pathname === '/login' || location.pathname === '/signup')) {
-          navigate('/chat', { replace: true });
+          navigate('/dashboard', { replace: true });
         }
       } catch (error) {
         // Handle error silently
