@@ -6,6 +6,7 @@ import StudentDashboard from './pages/student_dashboard';
 import Login from './pages/login';
 import Signup from './pages/signup';
 import MentalHealthChatbot from './pages/mental_health_si';
+import StudyPlan from './pages/study_plan';
 import React, { useState, useEffect } from 'react';
 import Sidebar from './pages/sidebar';
 import axios from 'axios';
@@ -215,6 +216,13 @@ function AppRoutes() {
       <Route path="/chat" element={
         <ProtectedRoute>
           <MentalHealthChatbot />
+        </ProtectedRoute>
+      } />
+
+      {/* Study Plan route - has its own sidebar */}
+      <Route path="/study-plan" element={
+        <ProtectedRoute>
+          <StudyPlan />
         </ProtectedRoute>
       } />
       

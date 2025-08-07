@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { API_ENDPOINTS } from '../config';
 
 const quizSections = [
@@ -187,6 +188,17 @@ export default function QuizModal({ isOpen, onClose, onQuizComplete }) {
     e.preventDefault();
     setReport("");
     setLoading(true);
+    setError(null);
+
+    // Check if all questions are answered
+    const totalQuestions = quizSections.reduce((total, section) => total + section.questions.length, 0);
+    const answeredQuestions = Object.keys(answers).length;
+    
+    if (answeredQuestions < totalQuestions) {
+      setError(`Please answer all questions. You've answered ${answeredQuestions} out of ${totalQuestions} questions.`);
+      setLoading(false);
+      return;
+    }
 
     const qaPairs = [];
     quizSections.forEach((section, sectionIdx) => {
@@ -197,18 +209,21 @@ export default function QuizModal({ isOpen, onClose, onQuizComplete }) {
     });
 
     const prompt = `
-Analyze this quiz result. Provide two markdown sections:
+Analyze this career quiz result and provide a well-formatted response with two clear sections:
 
 ### Conclusion
-Short (4-5 sentence) personality/strength summary.
+Write a concise personality and strength summary in 4-5 sentences. Focus on the individual's key traits, work style preferences, and natural strengths based on their answers.
 
 ### Career Recommendations
-Recommend 4 jobs using this format:
-**Job Title:** One-line explanation.
+Recommend 4 specific career paths that align with their personality and interests. Use this format for each recommendation:
 
-Answers:
+**Career Title:** Brief explanation of why this career fits their profile and what they would enjoy about it.
+
+Make the response clear, actionable, and well-formatted with proper markdown.
+
+Quiz Answers:
 ${qaPairs
-      .map((qa, i) => `${i + 1}. Q: ${qa.question}\nA: ${qa.answer}`)
+      .map((qa, i) => `${i + 1}. **Question:** ${qa.question}\n   **Answer:** ${qa.answer}`)
       .join("\n\n")}
 `;
 
@@ -219,25 +234,47 @@ ${qaPairs
         body: JSON.stringify({ prompt }),
       });
 
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
       const data = await res.json();
-      const rawOutput = data.response || data.error || "No response from AI.";
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      const rawOutput = data.response || "No response from AI.";
       setReport(rawOutput);
 
       const { conclusion, recommendations } = parseReport(rawOutput);
+      
+      if (!conclusion || !recommendations) {
+        throw new Error("Invalid response format from AI");
+      }
+
       const recommendationTitles = extractRecommendationTitles(recommendations);
       const email = localStorage.getItem("userEmail");
 
-      await fetch(API_ENDPOINTS.USER_UPDATE, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, conclusion, recommendations: recommendationTitles }),
-      });
+      if (email) {
+        try {
+          await fetch(API_ENDPOINTS.USER_UPDATE, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, conclusion, recommendations: recommendationTitles }),
+          });
+        } catch (updateErr) {
+          console.error("Error updating user data:", updateErr);
+          // Don't fail the quiz if user update fails
+        }
+      }
 
       setCurrentStep('results');
       onQuizComplete && onQuizComplete({ conclusion, recommendations });
     } catch (err) {
       console.error("Error contacting AI:", err);
-      setReport("Server error. Try again.");
+      setError(`Error: ${err.message}. Please try again.`);
+      setReport("");
     }
 
     setLoading(false);
@@ -264,11 +301,11 @@ ${qaPairs
       />
       
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
+      <div className="relative bg-white rounded-2xl shadow-2xl max-w-4xl w-full mx-4 overflow-y-auto" style={{ maxHeight: '90vh' }}>
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-2xl font-bold text-gray-900">
-            {currentStep === 'quiz' ? 'Career Assessment Quiz' : 'Your Results'}
+            {currentStep === 'quiz' ? 'Career Exploration Quiz' : 'Your Results'}
           </h2>
           <button
             onClick={handleClose}
@@ -281,14 +318,39 @@ ${qaPairs
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto" style={{ maxHeight: 'calc(90vh - 120px)' }}>
+        <div>
           {error && (
-            <div className="p-4 bg-red-100 text-red-700 rounded-lg mx-6 mt-4">
-              {error}
+            <div className="p-4 bg-red-100 text-red-700 rounded-lg mx-6 mt-4 border border-red-300">
+              <div className="flex items-center">
+                <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                {error}
+              </div>
             </div>
           )}
           {currentStep === 'quiz' ? (
             <div className="p-6">
+              {/* Progress indicator */}
+              <div className="mb-6">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm text-gray-600">
+                    Progress: {Object.keys(answers).length} of {quizSections.reduce((total, section) => total + section.questions.length, 0)} questions answered
+                  </span>
+                  <span className="text-sm text-gray-600">
+                    {Math.round((Object.keys(answers).length / quizSections.reduce((total, section) => total + section.questions.length, 0)) * 100)}%
+                  </span>
+                </div>
+                <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div 
+                    className="bg-black h-2 rounded-full transition-all duration-300"
+                    style={{ 
+                      width: `${(Object.keys(answers).length / quizSections.reduce((total, section) => total + section.questions.length, 0)) * 100}%` 
+                    }}
+                  ></div>
+                </div>
+              </div>
+              
               <form key="quiz-form" onSubmit={handleSubmit} className="space-y-8">
                 {quizSections.length === 0 && (
                   <div className="text-center py-8">
@@ -356,15 +418,21 @@ ${qaPairs
                   );
                 })}
 
-                <div className="flex justify-center pt-4">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="px-8 py-3 bg-black text-white rounded-lg font-semibold hover:bg-gray-800 transition-colors duration-150 disabled:opacity-50"
-                  >
-                    {loading ? "Analyzing..." : "Submit Quiz"}
-                  </button>
-                </div>
+                 <div className="flex justify-center pt-4">
+                   <button
+                     type="submit"
+                     disabled={loading}
+                     className="px-8 py-3 bg-black text-white rounded-lg font-semibold hover:bg-gray-800 transition-colors duration-150 disabled:opacity-50 flex items-center gap-2"
+                   >
+                     {loading && (
+                       <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                       </svg>
+                     )}
+                     {loading ? "Analyzing..." : "Submit Quiz"}
+                   </button>
+                 </div>
               </form>
             </div>
           ) : (
@@ -372,11 +440,37 @@ ${qaPairs
               <div className="prose max-w-none">
                 <div className="mb-8">
                   <h4 className="text-xl font-semibold mb-3 text-gray-900">Personality Summary</h4>
-                  <p className="text-gray-700 leading-relaxed">{conclusion}</p>
+                  <div className="text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-lg">
+                    <ReactMarkdown 
+                      components={{
+                        p: ({children}) => <p className="mb-3 last:mb-0">{children}</p>,
+                        strong: ({children}) => <strong className="font-semibold text-gray-900">{children}</strong>,
+                        em: ({children}) => <em className="italic">{children}</em>,
+                        ul: ({children}) => <ul className="list-disc list-inside space-y-1">{children}</ul>,
+                        ol: ({children}) => <ol className="list-decimal list-inside space-y-1">{children}</ol>,
+                        li: ({children}) => <li className="text-gray-700">{children}</li>
+                      }}
+                    >
+                      {conclusion}
+                    </ReactMarkdown>
+                  </div>
                 </div>
                 <div>
                   <h4 className="text-xl font-semibold mb-3 text-gray-900">Career Recommendations</h4>
-                  <div className="text-gray-700 leading-relaxed whitespace-pre-line">{recommendations}</div>
+                  <div className="text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-lg">
+                    <ReactMarkdown 
+                      components={{
+                        p: ({children}) => <p className="mb-3 last:mb-0">{children}</p>,
+                        strong: ({children}) => <strong className="font-semibold text-gray-900">{children}</strong>,
+                        em: ({children}) => <em className="italic">{children}</em>,
+                        ul: ({children}) => <ul className="list-disc list-inside space-y-1">{children}</ul>,
+                        ol: ({children}) => <ol className="list-decimal list-inside space-y-1">{children}</ol>,
+                        li: ({children}) => <li className="text-gray-700">{children}</li>
+                      }}
+                    >
+                      {recommendations}
+                    </ReactMarkdown>
+                  </div>
                 </div>
               </div>
               

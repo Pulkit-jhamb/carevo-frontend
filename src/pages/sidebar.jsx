@@ -72,7 +72,7 @@ export default function Sidebar() {
   ];
 
   return (
-    <div className="w-64 bg-white border-r border-gray-200 flex flex-col h-screen">
+    <div className="fixed left-0 top-0 h-screen w-64 z-40 bg-white border-r flex flex-col justify-between">
       {/* Logo */}
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center gap-2">
@@ -84,7 +84,7 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4">
+      <nav className="p-4">
         <div className="space-y-2">
           <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Navigation</div>
           {navItems.map((item) => {
@@ -124,8 +124,8 @@ export default function Sidebar() {
         </div>
       </nav>
 
-      {/* User Profile */}
-      <div className="p-4 border-t border-gray-200">
+      {/* User Profile - always at bottom */}
+      <div className="p-4 border-t border-gray-200 bg-white">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
             <span className="text-gray-600 font-semibold">{userName.charAt(0).toUpperCase()}</span>

@@ -7,6 +7,21 @@ export default function StudentDashboard() {
   const [user, setUser] = useState(null);
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
+  const [showConclusionModal, setShowConclusionModal] = useState(false);
+  const [showCgpaModal, setShowCgpaModal] = useState(false);
+  const [cgpaData, setCgpaData] = useState([]);
+  const [editCgpa, setEditCgpa] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [showProjectsModal, setShowProjectsModal] = useState(false);
+  const [editProjects, setEditProjects] = useState([]);
+  const [experiences, setExperiences] = useState([]);
+  const [showExperiencesModal, setShowExperiencesModal] = useState(false);
+  const [editExperiences, setEditExperiences] = useState([]);
+  const [showExperienceDetail, setShowExperienceDetail] = useState({ open: false, exp: null });
+  const [certifications, setCertifications] = useState([]);
+  const [showCertificationsModal, setShowCertificationsModal] = useState(false);
+  const [editCertifications, setEditCertifications] = useState([]);
+  const [profilePic, setProfilePic] = useState(null);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -18,6 +33,10 @@ export default function StudentDashboard() {
       .then((res) => res.json())
       .then((data) => {
         setUser(data);
+        setCgpaData(data.cgpa || []);
+        setProjects(data.projects || []);
+        setExperiences(data.experiences || []);
+        setCertifications(data.certifications || []);
       })
       .catch((err) => console.error("Error fetching user:", err));
   }, []);
@@ -54,6 +73,146 @@ export default function StudentDashboard() {
     }
   };
 
+  const handleOpenCgpaModal = () => {
+    setEditCgpa(cgpaData.length ? [...cgpaData] : [{ year: '', value: '' }]);
+    setShowCgpaModal(true);
+  };
+
+  const handleCgpaChange = (idx, field, value) => {
+    const updated = [...editCgpa];
+    updated[idx][field] = value;
+    setEditCgpa(updated);
+  };
+
+  const handleAddCgpaRow = () => {
+    setEditCgpa([...editCgpa, { year: '', value: '' }]);
+  };
+
+  const handleRemoveCgpaRow = (idx) => {
+    const updated = [...editCgpa];
+    updated.splice(idx, 1);
+    setEditCgpa(updated);
+  };
+
+  const handleSaveCgpa = async () => {
+    try {
+      await axios.patch(
+        API_ENDPOINTS.CGPA_UPDATE,
+        {
+          email: user.email,
+          cgpa: editCgpa,
+        }
+      );
+      setCgpaData(editCgpa);
+      setShowCgpaModal(false);
+    } catch (err) {
+      alert('Failed to update CGPA');
+    }
+  };
+
+  const handleOpenProjectsModal = () => {
+    setEditProjects(projects.length ? [...projects] : [{ name: '', link: '' }]);
+    setShowProjectsModal(true);
+  };
+  const handleProjectChange = (idx, field, value) => {
+    const updated = [...editProjects];
+    updated[idx][field] = value;
+    setEditProjects(updated);
+  };
+  const handleAddProjectRow = () => {
+    setEditProjects([...editProjects, { name: '', link: '' }]);
+  };
+  const handleRemoveProjectRow = (idx) => {
+    const updated = [...editProjects];
+    updated.splice(idx, 1);
+    setEditProjects(updated);
+  };
+  const handleSaveProjects = async () => {
+    try {
+      await axios.patch(
+        API_ENDPOINTS.PROJECTS_UPDATE,
+        {
+          email: user.email,
+          projects: editProjects,
+        }
+      );
+      setProjects(editProjects);
+      setShowProjectsModal(false);
+    } catch (err) {
+      alert('Failed to update projects');
+    }
+  };
+
+  const handleOpenExperiencesModal = () => {
+    setEditExperiences(experiences.length ? [...experiences] : [{ heading: '', content: '', link: '' }]);
+    setShowExperiencesModal(true);
+  };
+  const handleExperienceChange = (idx, field, value) => {
+    const updated = [...editExperiences];
+    updated[idx][field] = value;
+    setEditExperiences(updated);
+  };
+  const handleAddExperienceRow = () => {
+    setEditExperiences([...editExperiences, { heading: '', content: '', link: '' }]);
+  };
+  const handleRemoveExperienceRow = (idx) => {
+    const updated = [...editExperiences];
+    updated.splice(idx, 1);
+    setEditExperiences(updated);
+  };
+  const handleSaveExperiences = async () => {
+    try {
+      await axios.patch(
+        API_ENDPOINTS.EXPERIENCES_UPDATE,
+        {
+          email: user.email,
+          experiences: editExperiences,
+        }
+      );
+      setExperiences(editExperiences);
+      setShowExperiencesModal(false);
+    } catch (err) {
+      alert('Failed to update experiences');
+    }
+  };
+
+  const handleOpenCertificationsModal = () => {
+    setEditCertifications(certifications.length ? [...certifications] : [{ name: '', link: '' }]);
+    setShowCertificationsModal(true);
+  };
+
+  const handleCertificationChange = (idx, field, value) => {
+    const updated = [...editCertifications];
+    updated[idx][field] = value;
+    setEditCertifications(updated);
+  };
+
+  const handleAddCertificationRow = () => {
+    setEditCertifications([...editCertifications, { name: '', link: '' }]);
+  };
+
+  const handleRemoveCertificationRow = (idx) => {
+    const updated = [...editCertifications];
+    updated.splice(idx, 1);
+    setEditCertifications(updated);
+  };
+
+  const handleSaveCertifications = async () => {
+    try {
+      await axios.patch(
+        API_ENDPOINTS.CERTIFICATIONS_UPDATE,
+        {
+          email: user.email,
+          certifications: editCertifications,
+        }
+      );
+      setCertifications(editCertifications);
+      setShowCertificationsModal(false);
+    } catch (err) {
+      alert('Failed to update certifications');
+    }
+  };
+
   const navItems = [
     {
       label: "Dashboard",
@@ -81,36 +240,40 @@ export default function StudentDashboard() {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
         </svg>
       )
+    },
+    {
+      label: "Study Plan",
+      href: "/study-plan",
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      )
     }
   ];
 
-  // Sample data for the dashboard
-  const cgpaData = [
-    { year: "Year 1", value: 9.1 },
-    { year: "Year 2", value: 8.77 },
-    { year: "Year 3", value: 8.00 }
-  ];
+  // Helper to get a clean preview up to a character limit
 
-  const projects = [
-    "Machine Learning Project",
-    "Web Development Portfolio",
-    "Data Analysis Research",
-    "Mobile App Development"
-  ];
+  function getConclusionPreview(text, limit = 120) {
+    if (!text) return "";
+    if (text.length <= limit) return text;
+    // Find the last space before the limit to avoid breaking words
+    const trimmed = text.slice(0, limit);
+    const lastSpace = trimmed.lastIndexOf(" ");
+    return trimmed.slice(0, lastSpace) + "... more";
+  }
 
-  const experiences = [
-    { role: "Software Engineering Intern", description: "Developed full-stack applications using React and Node.js" },
-    { role: "Research Assistant", description: "Conducted research on AI and machine learning algorithms" },
-    { role: "Teaching Assistant", description: "Assisted professors in computer science courses" },
-    { role: "Freelance Developer", description: "Built custom solutions for various clients" }
-  ];
-
-  const certifications = [
-    "AWS Certified Solutions Architect",
-    "Google Cloud Professional Developer",
-    "Microsoft Azure Fundamentals",
-    "Certified Scrum Master (CSM)"
-  ];
+  // Helper to get CGPA for a given year (1-4)
+  function getCgpaForYear(cgpaData, year) {
+    const found = cgpaData.find(item => String(item.year) === String(year) || String(item.year) === `Year ${year}`);
+    return found ? found.value : null;
+  }
+  // Helper to get average CGPA
+  function getAverageCgpa(cgpaData) {
+    if (!cgpaData.length) return null;
+    const sum = cgpaData.reduce((acc, item) => acc + parseFloat(item.value || 0), 0);
+    return (sum / cgpaData.length).toFixed(2);
+  }
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -223,13 +386,41 @@ export default function StudentDashboard() {
                     <p className="text-gray-600 mb-3">
                       {user?.year ? `Year ${user.year}` : "SEM 5"}
                     </p>
-                    <div className="space-y-1">
-                      <div className="h-2 bg-gray-200 rounded w-full"></div>
-                      <div className="h-2 bg-gray-200 rounded w-3/4"></div>
-                      <div className="h-2 bg-gray-200 rounded w-5/6"></div>
-                      <div className="h-2 bg-gray-200 rounded w-2/3"></div>
-                      <div className="h-2 bg-gray-200 rounded w-4/5"></div>
-                    </div>
+                    {user?.conclusion ? (
+                      <>
+                        <div
+                          className="bg-gray-100 rounded p-3 text-gray-800 text-sm cursor-pointer overflow-hidden"
+                          style={{
+                            whiteSpace: 'pre-line',
+                          }}
+                          title="Click to view full conclusion"
+                          onClick={() => setShowConclusionModal(true)}
+                        >
+                          {getConclusionPreview(user.conclusion)}
+                        </div>
+                        {showConclusionModal && (
+                          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                            <div className="bg-white rounded-lg shadow-lg p-6 max-w-lg w-full relative">
+                              <button
+                                className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
+                                onClick={() => setShowConclusionModal(false)}
+                                aria-label="Close"
+                              >
+                                &times;
+                              </button>
+                              <h4 className="text-lg font-semibold mb-2">Conclusion</h4>
+                              <div className="text-gray-800 whitespace-pre-line">
+                                {user.conclusion}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="bg-gray-100 rounded p-3 text-gray-400 text-sm">
+                        No conclusion available yet.
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -238,122 +429,466 @@ export default function StudentDashboard() {
               <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-semibold text-gray-900">CGPA</h2>
-                  <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
-                    View Report
-                  </button>
-                </div>
-                
-                {/* Donut Chart */}
-                <div className="flex justify-center mb-4">
-                  <div className="relative w-32 h-32">
-                    <svg className="w-32 h-32 transform -rotate-90" viewBox="0 0 36 36">
-                      <path
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        fill="none"
-                        stroke="#e5e7eb"
-                        strokeWidth="2"
-                      />
-                      <path
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        fill="none"
-                        stroke="#374151"
-                        strokeWidth="2"
-                        strokeDasharray="60, 100"
-                        strokeDashoffset="0"
-                      />
-                      <path
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        fill="none"
-                        stroke="#6b7280"
-                        strokeWidth="2"
-                        strokeDasharray="25, 100"
-                        strokeDashoffset="-60"
-                      />
-                      <path
-                        d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                        fill="none"
-                        stroke="#9ca3af"
-                        strokeWidth="2"
-                        strokeDasharray="15, 100"
-                        strokeDashoffset="-85"
-                      />
-                    </svg>
+                  <div className="flex gap-2">
+                    <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700" onClick={handleOpenCgpaModal}>
+                      Update CGPA
+                    </button>
                   </div>
                 </div>
-                
-                {/* CGPA Data */}
-                <div className="flex justify-between">
-                  {cgpaData.map((item, index) => (
-                    <div key={index} className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-black rounded-full"></div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">{item.year}</p>
-                        <p className="text-sm text-gray-600">{item.value}</p>
+                {/* Single Progress Ring for Average CGPA - LeetCode Style (fixed arc start) */}
+                <div className="flex flex-col items-center mb-4">
+                  <div className="relative w-32 h-32 flex items-center justify-center">
+                    {(() => {
+                      const avg = getAverageCgpa(cgpaData);
+                      const avgNum = avg ? parseFloat(avg) : 0;
+                      const percent = avgNum / 10;
+                      let color = '#ef4444'; // red
+                      if (avgNum > 7.5) color = '#22c55e'; // green
+                      else if (avgNum > 5) color = '#eab308'; // yellow
+                      // SVG arc math
+                      const radius = 15.5;
+                      const circumference = 2 * Math.PI * radius;
+                      const arcLength = circumference * percent;
+                      return (
+                        <svg className="w-32 h-32" viewBox="0 0 36 36">
+                          {/* Background ring (full circle, always fixed) */}
+                          <circle
+                            cx="18" cy="18" r={radius}
+                            fill="none"
+                            stroke="#e5e7eb"
+                            strokeWidth="2.5"
+                          />
+                          {/* Progress arc - always starts at 225deg (bottom left) */}
+                          <circle
+                            cx="18" cy="18" r={radius}
+                            fill="none"
+                            stroke={color}
+                            strokeWidth="2.5"
+                            strokeDasharray={`${arcLength} ${circumference - arcLength}`}
+                            strokeDashoffset={circumference * 0.625}
+                            strokeLinecap="round"
+                            style={{
+                              transition: 'stroke-dasharray 0.5s, stroke 0.5s',
+                            }}
+                          />
+                          {/* Centered CGPA number only, no /10 */}
+                          <text
+                            x="18" y="20.5"
+                            textAnchor="middle"
+                            fontSize="0.45em"
+                            fontWeight="700"
+                            fill="#222"
+                            style={{ fontFamily: 'Inter, Arial, sans-serif', letterSpacing: '-0.04em' }}
+                          >
+                            {avg || '—'}
+                          </text>
+                        </svg>
+                      );
+                    })()}
+                  </div>
+                  {/* Year labels and values below the ring */}
+                  <div className="flex justify-between w-full mt-4 px-2 gap-2">
+                    {[1,2,3,4].map((year) => (
+                      <div key={year} className="flex flex-col items-center">
+                        <span className="text-xs text-gray-500">Year {year}</span>
+                        <span className="text-sm font-medium text-gray-900">
+                          {getCgpaForYear(cgpaData, year) || "—"}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                {/* CGPA Modal */}
+                {showCgpaModal && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                    <div className="bg-white rounded-lg shadow-lg p-6 max-w-lg w-full relative">
+                      <button
+                        className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
+                        onClick={() => setShowCgpaModal(false)}
+                        aria-label="Close"
+                      >
+                        &times;
+                      </button>
+                      <h4 className="text-lg font-semibold mb-4">Edit CGPA</h4>
+                      <div className="space-y-2">
+                        {editCgpa.map((row, idx) => (
+                          <div key={idx} className="flex gap-2 items-center">
+                            <input
+                              type="text"
+                              className="border rounded px-2 py-1 w-24"
+                              placeholder="Year"
+                              value={row.year}
+                              onChange={e => handleCgpaChange(idx, 'year', e.target.value)}
+                            />
+                            <input
+                              type="number"
+                              className="border rounded px-2 py-1 w-24"
+                              placeholder="CGPA"
+                              value={row.value}
+                              onChange={e => handleCgpaChange(idx, 'value', e.target.value)}
+                              min="0"
+                              max="10"
+                              step="0.01"
+                            />
+                            <button
+                              className="text-red-500 hover:text-red-700 text-lg"
+                              onClick={() => handleRemoveCgpaRow(idx)}
+                              title="Remove"
+                            >
+                              &minus;
+                            </button>
+                          </div>
+                        ))}
+                        <button
+                          className="mt-2 px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                          onClick={handleAddCgpaRow}
+                        >
+                          + Add Year
+                        </button>
+                      </div>
+                      <div className="flex justify-end gap-2 mt-4">
+                        <button
+                          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                          onClick={handleSaveCgpa}
+                        >
+                          Save
+                        </button>
+                        <button
+                          className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+                          onClick={() => setShowCgpaModal(false)}
+                        >
+                          Cancel
+                        </button>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                )}
               </div>
 
               {/* Project Section */}
               <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900 mb-2">Project</h2>
+                <div className="flex items-center justify-between mb-2">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-1">Projects</h2>
+                  <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700" onClick={handleOpenProjectsModal}>
+                    Add/Update Projects
+                  </button>
+                </div>
                 <p className="text-sm text-gray-600 mb-4">
-                  Below are the student's highest scoring subjects
+                  {projects.length === 0 ? 'Add your projects' : ''}
                 </p>
                 <div className="space-y-3">
-                  {projects.map((project, index) => (
-                    <div key={index} className="flex items-center space-x-3">
-                      <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
-                      <span className="text-sm text-gray-700">{project}</span>
-                    </div>
-                  ))}
+                  {projects.length === 0 ? (
+                    <div className="text-gray-400 text-sm italic">No projects added yet.</div>
+                  ) : (
+                    projects.map((project, index) => (
+                      <div key={index} className="flex items-center space-x-3">
+                        <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
+                        <span className="text-sm text-gray-700 font-medium">
+                          {project.link ? (
+                            <a href={project.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">{project.name}</a>
+                          ) : (
+                            project.name
+                          )}
+                        </span>
+                      </div>
+                    ))
+                  )}
                 </div>
+                {/* Projects Modal */}
+                {showProjectsModal && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                    <div className="bg-white rounded-lg shadow-lg p-6 max-w-lg w-full relative">
+                      <button
+                        className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
+                        onClick={() => setShowProjectsModal(false)}
+                        aria-label="Close"
+                      >
+                        &times;
+                      </button>
+                      <h4 className="text-lg font-semibold mb-4">Edit Projects</h4>
+                      <div className="space-y-2">
+                        {editProjects.map((row, idx) => (
+                          <div key={idx} className="flex gap-2 items-center">
+                            <input
+                              type="text"
+                              className="border rounded px-2 py-1 w-40"
+                              placeholder="Project Name"
+                              value={row.name}
+                              onChange={e => handleProjectChange(idx, 'name', e.target.value)}
+                            />
+                            <input
+                              type="url"
+                              className="border rounded px-2 py-1 w-56"
+                              placeholder="Project Link (optional)"
+                              value={row.link}
+                              onChange={e => handleProjectChange(idx, 'link', e.target.value)}
+                            />
+                            <button
+                              className="text-red-500 hover:text-red-700 text-lg"
+                              onClick={() => handleRemoveProjectRow(idx)}
+                              title="Remove"
+                            >
+                              &minus;
+                            </button>
+                          </div>
+                        ))}
+                        <button
+                          className="mt-2 px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                          onClick={handleAddProjectRow}
+                        >
+                          + Add Project
+                        </button>
+                      </div>
+                      <div className="flex justify-end gap-2 mt-4">
+                        <button
+                          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                          onClick={handleSaveProjects}
+                        >
+                          Save
+                        </button>
+                        <button
+                          className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+                          onClick={() => setShowProjectsModal(false)}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Experiences Section */}
               <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
                 <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-lg font-semibold text-gray-900">Experiences</h2>
-                  <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
-                    Upload
+                  <h2 className="text-lg font-semibold text-gray-900 mb-1">Experiences</h2>
+                  <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700" onClick={handleOpenExperiencesModal}>
+                    Update
                   </button>
                 </div>
-                <p className="text-sm text-gray-600 mb-4">
-                  The following are the career paths mentioned
-                </p>
-                <div className="space-y-3">
-                  {experiences.map((exp, index) => (
-                    <div key={index} className="flex items-start space-x-3">
-                      <div className="w-3 h-3 bg-gray-300 rounded-full mt-1"></div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">{exp.role}</p>
-                        <p className="text-xs text-gray-600">{exp.description}</p>
+                {/* Remove helper text */}
+                <div className="space-y-3" style={{ maxHeight: '220px', overflowY: 'auto' }}>
+                  {experiences.length === 0 ? (
+                    <div className="text-gray-400 text-sm italic">Update your experience</div>
+                  ) : (
+                    experiences.map((exp, index) => {
+                      const isLong = exp.content && exp.content.length > 120;
+                      return (
+                        <div key={index} className="flex flex-col mb-2">
+                          <span className="text-sm font-semibold text-gray-800">
+                            {exp.link ? (
+                              <a href={exp.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">{exp.heading}</a>
+                            ) : (
+                              exp.heading
+                            )}
+                          </span>
+                          <span className="text-xs text-gray-600 ml-1" style={{
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'pre-line',
+                            maxWidth: '100%'
+                          }}>
+                            {isLong ? exp.content.slice(0, 120) + '...' : exp.content}
+                            {isLong && (
+                              <button className="text-blue-500 ml-1 text-xs underline" onClick={() => setShowExperienceDetail({ open: true, exp })}>
+                                View more
+                              </button>
+                            )}
+                          </span>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+                {/* Experience Detail Modal */}
+                {showExperienceDetail.open && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                    <div className="bg-white rounded-lg shadow-lg p-6 max-w-lg w-full relative">
+                      <button
+                        className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
+                        onClick={() => setShowExperienceDetail({ open: false, exp: null })}
+                        aria-label="Close"
+                      >
+                        &times;
+                      </button>
+                      <h4 className="text-lg font-semibold mb-2">
+                        {showExperienceDetail.exp?.link ? (
+                          <a href={showExperienceDetail.exp.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">{showExperienceDetail.exp.heading}</a>
+                        ) : (
+                          showExperienceDetail.exp?.heading
+                        )}
+                      </h4>
+                      <div className="text-gray-800 whitespace-pre-line">
+                        {showExperienceDetail.exp?.content}
                       </div>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                )}
+                {/* Experiences Modal */}
+                {showExperiencesModal && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                    <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl w-full relative">
+                      <button
+                        className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
+                        onClick={() => setShowExperiencesModal(false)}
+                        aria-label="Close"
+                      >
+                        &times;
+                      </button>
+                      <h4 className="text-lg font-semibold mb-4">Edit Experiences</h4>
+                      <div className="space-y-2">
+                        {editExperiences.map((row, idx) => (
+                          <div key={idx} className="flex gap-2 items-center">
+                            <input
+                              type="text"
+                              className="border rounded px-2 py-1 w-40"
+                              placeholder="Heading"
+                              value={row.heading}
+                              onChange={e => handleExperienceChange(idx, 'heading', e.target.value)}
+                            />
+                            <input
+                              type="text"
+                              className="border rounded px-2 py-1 w-56"
+                              placeholder="Content"
+                              value={row.content}
+                              onChange={e => handleExperienceChange(idx, 'content', e.target.value)}
+                            />
+                            <input
+                              type="url"
+                              className="border rounded px-2 py-1 w-72"
+                              placeholder="Certificate/Link (optional)"
+                              value={row.link}
+                              onChange={e => handleExperienceChange(idx, 'link', e.target.value)}
+                            />
+                            <button
+                              className="text-red-500 hover:text-red-700 text-lg"
+                              onClick={() => handleRemoveExperienceRow(idx)}
+                              title="Remove"
+                            >
+                              &minus;
+                            </button>
+                          </div>
+                        ))}
+                        <button
+                          className="mt-2 px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                          onClick={handleAddExperienceRow}
+                        >
+                          + Add Experience
+                        </button>
+                      </div>
+                      <div className="flex justify-end gap-2 mt-4">
+                        <button
+                          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                          onClick={handleSaveExperiences}
+                        >
+                          Save
+                        </button>
+                        <button
+                          className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+                          onClick={() => setShowExperiencesModal(false)}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Certifications Section */}
               <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 lg:col-span-2">
                 <div className="flex items-center justify-between mb-2">
                   <h2 className="text-lg font-semibold text-gray-900">Certifications</h2>
-                  <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
-                    Upload
+                  <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700" onClick={handleOpenCertificationsModal}>
+                    Update
                   </button>
                 </div>
                 <p className="text-sm text-gray-600 mb-4">
-                  The following are the career paths mentioned
+                  {certifications.length === 0 ? 'Add your certifications' : ''}
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {certifications.map((cert, index) => (
-                    <div key={index} className="flex items-center space-x-3">
-                      <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
-                      <span className="text-sm text-gray-700">{cert}</span>
-                    </div>
-                  ))}
+                  {certifications.length === 0 ? (
+                    <div className="text-gray-400 text-sm italic">No certifications added yet.</div>
+                  ) : (
+                    certifications.map((cert, index) => (
+                      <div key={index} className="flex items-center space-x-3">
+                        <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
+                        <span className="text-sm text-gray-700 font-medium">
+                          {cert.link ? (
+                            <a href={cert.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800">{cert.name}</a>
+                          ) : (
+                            cert.name
+                          )}
+                        </span>
+                      </div>
+                    ))
+                  )}
                 </div>
+                {/* Certifications Modal */}
+                {showCertificationsModal && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+                    <div className="bg-white rounded-lg shadow-lg p-6 max-w-lg w-full relative">
+                      <button
+                        className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
+                        onClick={() => setShowCertificationsModal(false)}
+                        aria-label="Close"
+                      >
+                        &times;
+                      </button>
+                      <h4 className="text-lg font-semibold mb-4">Edit Certifications</h4>
+                      <div className="space-y-2">
+                        {editCertifications.map((row, idx) => (
+                          <div key={idx} className="flex gap-2 items-center">
+                            <input
+                              type="text"
+                              className="border rounded px-2 py-1 w-40"
+                              placeholder="Certification Name"
+                              value={row.name}
+                              onChange={e => handleCertificationChange(idx, 'name', e.target.value)}
+                            />
+                            <input
+                              type="url"
+                              className="border rounded px-2 py-1 w-56"
+                              placeholder="Certificate Link (optional)"
+                              value={row.link}
+                              onChange={e => handleCertificationChange(idx, 'link', e.target.value)}
+                            />
+                            <button
+                              className="text-red-500 hover:text-red-700 text-lg"
+                              onClick={() => handleRemoveCertificationRow(idx)}
+                              title="Remove"
+                            >
+                              &minus;
+                            </button>
+                          </div>
+                        ))}
+                        <button
+                          className="mt-2 px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600"
+                          onClick={handleAddCertificationRow}
+                        >
+                          + Add Certification
+                        </button>
+                      </div>
+                      <div className="flex justify-end gap-2 mt-4">
+                        <button
+                          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                          onClick={handleSaveCertifications}
+                        >
+                          Save
+                        </button>
+                        <button
+                          className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
+                          onClick={() => setShowCertificationsModal(false)}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
             </div>

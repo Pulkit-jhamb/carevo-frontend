@@ -27,6 +27,8 @@ export default function MentalHealthChatbot() {
   const [showSuggestedPrompts, setShowSuggestedPrompts] = useState(true);
   const [fadeInMessage, setFadeInMessage] = useState(false);
   const [showQuizModal, setShowQuizModal] = useState(false);
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [studyPlanToSave, setStudyPlanToSave] = useState(null);
   const chatEndRef = useRef(null);
   const navigate = useNavigate();
 
@@ -98,6 +100,57 @@ export default function MentalHealthChatbot() {
     }
   };
 
+  // Handle saving study plan when user confirms
+  const handleSaveStudyPlan = async () => {
+    try {
+      console.log("Saving study plan for user:", userEmail);
+      
+      const res = await fetch(API_ENDPOINTS.SAVE_STUDY_PLAN, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: 'include',
+        body: JSON.stringify({ email: userEmail }),
+      });
+      
+      const data = await res.json();
+      
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
+      console.log("Study plan saved successfully:", data);
+      
+      setMessages((msgs) => [
+        ...msgs,
+        { sender: "bot", text: "Perfect! I've saved your study plan to your Study Plan page. You can now visit the Study Plan page to track your progress and manage your tasks. 🎯" },
+      ]);
+      
+      setShowSaveModal(false);
+      setStudyPlanToSave(null);
+    } catch (err) {
+      console.error("Error saving study plan:", err);
+      setMessages((msgs) => [
+        ...msgs,
+        { sender: "bot", text: "Sorry, there was an error saving your study plan. Please try again." },
+      ]);
+    }
+  };
+
+  // Check if the last message contains save study plan option
+  const shouldShowSaveButton = () => {
+    if (messages.length === 0) return false;
+    const lastMessage = messages[messages.length - 1];
+    return lastMessage.sender === "bot" && 
+           (lastMessage.text.includes("save this study plan") || 
+            lastMessage.text.includes("Would you like me to save") ||
+            lastMessage.text.includes("Just say \"Yes, save it\""));
+  };
+
+  // Show save modal when user wants to save
+  const showSaveStudyPlanModal = () => {
+    setShowSaveModal(true);
+  };
+
   const handleSuggestedPrompt = (prompt) => {
     if (prompt.isQuiz) {
       setShowQuizModal(true);
@@ -123,7 +176,7 @@ export default function MentalHealthChatbot() {
 
   const handleQuizComplete = ({ conclusion, recommendations }) => {
     // Add a message to the chat about the quiz completion
-    const quizMessage = `I've completed the career assessment quiz! Here's what I discovered about myself:\n\n**Personality Summary:**\n${conclusion}\n\n**Career Recommendations:**\n${recommendations}\n\nCan you help me explore these career paths further?`;
+    const quizMessage = `I've completed the career exploration quiz! Here's what I discovered about myself:\n\n**Personality Summary:**\n${conclusion}\n\n**Career Recommendations:**\n${recommendations}\n\nCan you help me explore these career paths further?`;
     
     setMessages(prev => [...prev, { sender: "user", text: quizMessage }]);
     setShowQuizModal(false);
@@ -131,8 +184,8 @@ export default function MentalHealthChatbot() {
 
   const suggestedPrompts = [
     {
-      title: "Career Assessment Quiz",
-      query: "Take our comprehensive career assessment quiz to discover your strengths and get personalized recommendations.",
+      title: "Career Exploration",
+      query: "Take our comprehensive career exploration quiz to discover your strengths and get personalized recommendations.",
       icon: "📋",
       color: "bg-purple-100 text-purple-600",
       isQuiz: true
@@ -144,16 +197,10 @@ export default function MentalHealthChatbot() {
       color: "bg-blue-100 text-blue-600"
     },
     {
-      title: "Career Exploration",
-      query: "I'm confused about my career path. Can you help me explore different options?",
-      icon: "🎯",
-      color: "bg-green-100 text-green-600"
-    },
-    {
-      title: "Study Strategies",
-      query: "I want to improve my study habits and academic performance. What strategies would work best for me?",
-      icon: "🧠",
-      color: "bg-yellow-100 text-yellow-600"
+      title: "Feeling Anxious?",
+      query: "I'm feeling stressed and anxious about my academic future. Can you help me manage these feelings?",
+      icon: "😰",
+      color: "bg-red-100 text-red-600"
     }
   ];
 
@@ -192,6 +239,12 @@ export default function MentalHealthChatbot() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
               Chat
+            </a>
+            <a href="/study-plan" className="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Study Plan
             </a>
           </div>
 
@@ -252,7 +305,7 @@ export default function MentalHealthChatbot() {
               
               {/* Suggested Prompts in Center */}
               <div className="max-w-4xl w-full">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                   {suggestedPrompts.map((prompt, index) => (
                     <div 
                       key={index}
@@ -292,6 +345,21 @@ export default function MentalHealthChatbot() {
                         {msg.sender === "bot"
                           ? <ReactMarkdown components={{p: 'span'}}>{msg.text}</ReactMarkdown>
                           : msg.text}
+                        
+                        {/* Save Study Plan Button */}
+                        {msg.sender === "bot" && shouldShowSaveButton() && (
+                          <div className="mt-3 pt-3 border-t border-gray-200">
+                            <button
+                              onClick={showSaveStudyPlanModal}
+                              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm flex items-center gap-2"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+                              </svg>
+                              Save Study Plan
+                            </button>
+                          </div>
+                        )}
                       </div>
                       {msg.sender === "user" && USER_AVATAR}
                     </div>
@@ -373,6 +441,32 @@ export default function MentalHealthChatbot() {
         onClose={() => setShowQuizModal(false)}
         onQuizComplete={handleQuizComplete}
       />
+
+      {/* Save Study Plan Modal */}
+      {showSaveModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+            <h3 className="text-lg font-bold text-gray-900 mb-4">Save Study Plan</h3>
+            <p className="text-sm text-gray-700 mb-6">
+              Are you sure you want to save your current study plan? This will allow you to track your progress and manage your tasks in the Study Plan page.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowSaveModal(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveStudyPlan}
+                className="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700"
+              >
+                Save Study Plan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
