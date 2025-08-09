@@ -12,7 +12,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_ENDPOINTS } from './config';
 import { useAuthRedirect } from './hooks/useAuthRedirect';
-import VoiceInteraction from './pages/voice_interaction';
+
 
 function UserIcon() {
   return (
@@ -233,12 +233,7 @@ function AppRoutes() {
           <Navigate to="/dashboard" replace />
         </ProtectedRoute>
       } />
-      {/* Voice Interaction route */}
-      <Route path="/voice-interaction" element={
-        <ProtectedRoute>
-          <VoiceInteraction />
-        </ProtectedRoute>
-      } />
+      
       
     </Routes>
   );
