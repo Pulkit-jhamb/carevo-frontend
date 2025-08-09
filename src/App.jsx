@@ -8,10 +8,11 @@ import Signup from './pages/signup';
 import MentalHealthChatbot from './pages/mental_health_si';
 import StudyPlan from './pages/study_plan';
 import React, { useState, useEffect } from 'react';
-import Sidebar from './pages/sidebar';
+// import Sidebar from './pages/sidebar';
 import axios from 'axios';
 import { API_ENDPOINTS } from './config';
 import { useAuthRedirect } from './hooks/useAuthRedirect';
+import VoiceInteraction from './pages/voice_interaction';
 
 function UserIcon() {
   return (
@@ -232,6 +233,13 @@ function AppRoutes() {
           <Navigate to="/dashboard" replace />
         </ProtectedRoute>
       } />
+      {/* Voice Interaction route */}
+      <Route path="/voice-interaction" element={
+        <ProtectedRoute>
+          <VoiceInteraction />
+        </ProtectedRoute>
+      } />
+      
     </Routes>
   );
 } 

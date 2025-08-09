@@ -282,7 +282,7 @@ export default function StudentDashboard() {
       )
     },
     {
-      label: "AI Assistant",
+      label: "chat",
       href: "/chat",
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -304,7 +304,7 @@ export default function StudentDashboard() {
   // Sample data for the student dashboard
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200">
       {/* Sidebar */}
       <div className="w-64 bg-white border-r border-gray-200 flex flex-col h-screen">
         {/* Logo */}
@@ -391,7 +391,7 @@ export default function StudentDashboard() {
         </div>
 
         {/* Dashboard Content */}
-        <div className="flex-1 p-6 overflow-y-auto bg-gray-50">
+        <div className="flex-1 p-6 overflow-y-auto bg-transparent">
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               
@@ -457,7 +457,7 @@ export default function StudentDashboard() {
               <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-semibold text-gray-900">Academic Performance</h2>
-                  <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700" onClick={handleOpenTermModal}>
+                  <button className="px-3 py-1 text-sm bg-black text-white rounded hover:bg-gray-800" onClick={handleOpenTermModal}>
                     Update
                   </button>
                 </div>
@@ -577,7 +577,7 @@ export default function StudentDashboard() {
                        </div>
                        <div className="flex justify-end gap-2 mt-4">
                          <button
-                           className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                           className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
                            onClick={handleSaveTermData}
                          >
                            Save
@@ -640,7 +640,7 @@ export default function StudentDashboard() {
                          </button>
                          <div className="flex gap-2">
                            <button
-                             className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                             className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
                              onClick={handleSaveExtracurricularActivities}
                            >
                              Save
@@ -697,7 +697,7 @@ export default function StudentDashboard() {
                           </button>
                           <div className="flex gap-2">
                             <button
-                              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                              className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
                               onClick={handleSaveCertifications}
                             >
                               Save
@@ -763,7 +763,7 @@ export default function StudentDashboard() {
                           </button>
                           <div className="flex gap-2">
                             <button
-                              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                              className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
                               onClick={handleSaveSubjects}
                             >
                               Save
@@ -785,7 +785,7 @@ export default function StudentDashboard() {
                <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
                  <div className="flex items-center justify-between mb-2">
                    <h2 className="text-lg font-semibold text-gray-900">Top Subjects</h2>
-                   <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700" onClick={handleOpenSubjectsModal}>
+                   <button className="px-3 py-1 text-sm bg-black text-white rounded hover:bg-gray-800" onClick={handleOpenSubjectsModal}>
                      Update
                    </button>
                  </div>
@@ -813,7 +813,7 @@ export default function StudentDashboard() {
               <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
                 <div className="flex items-center justify-between mb-2">
                   <h2 className="text-lg font-semibold text-gray-900">Extracurricular Activities</h2>
-                  <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700" onClick={handleOpenExtracurricularModal}>
+                                     <button className="px-3 py-1 text-sm bg-black text-white rounded hover:bg-gray-800" onClick={handleOpenExtracurricularModal}>
                     Update
                   </button>
                 </div>
@@ -841,7 +841,7 @@ export default function StudentDashboard() {
               <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 lg:col-span-2">
                 <div className="flex items-center justify-between mb-2">
                   <h2 className="text-lg font-semibold text-gray-900">Certifications</h2>
-                  <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700" onClick={handleOpenCertificationsModal}>
+                                     <button className="px-3 py-1 text-sm bg-black text-white rounded hover:bg-gray-800" onClick={handleOpenCertificationsModal}>
                     Update
                   </button>
                 </div>

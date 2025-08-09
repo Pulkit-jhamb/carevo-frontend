@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { API_ENDPOINTS } from '../config';
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+// import Sidebar from './sidebar';
 
 
 const quizSections = [
@@ -355,18 +356,87 @@ function extractRecommendationTitles(recommendationsRaw) {
     });
 }
 
+// Helper for word-by-word fade-in animation
+function AnimatedText({ text, className = "" }) {
+  const [visibleWords, setVisibleWords] = useState(0);
+  const words = text ? text.split(" ") : [];
+
+  useEffect(() => {
+    setVisibleWords(0);
+    if (!text) return;
+    let i = 0;
+    const interval = setInterval(() => {
+      i++;
+      setVisibleWords(i);
+      if (i >= words.length) clearInterval(interval);
+    }, 40); // 40ms per word for smooth effect
+    return () => clearInterval(interval);
+  }, [text]);
+
+  return (
+    <span className={className}>
+      {words.map((word, idx) => (
+        <span
+          key={idx}
+          style={{
+            opacity: idx < visibleWords ? 1 : 0,
+            transition: "opacity 0.3s",
+            marginRight: "0.25em"
+          }}
+        >
+          {word}
+        </span>
+      ))}
+    </span>
+  );
+}
+
+// Extract strengths and recommended path from the conclusion text (simple heuristic)
+function extractCapabilities(conclusion) {
+  // Example: Look for strengths/traits in the conclusion
+  // You can improve this extraction logic as needed
+  const strengths = [];
+  if (/organized|precise|dependable/i.test(conclusion)) strengths.push("Organized & Precise");
+  if (/creative|curious|imaginative/i.test(conclusion)) strengths.push("Creative & Curious");
+  if (/supportive|caring|empathetic/i.test(conclusion)) strengths.push("Supportive & Caring");
+  if (/goal-oriented|driven|ambitious/i.test(conclusion)) strengths.push("Goal-Oriented & Driven");
+  if (strengths.length === 0) strengths.push("Adaptable");
+  return strengths;
+}
+
+function extractRecommendedPath(recommendations) {
+  // Use the first recommended job as the path
+  const lines = recommendations.split("\n").filter(l => l.trim());
+  const first = lines[0] || "";
+  return first.replace(/\*\*/g, "").trim();
+}
+
 export default function Quiz() {
   const [answers, setAnswers] = useState({});
   const [report, setReport] = useState("");
   const [loading, setLoading] = useState(false);
+  const [userName, setUserName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const navigate = useNavigate();
 
-  const handleChange = (sectionIdx, qIdx, value) => {
-    setAnswers(prev => ({
-      ...prev,
-      [`${sectionIdx}-${qIdx}`]: value,
-    }));
-  };
+  useEffect(() => {
+    const getUserInfo = async () => {
+      try {
+        const response = await axios.get(API_ENDPOINTS.AUTH_STATUS, {
+          withCredentials: true
+        });
+        if (response.data.authenticated && response.data.user) {
+          setUserName(response.data.user.name || "User");
+          setUserEmail(response.data.user.email);
+        }
+      } catch (error) {
+        console.error("Failed to get user info:", error);
+        navigate("/login");
+      }
+    };
+    getUserInfo();
+  }, [navigate]);
 
   const handleLogout = async () => {
     try {
@@ -381,6 +451,52 @@ export default function Quiz() {
       console.error("Logout failed:", error);
       navigate("/login");
     }
+  };
+
+  const navItems = [
+    {
+      label: "Dashboard",
+      href: "/dashboard",
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
+        </svg>
+      )
+    },
+    {
+      label: "Quiz",
+      href: "/quiz",
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+      )
+    },
+    {
+      label: "Chat",
+      href: "/chat",
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+      )
+    },
+    {
+      label: "Study Plan",
+      href: "/study-plan",
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+      )
+    }
+  ];
+
+  const handleChange = (sectionIdx, qIdx, value) => {
+    setAnswers(prev => ({
+      ...prev,
+      [`${sectionIdx}-${qIdx}`]: value,
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -442,12 +558,96 @@ ${qaPairs
 
   const { conclusion, recommendations } = parseReport(report);
 
+  // Only show the animated conclusion page if report exists
+  const showConclusionPage = !!report;
+
   return (
-    <div className="flex-1 flex flex-col bg-gray-50">
-      {/* Top Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Career Quiz</h1>
-        <div className="flex items-center gap-3">
+    <div className="flex bg-white min-h-screen">
+      {/* Sidebar */}
+      <div className={`fixed left-0 top-0 h-screen z-40 transition-all duration-300 flex flex-col ${isCollapsed ? 'w-16' : 'w-64'}`} style={{ backgroundColor: '#fafafa' }}>
+        {/* Logo Section */}
+        <div className="p-4 border-b border-gray-200" style={{ backgroundColor: '#fafafa' }}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">C</span>
+              </div>
+              {!isCollapsed && <span className="text-xl font-bold text-black">Carevo</span>}
+            </div>
+            <button
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="p-1 rounded hover:bg-gray-200 transition-colors"
+            >
+              <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 p-4" style={{ backgroundColor: '#fafafa' }}>
+          <div className="space-y-2">
+            {!isCollapsed && <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Navigation</div>}
+            {navItems.map((item) => {
+              const isActive = window.location.pathname === item.href;
+              return (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
+                    isActive
+                      ? 'bg-gray-200 text-black'
+                      : 'text-gray-700 hover:bg-gray-100'
+                  }`}
+                  title={isCollapsed ? item.label : ""}
+                >
+                  {item.icon}
+                  {!isCollapsed && item.label}
+                </a>
+              );
+            })}
+          </div>
+
+          {!isCollapsed && (
+            <div className="mt-8 space-y-2">
+              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Settings & Help</div>
+              <a href="#" className="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Settings
+              </a>
+              <a href="#" className="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Help
+              </a>
+            </div>
+          )}
+        </nav>
+
+        {/* User Profile - always at bottom */}
+        <div className="p-4 border-t border-gray-200" style={{ backgroundColor: '#fafafa' }}>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="text-gray-600 font-semibold">{userName.charAt(0).toUpperCase()}</span>
+            </div>
+            {!isCollapsed && (
+              <div className="flex-1 min-w-0 text-left">
+                <p className="text-sm font-medium text-gray-900 truncate">{userName}</p>
+                <p className="text-xs text-gray-500 truncate">{userEmail}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className={`flex-1 flex flex-col transition-all duration-300 bg-white ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
+        {/* Logout Button - Notion style, top-right */}
+        <div className="flex justify-end px-8 pt-8">
           <button 
             onClick={handleLogout}
             className="px-4 py-2 text-sm font-medium text-white bg-black rounded-lg hover:bg-gray-800 flex items-center gap-2"
@@ -458,85 +658,143 @@ ${qaPairs
             </svg>
           </button>
         </div>
-      </div>
 
-      {/* Quiz Content */}
-      <div className="flex-1 p-6 overflow-y-auto">
-        <div className="max-w-4xl mx-auto">
-          <form onSubmit={handleSubmit} className="space-y-10 w-full">
-            {(() => {
-              let globalIdx = 0;
-              return quizSections.map((section, sectionIdx) => (
-                <div key={section.title} className="bg-white rounded-lg border border-gray-200 p-6">
-                  <h3 className="font-bold text-lg text-gray-700 mb-4">{section.title}</h3>
-                  <div className="space-y-8">
-                    {section.questions.map((q, qIdx) => {
-                      globalIdx++;
-                      const key = `${sectionIdx}-${qIdx}`;
-                      return (
-                        <div key={q.q}>
-                          <div className="font-semibold mb-2 flex items-center">
-                            <span className="mr-2 text-gray-500">{globalIdx}.</span> {q.q}
-                          </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            {q.options.map((opt) => {
-                              const isSelected = answers[key] === opt;
-                              return (
-                                <label
-                                  key={opt}
-                                  className={`flex items-center rounded-lg px-4 py-2 cursor-pointer border-2 transition ${
-                                    isSelected
-                                      ? "bg-black text-white border-black"
-                                      : "bg-white text-black border-gray-200 hover:border-black"
-                                  }`}
-                                >
-                                  <input
-                                    type="radio"
-                                    name={key}
-                                    value={opt}
-                                    checked={isSelected}
-                                    onChange={() => handleChange(sectionIdx, qIdx, opt)}
-                                    className="sr-only"
-                                  />
-                                  <span className="text-sm">{opt}</span>
-                                </label>
-                              );
-                            })}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+        <div className="flex-1 pb-16 pt-4 overflow-y-auto bg-white">
+          <div
+            className="w-full"
+            style={{
+              maxWidth: showConclusionPage ? "1050px" : "1200px", // Increased width
+              paddingLeft: "2rem", // Slightly reduced padding
+              paddingRight: "2rem",
+              boxSizing: "border-box",
+              overflowX: showConclusionPage ? "auto" : "visible", // Prevent horizontal overflow
+            }}
+          >
+            {showConclusionPage ? (
+              <div className="mt-16 mb-24 w-full flex flex-col items-start">
+                <h1
+                  className="text-3xl font-bold text-gray-900 mb-10 tracking-tight"
+                  style={{ letterSpacing: "-0.02em" }}
+                >
+                  CONCLUSION
+                </h1>
+                <div className="mb-10 w-full">
+                  <AnimatedText
+                    text={conclusion}
+                    className="text-lg text-gray-800 leading-relaxed"
+                    style={{
+                      lineHeight: "1.8",
+                      maxWidth: "100%",
+                      whiteSpace: "pre-line",
+                      overflowWrap: "break-word",
+                    }}
+                  />
                 </div>
-              ));
-            })()}
-
-            <div className="flex justify-center">
-              <button
-                type="submit"
-                disabled={loading}
-                className="px-8 py-3 bg-black text-white rounded-lg font-semibold hover:bg-gray-800 transition disabled:opacity-50"
-              >
-                {loading ? "Analyzing..." : "Submit Quiz"}
-              </button>
-            </div>
-          </form>
-
-          {report && (
-            <div className="mt-8 bg-white rounded-lg border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold mb-4">Your Results</h3>
-              <div className="prose max-w-none">
-                <div className="mb-6">
-                  <h4 className="text-md font-semibold mb-2">Conclusion</h4>
-                  <p className="text-gray-700">{conclusion}</p>
+                {/* Divider */}
+                <hr className="w-full border-t border-gray-200 mb-8" />
+                <div className="mb-10 w-full">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">User Capabilities</h2>
+                  <ul className="list-disc pl-6 space-y-2">
+                    {extractCapabilities(conclusion).map((cap, idx) => (
+                      <li key={idx} className="text-gray-800 text-base">
+                        <AnimatedText text={cap} />
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <div>
-                  <h4 className="text-md font-semibold mb-2">Career Recommendations</h4>
-                  <div className="text-gray-700">{recommendations}</div>
+                {/* Divider */}
+                <hr className="w-full border-t border-gray-200 mb-8" />
+                <div className="mb-10 w-full" style={{ wordBreak: "break-word", overflowWrap: "break-word" }}>
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Recommended Path</h2>
+                  <AnimatedText
+                    text={extractRecommendedPath(recommendations)}
+                    className="text-base text-gray-800"
+                    style={{
+                      wordBreak: "break-word",
+                      whiteSpace: "pre-line",
+                      maxWidth: "100%",
+                      overflowWrap: "break-word"
+                    }}
+                  />
+                </div>
+                <div className="flex justify-start mt-16 w-full">
+                  <button
+                    className="px-8 py-3 bg-black text-white rounded-lg font-semibold hover:bg-gray-800 transition"
+                    onClick={() => {
+                      setReport("");
+                      setAnswers({});
+                    }}
+                  >
+                    Retake Quiz
+                  </button>
                 </div>
               </div>
-            </div>
-          )}
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-12 w-full">
+                {/* Quiz Heading */}
+                <h1 className="text-2xl font-bold text-gray-900 mb-10 tracking-tight" style={{ letterSpacing: "-0.02em" }}>
+                  Psychometric Quiz
+                </h1>
+                {/* Quiz Questions */}
+                {(() => {
+                  let globalIdx = 0;
+                  return quizSections.map((section, sectionIdx) => (
+                    <div key={section.title} className="mb-12">
+                      <h3 className="font-bold text-lg text-gray-900 mb-6">{section.title}</h3>
+                      <div className="space-y-6">
+                        {section.questions.map((q, qIdx) => {
+                          globalIdx++;
+                          const key = `${sectionIdx}-${qIdx}`;
+                          return (
+                            <div key={q.q} className="mb-6">
+                              <div className="font-medium mb-3 flex items-center text-gray-900">
+                                <span className="mr-2 text-gray-500">{globalIdx}.</span> {q.q}
+                              </div>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                {q.options.map((opt) => {
+                                  const isSelected = answers[key] === opt;
+                                  return (
+                                    <label
+                                      key={opt}
+                                      className={`flex items-center rounded-lg px-4 py-3 cursor-pointer border transition
+                                        ${isSelected
+                                          ? "bg-black text-white border-black"
+                                          : "bg-white text-black border-gray-200 hover:border-black hover:bg-gray-50"
+                                        }`}
+                                      style={{ boxShadow: "none" }}
+                                    >
+                                      <input
+                                        type="radio"
+                                        name={key}
+                                        value={opt}
+                                        checked={isSelected}
+                                        onChange={() => handleChange(sectionIdx, qIdx, opt)}
+                                        className="sr-only"
+                                      />
+                                      <span className="text-sm">{opt}</span>
+                                    </label>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ));
+                })()}
+                <div className="flex justify-start mt-8">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="px-8 py-3 bg-black text-white rounded-lg font-semibold hover:bg-gray-800 transition disabled:opacity-50"
+                  >
+                    {loading ? "Analyzing..." : "Submit Quiz"}
+                  </button>
+                </div>
+              </form>
+            )}
+          </div>
         </div>
       </div>
     </div>

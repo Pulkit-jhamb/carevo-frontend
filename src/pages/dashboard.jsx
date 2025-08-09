@@ -22,6 +22,7 @@ export default function StudentDashboard() {
   const [showCertificationsModal, setShowCertificationsModal] = useState(false);
   const [editCertifications, setEditCertifications] = useState([]);
   const [profilePic, setProfilePic] = useState(null);
+  const [isCollapsed, setIsCollapsed] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -233,7 +234,7 @@ export default function StudentDashboard() {
       )
     },
     {
-      label: "AI Assistant",
+      label: "Chat",
       href: "/chat",
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -276,23 +277,33 @@ export default function StudentDashboard() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200">
       {/* Sidebar */}
-      <div className="w-64 bg-white border-r border-gray-200 flex flex-col h-screen">
-        {/* Logo */}
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">C</span>
+      <div className={`fixed left-0 top-0 h-screen z-40 transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-64'}`} style={{ backgroundColor: '#fafafa' }}>
+        {/* Logo Section */}
+        <div className="p-4 border-b border-gray-200" style={{ backgroundColor: '#fafafa' }}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-sm">C</span>
+              </div>
+              {!isCollapsed && <span className="text-xl font-bold text-black">Carevo</span>}
             </div>
-            <span className="text-xl font-bold text-black">Carevo</span>
+            <button
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              className="p-1 rounded hover:bg-gray-200 transition-colors"
+            >
+              <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+              </svg>
+            </button>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4">
+        <nav className="flex-1 p-4" style={{ backgroundColor: '#fafafa' }}>
           <div className="space-y-2">
-            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Navigation</div>
+            {!isCollapsed && <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Navigation</div>}
             {navItems.map((item) => {
               const isActive = location.pathname === item.href;
               return (
@@ -301,51 +312,56 @@ export default function StudentDashboard() {
                   href={item.href}
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                     isActive
-                      ? 'bg-gray-100 text-black'
+                      ? 'bg-gray-200 text-black'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
+                  title={isCollapsed ? item.label : ""}
                 >
                   {item.icon}
-                  {item.label}
+                  {!isCollapsed && item.label}
                 </a>
               );
             })}
           </div>
 
-          <div className="mt-8 space-y-2">
-            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Settings & Help</div>
-            <a href="#" className="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              Settings
-            </a>
-            <a href="#" className="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Help
-            </a>
-          </div>
+          {!isCollapsed && (
+            <div className="mt-8 space-y-2">
+              <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Settings & Help</div>
+              <a href="#" className="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Settings
+              </a>
+              <a href="#" className="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Help
+              </a>
+            </div>
+          )}
         </nav>
 
-        {/* User Profile */}
-        <div className="p-4 border-t border-gray-200">
+        {/* User Profile - always at bottom */}
+        <div className="p-4 border-t border-gray-200 mt-auto" style={{ backgroundColor: '#fafafa' }}>
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
               <span className="text-gray-600 font-semibold">{userName.charAt(0).toUpperCase()}</span>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">{userName}</p>
-              <p className="text-xs text-gray-500 truncate">{userEmail}</p>
-            </div>
+            {!isCollapsed && (
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">{userName}</p>
+                <p className="text-xs text-gray-500 truncate">{userEmail}</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className={`flex-1 flex flex-col transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
         {/* Top Header */}
         <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
@@ -363,7 +379,7 @@ export default function StudentDashboard() {
         </div>
 
         {/* Dashboard Content */}
-        <div className="flex-1 p-6 overflow-y-auto bg-gray-50">
+        <div className="flex-1 p-6 overflow-y-auto bg-transparent">
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               
@@ -430,7 +446,7 @@ export default function StudentDashboard() {
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-semibold text-gray-900">CGPA</h2>
                   <div className="flex gap-2">
-                    <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700" onClick={handleOpenCgpaModal}>
+                    <button className="px-3 py-1 text-sm bg-black text-white rounded hover:bg-gray-800" onClick={handleOpenCgpaModal}>
                       Update CGPA
                     </button>
                   </div>
@@ -548,7 +564,7 @@ export default function StudentDashboard() {
                       </div>
                       <div className="flex justify-end gap-2 mt-4">
                         <button
-                          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                          className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
                           onClick={handleSaveCgpa}
                         >
                           Save
@@ -569,7 +585,7 @@ export default function StudentDashboard() {
               <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
                 <div className="flex items-center justify-between mb-2">
                   <h2 className="text-lg font-semibold text-gray-900 mb-1">Projects</h2>
-                  <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700" onClick={handleOpenProjectsModal}>
+                  <button className="px-3 py-1 text-sm bg-black text-white rounded hover:bg-gray-800" onClick={handleOpenProjectsModal}>
                     Add/Update Projects
                   </button>
                 </div>
@@ -641,7 +657,7 @@ export default function StudentDashboard() {
                       </div>
                       <div className="flex justify-end gap-2 mt-4">
                         <button
-                          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                          className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
                           onClick={handleSaveProjects}
                         >
                           Save
@@ -662,7 +678,7 @@ export default function StudentDashboard() {
               <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
                 <div className="flex items-center justify-between mb-2">
                   <h2 className="text-lg font-semibold text-gray-900 mb-1">Experiences</h2>
-                  <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700" onClick={handleOpenExperiencesModal}>
+                  <button className="px-3 py-1 text-sm bg-black text-white rounded hover:bg-gray-800" onClick={handleOpenExperiencesModal}>
                     Update
                   </button>
                 </div>
@@ -781,7 +797,7 @@ export default function StudentDashboard() {
                       </div>
                       <div className="flex justify-end gap-2 mt-4">
                         <button
-                          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                          className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
                           onClick={handleSaveExperiences}
                         >
                           Save
@@ -802,7 +818,7 @@ export default function StudentDashboard() {
               <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 lg:col-span-2">
                 <div className="flex items-center justify-between mb-2">
                   <h2 className="text-lg font-semibold text-gray-900">Certifications</h2>
-                  <button className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700" onClick={handleOpenCertificationsModal}>
+                  <button className="px-3 py-1 text-sm bg-black text-white rounded hover:bg-gray-800" onClick={handleOpenCertificationsModal}>
                     Update
                   </button>
                 </div>
@@ -874,7 +890,7 @@ export default function StudentDashboard() {
                       </div>
                       <div className="flex justify-end gap-2 mt-4">
                         <button
-                          className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                          className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
                           onClick={handleSaveCertifications}
                         >
                           Save
