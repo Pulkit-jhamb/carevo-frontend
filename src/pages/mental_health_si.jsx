@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { API_ENDPOINTS } from '../config';
 import axios from "axios";
-import QuizModal from '../components/QuizModal';
+// import QuizModal from '../components/QuizModal';
 
 // Message component for user and AI messages
 function Message({ text, isUser, animate }) {
@@ -58,7 +58,7 @@ export default function MentalHealthSI() {
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [showQuizModal, setShowQuizModal] = useState(false);
+  // const [showQuizModal, setShowQuizModal] = useState(false);
   const [showChatPage, setShowChatPage] = useState(false); // NEW: controls which page is shown
   const [fadeOutPrompt, setFadeOutPrompt] = useState(false); // NEW: for fade animation
   const messagesEndRef = useRef(null);
@@ -430,7 +430,7 @@ export default function MentalHealthSI() {
         </div>
       </div>
       {/* Quiz Modal */}
-      <QuizModal isOpen={showQuizModal} onClose={() => setShowQuizModal(false)} />
+      {/* <QuizModal isOpen={showQuizModal} onClose={() => setShowQuizModal(false)} /> */}
 
       {/* Fade-in animation for chat page */}
       <style>

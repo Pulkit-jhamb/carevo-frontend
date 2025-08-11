@@ -1,338 +1,41 @@
 import React, { useEffect, useState } from "react";
 import { API_ENDPOINTS } from "../config";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-// import Sidebar from './sidebar';
+import { useNavigate, Link } from "react-router-dom";
 
+// After your imports, add:
+axios.defaults.baseURL = 'http://localhost:5001';
+axios.defaults.withCredentials = true;
 
-const quizSections = [
- {
-   title: 'Personality & Work-Style',
-   questions: [
-     {
-       q: 'When working in a group, I prefer to:',
-       options: [
-         'Lead and direct the discussion',
-         'Listen and support others',
-         'Focus on tasks quietly',
-         'Explore different ideas and possibilities',
-       ],
-     },
-     {
-       q: 'I’m energized by (choose one):',
-       options: [
-         'Having clear, structured tasks',
-         'A flexible, open-ended schedule',
-         'Joining social events/classes',
-         'Time alone to reflect or learn',
-       ],
-     },
-     {
-       q: 'On a typical day, I feel:',
-       options: [
-         'Very organized and on schedule',
-         'Somewhat organized, but okay with flexibility',
-         'Chilled and go-with-the-flow',
-         'A bit scattered, lots of thoughts',
-       ],
-     },
-     {
-       q: 'I make decisions when:',
-       options: [
-         'I rely on established rules or data',
-         'I trust my gut feelings',
-         'I ask others for their viewpoints',
-         'I explore all options thoroughly',
-       ],
-     },
-   ],
- },
- {
-   title: 'Interests & Motivations (RIASEC-Based)',
-   questions: [
-     {
-       q: 'Which task fits you best?',
-       options: [
-         'Designing a creative project',
-         'Solving logic puzzles',
-         'Helping a friend with a problem',
-         'Organizing an event or group',
-       ],
-     },
-     {
-       q: 'In free time, I enjoy more:',
-       options: [
-         'Crafting/art/music',
-         'Reading non-fiction or research',
-         'Playing team sports or socializing',
-         'Building things or fixing gadgets',
-       ],
-     },
-     {
-       q: 'I’m most interested in:',
-       options: [
-         'Artistic expression',
-         'Scientific or technical explanations',
-         'Teaching or mentoring others',
-         'Selling ideas or organizing events',
-       ],
-     },
-   ],
- },
- {
-   title: 'Strengths & Preferences',
-   questions: [
-     {
-       q: 'I’m known for being:',
-       options: [
-         'Dependable and precise',
-         'Creative and curious',
-         'Caring and supportive',
-         'Driven and goal-oriented',
-       ],
-     },
-     {
-       q: 'What drains me the most?',
-       options: [
-         'Unstructured chaos or constant socializing',
-         'Repetitive routines',
-         'Tasks without personal meaning',
-         'Lack of challenges or growth',
-       ],
-     },
-     {
-       q: 'I enjoy tasks where I can:',
-       options: [
-         'Analyse patterns and data',
-         'Use imagination and innovation',
-         'Support others emotionally',
-         'Achieve and see measurable progress',
-       ],
-     },
-   ],
- },
- {
-   title: 'Work Approach & Psychology',
-   questions: [
-     {
-       q: 'When facing a difficult task, I:',
-       options: [
-         'Break it into small, regular steps',
-         'Tackle the most interesting parts first',
-         'Ask for help or collaborate',
-         'Push myself through until it’s done',
-       ],
-     },
-     {
-       q: 'Under pressure, I typically:',
-       options: [
-         'Stay calm and find solutions',
-         'Overthink possibilities',
-         'Seek reassurance from others',
-         'Focus and get results',
-       ],
-     },
-     {
-       q: 'I learn best through:',
-       options: [
-         'Practical hands-on experience',
-         'Books, lectures, research',
-         'Discussion and reflection',
-         'Teaching others or leading groups',
-       ],
-     },
-   ],
- },
- {
-   title: 'Values & Personality Traits',
-   questions: [
-     {
-       q: 'I value at work:',
-       options: [
-         'Accuracy and high quality',
-         'Creativity and novelty',
-         'Connection and helping others',
-         'Recognition and achievement',
-       ],
-     },
-     {
-       q: 'When solving problems, I rely on:',
-       options: [
-         'Step-by-step plans',
-         'Insight and creativity',
-         'People’s feelings and needs',
-         'Efficiency and bold action',
-       ],
-     },
-     {
-       q: 'About feedback, I’m:',
-       options: [
-         'Highly sensitive to criticism',
-         'Motivated by clear standards',
-         'Uncomfortable with competition',
-         'Driven by public acknowledgment',
-       ],
-     },
-   ],
- },
- {
-   title: 'Academics & Learning Habits',
-   questions: [
-     {
-       q: 'My strongest subject is:',
-       options: [
-         'Math, logic, sciences',
-         'Writing, literature, arts',
-         'Social sciences, psychology',
-         'Business studies, economics',
-       ],
-     },
-     {
-       q: 'In a project, I prefer to:',
-       options: [
-         'Explore new ideas and options',
-         'Stick to a clear, reliable method',
-         'Ensure the group is cohesive',
-         'Push for results and progress',
-       ],
-     },
-     {
-       q: 'I’m motivated by:',
-       options: [
-         'Solving interesting problems',
-         'Expressing myself creatively',
-         'Caring for others',
-         'Setting and achieving clear goals',
-       ],
-     },
-   ],
- },
- {
-   title: 'Skills & Competencies',
-   questions: [
-     {
-       q: 'Which skill do you feel strongest at?',
-       options: [
-         'Logical reasoning or analysis',
-         'Creative brainstorming',
-         'Communication and empathy',
-         'Leading teams or projects',
-       ],
-     },
-     {
-       q: 'Which skill would you most want to improve?',
-       options: [
-         'Technical or data proficiency',
-         'Creative expression',
-         'Interpersonal or listening skills',
-         'Planning and organization',
-       ],
-     },
-   ],
- },
- {
-   title: 'Career Preferences & Goals',
-   questions: [
-     {
-       q: 'How do you measure success?',
-       options: [
-         'Well-executed work',
-         'Original ideas implemented',
-         'Impact on others’ lives',
-         'Recognition and status',
-       ],
-     },
-     {
-       q: 'Ideally, my daily work:',
-       options: [
-         'Is structured and reliable',
-         'Is flexible and changing',
-         'Is collaborative and social',
-         'Is goal-focused and fast-paced',
-       ],
-     },
-     {
-       q: 'If you had to choose, you’d rather:',
-       options: [
-         'Research and learn independently',
-         'Create something new',
-         'Support others or teach',
-         'Build or manage something concrete',
-       ],
-     },
-   ],
- },
- {
-   title: 'Personal Growth & Self-Awareness',
-   questions: [
-     {
-       q: 'Your top three values are:',
-       options: [
-         'Stability, accuracy, tradition',
-         'Innovation, freedom, creativity',
-         'Compassion, connection, integrity',
-         'Ambition, leadership, achievement',
-       ],
-     },
-     {
-       q: 'You prefer feedback that is:',
-       options: [
-         'Honest and actionable',
-         'Gentle but clear',
-         'Supportive and uplifting',
-         'Direct and challenge-driven',
-       ],
-     },
-     {
-       q: 'What energizes you most?',
-       options: [
-         'Achieving well-defined goals',
-         'Exploring new ideas',
-         'Strengthening relationships',
-         'Making an impact or leading',
-       ],
-     },
-   ],
- },
- {
-   title: 'Motivation & Future Outlook',
-   questions: [
-     {
-       q: 'What would you regret most?',
-       options: [
-         'Not mastering a skill',
-         'Never exploring your creativity',
-         'Not helping people',
-         'Never becoming a leader',
-       ],
-     },
-     {
-       q: 'In five years, you ideally:',
-       options: [
-         'Have deep knowledge in your field',
-         'Have created or contributed to something unique',
-         'Have made a difference for others',
-         'Have risen to a significant position',
-       ],
-     },
-     {
-       q: 'If money wasn’t a factor, you’d pick work that:',
-       options: [
-         'Engages your mind and analysis',
-         'Lets you express your artistic self',
-         'Allows you to mentor or support others',
-         'Lets you organize, lead, or build',
-       ],
-     },
-   ],
- },
-];
-
+// Enhanced parsing function for new JSON structure
+function parseEnhancedReport(report) {
+  try {
+    // Try to parse as JSON first (new format)
+    const parsed = JSON.parse(report);
+    if (parsed.headline && parsed.summary) {
+      return {
+        headline: parsed.headline,
+        summary: parsed.summary,
+        topCapabilities: parsed.top_capabilities || [],
+        recommendedPath: parsed.recommended_path || "",
+        strengths: parsed.strengths || "",
+        growthAreas: parsed.growth_areas || [],
+        suggestedSteps: parsed.suggested_next_steps || [],
+        confidence: parsed.confidence || "medium"
+      };
+    }
+  } catch (e) {
+    // Fallback to old parsing method
+    console.log("Using fallback parsing");
+  }
+  
+  // Fallback parsing for old format
+  return parseReport(report);
+}
 
 function parseReport(report) {
-  const sections = report.split(/###\s+/); // split sections based on headings
+  const sections = report.split(/###\s+/);
   let conclusion = "", recommendations = "";
-
   for (const section of sections) {
     if (/Conclusion/i.test(section)) {
       conclusion = section.replace(/Conclusion/i, "").trim();
@@ -340,11 +43,9 @@ function parseReport(report) {
       recommendations = section.replace(/Career Recommendations/i, "").trim();
     }
   }
-
   return { conclusion, recommendations };
 }
 
-// ✅ Extract only titles from career recommendation text
 function extractRecommendationTitles(recommendationsRaw) {
   return recommendationsRaw
     .split(/\n+/)
@@ -356,15 +57,12 @@ function extractRecommendationTitles(recommendationsRaw) {
     });
 }
 
-// Helper for word-by-word fade-in animation
+// Enhanced AnimatedText component with better performance
 function AnimatedText({ text, className = "" }) {
   const [visibleWords, setVisibleWords] = useState(0);
-  // Split text into paragraphs by line breaks or after a period followed by a space (for long sentences)
   const paragraphs = text
     ? text.split(/\n+/).flatMap(p => p.split(/(?<=\.)\s+/g))
     : [];
-
-  // Flatten all words for animation timing
   const allWords = paragraphs.flatMap(p => p.split(" "));
   useEffect(() => {
     setVisibleWords(0);
@@ -377,7 +75,6 @@ function AnimatedText({ text, className = "" }) {
     }, 40);
     return () => clearInterval(interval);
   }, [text]);
-
   let wordCount = 0;
   return (
     <div className={className}>
@@ -406,10 +103,213 @@ function AnimatedText({ text, className = "" }) {
   );
 }
 
-// Extract strengths and recommended path from the conclusion text (simple heuristic)
+// Enhanced AnimatedText component with character-by-character animation
+function EnhancedAnimatedText({ text, className = "", delay = 40 }) {
+  const [visibleChars, setVisibleChars] = useState(0);
+  
+  useEffect(() => {
+    setVisibleChars(0);
+    if (!text) return;
+    
+    let i = 0;
+    const interval = setInterval(() => {
+      i++;
+      setVisibleChars(i);
+      if (i >= text.length) clearInterval(interval);
+    }, delay);
+    
+    return () => clearInterval(interval);
+  }, [text, delay]);
+
+  return (
+    <div className={className}>
+      {text.split('').map((char, idx) => (
+        <span
+          key={idx}
+          style={{
+            opacity: idx < visibleChars ? 1 : 0,
+            transition: "opacity 0.1s",
+          }}
+        >
+          {char}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+// Enhanced results display component
+function EnhancedResultsDisplay({ report, onRetake, userEmail }) {
+  const results = parseEnhancedReport(report);
+  
+  const handleSaveResults = async () => {
+    try {
+      const resultData = {
+        email: userEmail,
+        quiz_result: results
+      };
+      
+      await axios.post('/user/quiz-result', resultData);
+      alert('Results saved to your profile!');
+    } catch (error) {
+      console.error('Error saving results:', error);
+      alert('Failed to save results. Please try again.');
+    }
+  };
+  
+  return (
+    <div className="mt-16 mb-24 w-full flex flex-col items-start">
+      {/* Header */}
+      <div className="mb-12 w-full">
+        <h1 className="text-4xl font-bold text-gray-900 mb-4 tracking-tight">
+          Your Personality Profile
+        </h1>
+        {results.headline && (
+          <h2 className="text-2xl font-semibold text-blue-600 mb-6">
+            <EnhancedAnimatedText text={results.headline} />
+          </h2>
+        )}
+      </div>
+
+      {/* Summary */}
+      {results.summary && (
+        <div className="mb-10 w-full bg-gray-50 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-3">Executive Summary</h3>
+          <EnhancedAnimatedText 
+            text={results.summary} 
+            className="text-base text-gray-800 leading-relaxed"
+          />
+        </div>
+      )}
+
+      <hr className="w-full border-t border-gray-200 mb-8" />
+
+      {/* Top Capabilities */}
+      {results.topCapabilities && results.topCapabilities.length > 0 && (
+        <div className="mb-10 w-full">
+          <h3 className="text-xl font-semibold text-gray-900 mb-4">Your Top Capabilities</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {results.topCapabilities.map((capability, idx) => (
+              <div key={idx} className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                <div className="flex items-center space-x-2">
+                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                  <span className="text-blue-800 font-medium">
+                    <EnhancedAnimatedText text={capability} delay={20} />
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <hr className="w-full border-t border-gray-200 mb-8" />
+
+      {/* Recommended Path */}
+      {results.recommendedPath && (
+        <div className="mb-10 w-full">
+          <h3 className="text-xl font-semibold text-gray-900 mb-4">Recommended Career Path</h3>
+          <div className="bg-green-50 rounded-lg p-6 border border-green-200">
+            <EnhancedAnimatedText 
+              text={results.recommendedPath} 
+              className="text-base text-green-800 leading-relaxed"
+            />
+          </div>
+        </div>
+      )}
+
+      <hr className="w-full border-t border-gray-200 mb-8" />
+
+      {/* Strengths */}
+      {results.strengths && (
+        <div className="mb-10 w-full">
+          <h3 className="text-xl font-semibold text-gray-900 mb-4">Your Key Strengths</h3>
+          <div className="bg-yellow-50 rounded-lg p-6 border border-yellow-200">
+            <EnhancedAnimatedText 
+              text={results.strengths} 
+              className="text-base text-yellow-800 leading-relaxed"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Growth Areas */}
+      {results.growthAreas && results.growthAreas.length > 0 && (
+        <div className="mb-10 w-full">
+          <h3 className="text-xl font-semibold text-gray-900 mb-4">Areas for Growth</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {results.growthAreas.map((area, idx) => (
+              <div key={idx} className="bg-orange-50 rounded-lg p-4 border border-orange-200">
+                <span className="text-orange-800 font-medium capitalize">
+                  <EnhancedAnimatedText text={area} delay={20} />
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <hr className="w-full border-t border-gray-200 mb-8" />
+
+      {/* Suggested Next Steps */}
+      {results.suggestedSteps && results.suggestedSteps.length > 0 && (
+        <div className="mb-10 w-full">
+          <h3 className="text-xl font-semibold text-gray-900 mb-4">Suggested Next Steps</h3>
+          <div className="space-y-4">
+            {results.suggestedSteps.map((step, idx) => (
+              <div key={idx} className="bg-purple-50 rounded-lg p-4 border border-purple-200">
+                <div className="flex items-start space-x-3">
+                  <div className="flex-shrink-0 mt-1">
+                    <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">{idx + 1}</span>
+                    </div>
+                  </div>
+                  <span className="text-purple-800 text-sm leading-relaxed">
+                    <EnhancedAnimatedText text={step} delay={15} />
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Confidence Indicator */}
+      {results.confidence && (
+        <div className="mb-10 w-full">
+          <div className="flex items-center space-x-2 text-sm text-gray-600">
+            <span>Assessment Confidence:</span>
+            <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+              results.confidence === 'high' ? 'bg-green-100 text-green-800' :
+              results.confidence === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+              'bg-red-100 text-red-800'
+            }`}>
+              {results.confidence.toUpperCase()}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Action Buttons */}
+      <div className="flex justify-start space-x-4 mt-16 w-full">
+        <button
+          className="px-8 py-3 bg-black text-white rounded-lg font-semibold hover:bg-gray-800 transition"
+          onClick={onRetake}
+        >
+          Retake Quiz
+        </button>
+        <button
+          className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
+          onClick={handleSaveResults}
+        >
+          Save Results
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function extractCapabilities(conclusion) {
-  // Example: Look for strengths/traits in the conclusion
-  // You can improve this extraction logic as needed
   const strengths = [];
   if (/organized|precise|dependable/i.test(conclusion)) strengths.push("Organized & Precise");
   if (/creative|curious|imaginative/i.test(conclusion)) strengths.push("Creative & Curious");
@@ -420,37 +320,68 @@ function extractCapabilities(conclusion) {
 }
 
 function extractRecommendedPath(recommendations) {
-  // Use the first recommended job as the path
   const lines = recommendations.split("\n").filter(l => l.trim());
   const first = lines[0] || "";
   return first.replace(/\*\*/g, "").trim();
 }
 
 export default function Quiz() {
+  const [questions, setQuestions] = useState([]);
+  const [quizId, setQuizId] = useState("");
   const [answers, setAnswers] = useState({});
   const [report, setReport] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Start as loading
+  const [error, setError] = useState("");
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [isCollapsed, setIsCollapsed] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const getUserInfo = async () => {
+    const getUserInfoAndQuiz = async () => {
+      setLoading(true);
+      setError("");
       try {
-        const response = await axios.get(API_ENDPOINTS.AUTH_STATUS, {
+        // Use full URL for auth check
+        const response = await axios.get("http://localhost:5001/auth/status", {
           withCredentials: true
         });
+        
+        console.log("Auth response:", response.data); // Debug log
+        
         if (response.data.authenticated && response.data.user) {
           setUserName(response.data.user.name || "User");
           setUserEmail(response.data.user.email);
+  
+          // Use full URL for quiz generation
+          const quizRes = await axios.post("http://localhost:5001/quiz/generate", {
+            studentId: response.data.user.email
+          }, {
+            withCredentials: true  // Add this!
+          });
+          
+          console.log("Quiz response:", quizRes.data); // Debug log
+          
+          setQuestions(quizRes.data.questions || []);
+          setQuizId(quizRes.data.quizId || "");
+        } else {
+          setError("Not authenticated. Please login.");
+          navigate("/login");
         }
       } catch (error) {
-        console.error("Failed to get user info:", error);
-        navigate("/login");
+        console.error("Full error details:", error);
+        console.error("Error response:", error.response?.data);
+        
+        const errorMessage = error.response?.data?.error || 
+                            error.response?.data?.message || 
+                            error.message || 
+                            "Unknown error occurred";
+        
+        setError(`Failed to load quiz: ${errorMessage}`);
       }
+      setLoading(false);
     };
-    getUserInfo();
+    getUserInfoAndQuiz();
   }, [navigate]);
 
   const handleLogout = async () => {
@@ -507,10 +438,10 @@ export default function Quiz() {
     }
   ];
 
-  const handleChange = (sectionIdx, qIdx, value) => {
+  const handleChange = (qId, optId) => {
     setAnswers(prev => ({
       ...prev,
-      [`${sectionIdx}-${qIdx}`]: value,
+      [qId]: optId,
     }));
   };
 
@@ -518,86 +449,53 @@ export default function Quiz() {
     e.preventDefault();
     setReport("");
     setLoading(true);
-
-    const qaPairs = [];
-    quizSections.forEach((section, sectionIdx) => {
-      section.questions.forEach((q, qIdx) => {
-        const answer = answers[`${sectionIdx}-${qIdx}`] || "";
-        qaPairs.push({ question: q.q, answer });
-      });
-    });
-
-    const prompt = `
-Analyze this quiz result. Provide two markdown sections:
-
-### Conclusion
-Short (4-5 sentence) personality/strength summary.
-
-### Career Recommendations
-Recommend 4 jobs using this format:
-**Job Title:** One-line explanation.
-
-Answers:
-${qaPairs
-      .map((qa, i) => `${i + 1}. Q: ${qa.question}\nA: ${qa.answer}`)
-      .join("\n\n")}
-`;
-
+  
     try {
-      const res = await fetch(API_ENDPOINTS.AI, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
+      const res = await axios.post("http://localhost:5001/quiz/submit", {
+        studentId: userEmail,
+        quizId,
+        answers,
+      }, {
+        withCredentials: true  // Add this!
       });
-
-      const data = await res.json();
-      const rawOutput = data.response || data.error || "No response from AI.";
-      setReport(rawOutput);
-
-      const { conclusion, recommendations } = parseReport(rawOutput);
-      const recommendationTitles = extractRecommendationTitles(recommendations);
-      const email = localStorage.getItem("userEmail");
-
-      // Save full quiz result to user profile
-      await fetch(API_ENDPOINTS.USER_UPDATE, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email,
-          conclusion,
-          recommendations: recommendationTitles,
-          quiz_result: rawOutput // <-- Save the full output
-        }),
-      });
+      
+      setReport(JSON.stringify(res.data));
     } catch (err) {
-      console.error("Error contacting AI:", err);
+      console.error("Error submitting quiz:", err);
+      console.error("Submit error response:", err.response?.data);
       setReport("Server error. Try again.");
     }
-
+  
     setLoading(false);
   };
 
-  const { conclusion, recommendations } = parseReport(report);
-
-  // Only show the animated conclusion page if report exists
+  // Parse report if available
+  let parsed = { conclusion: "", recommendations: "" };
+  try {
+    parsed = report ? JSON.parse(report) : { conclusion: "", recommendations: "" };
+  } catch {
+    parsed = parseReport(report);
+  }
+  const { conclusion, recommendations } = parsed;
   const showConclusionPage = !!report;
 
   useEffect(() => {
     const fetchQuizResult = async () => {
-      const email = localStorage.getItem("userEmail");
-      if (!email) return;
+      if (!userEmail) return;
       try {
-        const res = await fetch(`${API_ENDPOINTS.BACKEND}/user/quiz-result?email=${encodeURIComponent(email)}`);
-        const data = await res.json();
-        if (data.quiz_result) {
-          setReport(data.quiz_result);
+        const res = await axios.get("http://localhost:5001/quiz/result", {
+          params: { studentId: userEmail },
+          withCredentials: true
+        });
+        if (res.data) {
+          setReport(JSON.stringify(res.data));
         }
       } catch (err) {
         // Ignore error, just show quiz
       }
     };
     fetchQuizResult();
-  }, []);
+  }, [userEmail]);
 
   return (
     <div className="flex bg-white min-h-screen">
@@ -630,9 +528,9 @@ ${qaPairs
             {navItems.map((item) => {
               const isActive = window.location.pathname === item.href;
               return (
-                <a
+                <Link
                   key={item.label}
-                  href={item.href}
+                  to={item.href}
                   className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
                     isActive
                       ? 'bg-gray-200 text-black'
@@ -642,7 +540,7 @@ ${qaPairs
                 >
                   {item.icon}
                   {!isCollapsed && item.label}
-                </a>
+                </Link>
               );
             })}
           </div>
@@ -697,136 +595,100 @@ ${qaPairs
           </button>
         </div>
 
-        <div className="flex-1 pb-16 pt-4 overflow-y-auto bg-white">
-          <div
-            className="w-full"
-            style={{
-              maxWidth: showConclusionPage ? "1050px" : "1200px", // Increased width
-              paddingLeft: "2rem", // Slightly reduced padding
-              paddingRight: "2rem",
-              boxSizing: "border-box",
-              overflowX: showConclusionPage ? "auto" : "visible", // Prevent horizontal overflow
-            }}
-          >
-            {showConclusionPage ? (
-              <div className="mt-16 mb-24 w-full flex flex-col items-start">
-                <h1
-                  className="text-3xl font-bold text-gray-900 mb-10 tracking-tight"
-                  style={{ letterSpacing: "-0.02em" }}
-                >
-                  CONCLUSION
-                </h1>
-                <div className="mb-10 w-full">
-                  <AnimatedText
-                    text={conclusion}
-                    className="text-lg text-gray-800 leading-relaxed"
-                  />
-                </div>
-                {/* Divider */}
-                <hr className="w-full border-t border-gray-200 mb-8" />
-                <div className="mb-10 w-full">
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">User Capabilities</h2>
-                  <ul className="list-disc pl-6 space-y-2">
-                    {extractCapabilities(conclusion).map((cap, idx) => (
-                      <li key={idx} className="text-gray-800 text-base">
-                        <AnimatedText text={cap} />
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                {/* Divider */}
-                <hr className="w-full border-t border-gray-200 mb-8" />
-                <div className="mb-10 w-full" style={{ wordBreak: "break-word", overflowWrap: "break-word" }}>
-                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Recommended Path</h2>
-                  <AnimatedText
-                    text={extractRecommendedPath(recommendations)}
-                    className="text-base text-gray-800"
-                    style={{
-                      wordBreak: "break-word",
-                      whiteSpace: "pre-line",
-                      maxWidth: "100%",
-                      overflowWrap: "break-word"
-                    }}
-                  />
-                </div>
-                <div className="flex justify-start mt-16 w-full">
-                  <button
-                    className="px-8 py-3 bg-black text-white rounded-lg font-semibold hover:bg-gray-800 transition"
-                    onClick={() => {
-                      setReport("");
-                      setAnswers({});
-                    }}
-                  >
-                    Retake Quiz
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-12 w-full">
-                {/* Quiz Heading */}
-                <h1 className="text-2xl font-bold text-gray-900 mb-10 tracking-tight" style={{ letterSpacing: "-0.02em" }}>
-                  Psychometric Quiz
-                </h1>
-                {/* Quiz Questions */}
-                {(() => {
-                  let globalIdx = 0;
-                  return quizSections.map((section, sectionIdx) => (
-                    <div key={section.title} className="mb-12">
-                      <h3 className="font-bold text-lg text-gray-900 mb-6">{section.title}</h3>
-                      <div className="space-y-6">
-                        {section.questions.map((q, qIdx) => {
-                          globalIdx++;
-                          const key = `${sectionIdx}-${qIdx}`;
-                          return (
-                            <div key={q.q} className="mb-6">
-                              <div className="font-medium mb-3 flex items-center text-gray-900">
-                                <span className="mr-2 text-gray-500">{globalIdx}.</span> {q.q}
-                              </div>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {q.options.map((opt) => {
-                                  const isSelected = answers[key] === opt;
-                                  return (
-                                    <label
-                                      key={opt}
-                                      className={`flex items-center rounded-lg px-4 py-3 cursor-pointer border transition
-                                        ${isSelected
-                                          ? "bg-black text-white border-black"
-                                          : "bg-white text-black border-gray-200 hover:border-black hover:bg-gray-50"
-                                        }`}
-                                      style={{ boxShadow: "none" }}
-                                    >
-                                      <input
-                                        type="radio"
-                                        name={key}
-                                        value={opt}
-                                        checked={isSelected}
-                                        onChange={() => handleChange(sectionIdx, qIdx, opt)}
-                                        className="sr-only"
-                                      />
-                                      <span className="text-sm">{opt}</span>
-                                    </label>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          );
-                        })}
+        <div className="flex-1 pb-16 pt-4 overflow-y-auto bg-white flex items-center justify-center">
+          {loading ? (
+            <span className="text-gray-500 text-lg">Loading quiz...</span>
+          ) : error ? (
+            <span className="text-red-500 text-lg">{error}</span>
+          ) : (
+            <div
+              className="w-full"
+              style={{
+                maxWidth: showConclusionPage ? "1050px" : "1200px",
+                paddingLeft: "2rem",
+                paddingRight: "2rem",
+                boxSizing: "border-box",
+                overflowX: showConclusionPage ? "auto" : "visible",
+              }}
+            >
+              {showConclusionPage ? (
+                <EnhancedResultsDisplay 
+                  report={report} 
+                  onRetake={() => { 
+                    setReport(""); 
+                    setAnswers({}); 
+                  }}
+                  userEmail={userEmail}
+                />
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-12 w-full">
+                  <h1 className="text-2xl font-bold text-gray-900 mb-10 tracking-tight" style={{ letterSpacing: "-0.02em" }}>
+                    Personalized Psychometric Quiz
+                  </h1>
+                  {/* Render AI-generated questions */}
+                  {questions.length === 0 ? (
+                    <div className="text-gray-500 text-lg">Loading personalized questions...</div>
+                  ) : (
+                    <div>
+                      <div className="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <p className="text-blue-800 text-sm">
+                          <strong>Note:</strong> This quiz has been personalized based on your academic profile and background. 
+                          Your responses will help us provide tailored career guidance and insights.
+                        </p>
                       </div>
+                      {questions.map((q, idx) => (
+                        <div key={q.id} className="mb-8">
+                          <div className="font-medium mb-3 flex items-center text-gray-900">
+                            <span className="mr-2 text-gray-500">{idx + 1}.</span> {q.text}
+                          </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {q.options.map((opt) => {
+                              const isSelected = answers[q.id] === opt.id;
+                              return (
+                                <label
+                                  key={opt.id}
+                                  className={`flex items-center rounded-lg px-4 py-3 cursor-pointer border transition
+                                    ${isSelected
+                                      ? "bg-black text-white border-black"
+                                      : "bg-white text-black border-gray-200 hover:border-black hover:bg-gray-50"
+                                    }`}
+                                  style={{ boxShadow: "none" }}
+                                >
+                                  <input
+                                    type="radio"
+                                    name={q.id}
+                                    value={opt.id}
+                                    checked={isSelected}
+                                    onChange={() => handleChange(q.id, opt.id)}
+                                    className="sr-only"
+                                  />
+                                  <span className="text-sm">{opt.text}</span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  ));
-                })()}
-                <div className="flex justify-start mt-8">
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="px-8 py-3 bg-black text-white rounded-lg font-semibold hover:bg-gray-800 transition disabled:opacity-50"
-                  >
-                    {loading ? "Analyzing..." : "Submit Quiz"}
-                  </button>
-                </div>
-              </form>
-            )}
-          </div>
+                  )}
+                  <div className="flex justify-start mt-8">
+                    <button
+                      type="submit"
+                      disabled={loading || Object.keys(answers).length !== questions.length}
+                      className="px-8 py-3 bg-black text-white rounded-lg font-semibold hover:bg-gray-800 transition disabled:opacity-50"
+                    >
+                      {loading ? "Analyzing..." : "Get My Personality Profile"}
+                    </button>
+                  </div>
+                  {Object.keys(answers).length > 0 && (
+                    <div className="mt-4 text-sm text-gray-600">
+                      Progress: {Object.keys(answers).length}/{questions.length} questions answered
+                    </div>
+                  )}
+                </form>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
