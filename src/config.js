@@ -21,6 +21,8 @@ export const API_ENDPOINTS = {
   EXTRACURRICULAR_UPDATE: `${API_BASE_URL}/user/extracurricular`,
   SUBJECTS_UPDATE: `${API_BASE_URL}/user/subjects`,
   STUDY_PLAN_UPDATE: `${API_BASE_URL}/user/study-plan`,
+  BACKEND: "http://localhost:5001", // or your backend URL
+  QUIZ_RESULT: "http://localhost:5001/user/quiz-result",
 };
 
-export default API_BASE_URL; 
+export default API_BASE_URL;

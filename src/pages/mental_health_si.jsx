@@ -184,7 +184,12 @@ export default function MentalHealthSI() {
     }
   };
 
+  // Replace handleSuggestedPrompt for Career Exploration to navigate to quiz
   const handleSuggestedPrompt = (prompt) => {
+    if (prompt.includes("career exploration quiz")) {
+      navigate("/quiz");
+      return;
+    }
     setInputMessage(prompt);
     setShowSuggestedPrompts(false);
     setShowChatPage(true);
@@ -326,19 +331,6 @@ export default function MentalHealthSI() {
                     </button>
                   </div>
                 </form>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex gap-3 mb-8">
-                <button className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
-                  Ask
-                </button>
-                <button className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
-                  Research
-                </button>
-                <button className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors">
-                  Build
-                </button>
               </div>
 
               {/* Suggested Prompts */}

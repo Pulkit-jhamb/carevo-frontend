@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { API_ENDPOINTS } from '../config';
+import React, { useEffect, useState } from "react";
+import { API_ENDPOINTS } from "../config";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 // import Sidebar from './sidebar';
@@ -359,8 +359,13 @@ function extractRecommendationTitles(recommendationsRaw) {
 // Helper for word-by-word fade-in animation
 function AnimatedText({ text, className = "" }) {
   const [visibleWords, setVisibleWords] = useState(0);
-  const words = text ? text.split(" ") : [];
+  // Split text into paragraphs by line breaks or after a period followed by a space (for long sentences)
+  const paragraphs = text
+    ? text.split(/\n+/).flatMap(p => p.split(/(?<=\.)\s+/g))
+    : [];
 
+  // Flatten all words for animation timing
+  const allWords = paragraphs.flatMap(p => p.split(" "));
   useEffect(() => {
     setVisibleWords(0);
     if (!text) return;
@@ -368,26 +373,36 @@ function AnimatedText({ text, className = "" }) {
     const interval = setInterval(() => {
       i++;
       setVisibleWords(i);
-      if (i >= words.length) clearInterval(interval);
-    }, 40); // 40ms per word for smooth effect
+      if (i >= allWords.length) clearInterval(interval);
+    }, 40);
     return () => clearInterval(interval);
   }, [text]);
 
+  let wordCount = 0;
   return (
-    <span className={className}>
-      {words.map((word, idx) => (
-        <span
-          key={idx}
-          style={{
-            opacity: idx < visibleWords ? 1 : 0,
-            transition: "opacity 0.3s",
-            marginRight: "0.25em"
-          }}
-        >
-          {word}
-        </span>
-      ))}
-    </span>
+    <div className={className}>
+      {paragraphs.map((para, pIdx) => {
+        const words = para.split(" ");
+        const start = wordCount;
+        wordCount += words.length;
+        return (
+          <p key={pIdx} style={{ marginBottom: "1em", wordBreak: "break-word" }}>
+            {words.map((word, idx) => (
+              <span
+                key={idx}
+                style={{
+                  opacity: start + idx < visibleWords ? 1 : 0,
+                  transition: "opacity 0.3s",
+                  marginRight: "0.25em"
+                }}
+              >
+                {word}
+              </span>
+            ))}
+          </p>
+        );
+      })}
+    </div>
   );
 }
 
@@ -543,10 +558,16 @@ ${qaPairs
       const recommendationTitles = extractRecommendationTitles(recommendations);
       const email = localStorage.getItem("userEmail");
 
+      // Save full quiz result to user profile
       await fetch(API_ENDPOINTS.USER_UPDATE, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, conclusion, recommendations: recommendationTitles }),
+        body: JSON.stringify({
+          email,
+          conclusion,
+          recommendations: recommendationTitles,
+          quiz_result: rawOutput // <-- Save the full output
+        }),
       });
     } catch (err) {
       console.error("Error contacting AI:", err);
@@ -560,6 +581,23 @@ ${qaPairs
 
   // Only show the animated conclusion page if report exists
   const showConclusionPage = !!report;
+
+  useEffect(() => {
+    const fetchQuizResult = async () => {
+      const email = localStorage.getItem("userEmail");
+      if (!email) return;
+      try {
+        const res = await fetch(`${API_ENDPOINTS.BACKEND}/user/quiz-result?email=${encodeURIComponent(email)}`);
+        const data = await res.json();
+        if (data.quiz_result) {
+          setReport(data.quiz_result);
+        }
+      } catch (err) {
+        // Ignore error, just show quiz
+      }
+    };
+    fetchQuizResult();
+  }, []);
 
   return (
     <div className="flex bg-white min-h-screen">
@@ -682,12 +720,6 @@ ${qaPairs
                   <AnimatedText
                     text={conclusion}
                     className="text-lg text-gray-800 leading-relaxed"
-                    style={{
-                      lineHeight: "1.8",
-                      maxWidth: "100%",
-                      whiteSpace: "pre-line",
-                      overflowWrap: "break-word",
-                    }}
                   />
                 </div>
                 {/* Divider */}

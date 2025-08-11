@@ -40,3 +40,13 @@
 .read-the-docs {
   color: #888;
 }
+
+.output-wrap {
+  white-space: pre-line !important;
+  word-break: break-word !important;
+  overflow-wrap: break-word !important;
+  text-align: left;
+  width: 100%;
+  max-width: 100%;
+  display: block;
+}
