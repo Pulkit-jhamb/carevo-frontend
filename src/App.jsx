@@ -12,6 +12,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_ENDPOINTS } from './config';
 import { useAuthRedirect } from './hooks/useAuthRedirect';
+import CarevoHomepage from './pages/home';
 
 
 function UserIcon() {
@@ -219,6 +220,14 @@ function AppRoutes() {
           <MentalHealthChatbot />
         </ProtectedRoute>
       } />
+
+      {/* Carevo Homepage route - no sidebar */}
+      <Route path="/carevo-homepage" element={
+        <ProtectedRoute>
+          <CarevoHomepage />
+        </ProtectedRoute>
+      } />
+        
 
       {/* Study Plan route - has its own sidebar */}
       <Route path="/study-plan" element={

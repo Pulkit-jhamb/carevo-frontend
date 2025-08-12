@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { API_ENDPOINTS } from "../config";
 import axios from "axios";
+import Sidebar from "./Sidebar"; // Import the Sidebar component
 
 export default function StudentDashboard() {
   const [user, setUser] = useState(null);
@@ -20,6 +21,7 @@ export default function StudentDashboard() {
   const [showSubjectsModal, setShowSubjectsModal] = useState(false);
   const [subjects, setSubjects] = useState([]);
   const [editSubjects, setEditSubjects] = useState([]);
+  const [isCollapsed, setIsCollapsed] = useState(false); // State for sidebar collapse
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -42,18 +44,18 @@ export default function StudentDashboard() {
           { activity: "Dance Troupe", role: "Lead Performer" },
           { activity: "Environment Club", role: "Member" }
         ]);
-                 setCertifications(data.certifications || [
-           "Microsoft Office Specialist",
-           "Python Basics - Code.org",
-           "Creative Writing Workshop",
-           "Math Olympiad Level 1"
-         ]);
-         setSubjects(data.subjects || [
-           { name: "Mathematics", marks: 95 },
-           { name: "Science", marks: 88 },
-           { name: "Computer Applications", marks: 92 },
-           { name: "English", marks: 85 }
-         ]);
+        setCertifications(data.certifications || [
+          "Microsoft Office Specialist",
+          "Python Basics - Code.org",
+          "Creative Writing Workshop",
+          "Math Olympiad Level 1"
+        ]);
+        setSubjects(data.subjects || [
+          { name: "Mathematics", marks: 95 },
+          { name: "Science", marks: 88 },
+          { name: "Computer Applications", marks: 92 },
+          { name: "English", marks: 85 }
+        ]);
       })
       .catch((err) => console.error("Error fetching user:", err));
   }, []);
@@ -262,125 +264,23 @@ export default function StudentDashboard() {
     }
   };
 
-  const navItems = [
-    {
-      label: "Dashboard",
-      href: "/dashboard",
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z" />
-        </svg>
-      )
-    },
-    {
-      label: "Quiz",
-      href: "/quiz",
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-        </svg>
-      )
-    },
-    {
-      label: "chat",
-      href: "/chat",
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-        </svg>
-      )
-    },
-    {
-      label: "Study Plan",
-      href: "/study-plan",
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-        </svg>
-      )
-    }
-  ];
-
-  // Sample data for the student dashboard
-
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200">
-      {/* Sidebar */}
-      <div className="w-64 bg-white border-r border-gray-200 flex flex-col h-screen">
-        {/* Logo */}
-        <div className="p-6 border-b border-gray-200">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">C</span>
-            </div>
-            <span className="text-xl font-bold text-black">Carevo</span>
-          </div>
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 p-4">
-          <div className="space-y-2">
-            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Navigation</div>
-            {navItems.map((item) => {
-              const isActive = location.pathname === item.href;
-              return (
-                <a
-                  key={item.label}
-                  href={item.href}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors ${
-                    isActive
-                      ? 'bg-gray-100 text-black'
-                      : 'text-gray-700 hover:bg-gray-100'
-                  }`}
-                >
-                  {item.icon}
-                  {item.label}
-                </a>
-              );
-            })}
-          </div>
-
-          <div className="mt-8 space-y-2">
-            <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Settings & Help</div>
-            <a href="#" className="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              Settings
-            </a>
-            <a href="#" className="flex items-center gap-3 px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Help
-            </a>
-          </div>
-        </nav>
-
-        {/* User Profile */}
-        <div className="p-4 border-t border-gray-200">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-              <span className="text-gray-600 font-semibold">{userName.charAt(0).toUpperCase()}</span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-gray-900 truncate">{userName}</p>
-              <p className="text-xs text-gray-500 truncate">{userEmail}</p>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Imported Sidebar */}
+      <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className={`flex-1 flex flex-col transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
         {/* Top Header */}
-        <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <div className="flex items-center gap-3">
+        <div className="bg-white border-b border-gray-200 px-8 py-6 flex items-center justify-between shadow-sm">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-1">Student Dashboard</h1>
+            <p className="text-gray-600">Welcome back, {userName}</p>
+          </div>
+          <div className="flex items-center gap-4">
             <button 
               onClick={handleLogout}
-              className="px-4 py-2 text-sm font-medium text-white bg-black rounded-lg hover:bg-gray-800 flex items-center gap-2"
+              className="px-6 py-3 text-sm font-medium text-white bg-gray-700 rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2 shadow-sm"
             >
               LOGOUT
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -391,33 +291,33 @@ export default function StudentDashboard() {
         </div>
 
         {/* Dashboard Content */}
-        <div className="flex-1 p-6 overflow-y-auto bg-transparent">
+        <div className="flex-1 p-8 overflow-y-auto bg-transparent">
           <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               
               {/* About Section */}
-              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">About</h2>
-                <div className="flex items-start space-x-4">
-                  <div className="w-24 h-24 bg-gray-300 rounded-full flex items-center justify-center">
-                    <svg className="w-12 h-12 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+              <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                <h2 className="text-xl font-semibold text-gray-900 mb-6">About</h2>
+                <div className="flex items-start space-x-6">
+                  <div className="w-28 h-28 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full flex items-center justify-center shadow-inner">
+                    <svg className="w-14 h-14 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                     </svg>
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-gray-900 mb-1">
+                    <h3 className="text-2xl font-bold text-gray-900 mb-2">
                       {user?.name || "Aanya Mehra"}
                     </h3>
-                    <p className="text-gray-700 font-medium mb-1">
+                    <p className="text-gray-700 font-medium mb-1 text-lg">
                       {user?.institute || "SPRINGDALE HIGH SCHOOL"}
                     </p>
-                    <p className="text-gray-600 mb-3">
+                    <p className="text-gray-600 mb-4">
                       {user?.year ? `Year ${user.year}` : "10TH GRADE"}
                     </p>
                     {user?.conclusion ? (
                       <>
                         <div
-                          className="bg-gray-100 rounded p-3 text-gray-800 text-sm cursor-pointer overflow-hidden"
+                          className="bg-gray-50 rounded-lg p-4 text-gray-800 text-sm cursor-pointer border border-gray-100 hover:bg-gray-100 transition-colors"
                           style={{
                             whiteSpace: 'pre-line',
                           }}
@@ -427,17 +327,17 @@ export default function StudentDashboard() {
                           {getConclusionPreview(user.conclusion)}
                         </div>
                         {showConclusionModal && (
-                          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-                            <div className="bg-white rounded-lg shadow-lg p-6 max-w-lg w-full relative">
+                          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                            <div className="bg-white rounded-xl shadow-2xl p-8 max-w-lg w-full relative m-4">
                               <button
-                                className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
+                                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl transition-colors"
                                 onClick={() => setShowConclusionModal(false)}
                                 aria-label="Close"
                               >
                                 &times;
                               </button>
-                              <h4 className="text-lg font-semibold mb-2">Conclusion</h4>
-                              <div className="text-gray-800 whitespace-pre-line">
+                              <h4 className="text-xl font-semibold mb-4 text-gray-900">Conclusion</h4>
+                              <div className="text-gray-800 whitespace-pre-line leading-relaxed">
                                 {user.conclusion}
                               </div>
                             </div>
@@ -445,7 +345,7 @@ export default function StudentDashboard() {
                         )}
                       </>
                     ) : (
-                      <div className="bg-gray-100 rounded p-3 text-gray-400 text-sm">
+                      <div className="bg-gray-50 rounded-lg p-4 text-gray-400 text-sm border border-gray-100">
                         No conclusion available yet.
                       </div>
                     )}
@@ -454,17 +354,17 @@ export default function StudentDashboard() {
               </div>
 
               {/* Academic Performance Section */}
-              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-gray-900">Academic Performance</h2>
-                  <button className="px-3 py-1 text-sm bg-black text-white rounded hover:bg-gray-800" onClick={handleOpenTermModal}>
+              <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-semibold text-gray-900">Academic Performance</h2>
+                  <button className="px-4 py-2 text-sm bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors shadow-sm" onClick={handleOpenTermModal}>
                     Update
                   </button>
                 </div>
                 
                 {/* Dynamic Donut Chart */}
-                <div className="flex justify-center mb-4">
-                  <div className="relative w-32 h-32">
+                <div className="flex justify-center mb-6">
+                  <div className="relative w-36 h-36">
                     {(() => {
                       const avg = getAveragePercentage(termData);
                       const avgNum = avg || 0;
@@ -478,7 +378,7 @@ export default function StudentDashboard() {
                       const arcLength = circumference * percent;
                       
                       return (
-                        <svg className="w-32 h-32" viewBox="0 0 36 36">
+                        <svg className="w-36 h-36" viewBox="0 0 36 36">
                           {/* Background ring */}
                           <circle
                             cx="18" cy="18" r={radius}
@@ -503,9 +403,9 @@ export default function StudentDashboard() {
                           <text
                             x="18" y="20.5"
                             textAnchor="middle"
-                            fontSize="0.45em"
+                            fontSize="0.5em"
                             fontWeight="700"
-                            fill="#222"
+                            fill="#374151"
                             style={{ fontFamily: 'Inter, Arial, sans-serif', letterSpacing: '-0.04em' }}
                           >
                             {avg || '—'}
@@ -517,349 +417,340 @@ export default function StudentDashboard() {
                 </div>
                 
                 {/* Performance Data */}
-                <div className="flex justify-between">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-gray-700 rounded-full"></div>
+                <div className="flex justify-between gap-4">
+                  <div className="flex items-center space-x-3 bg-gray-50 rounded-lg p-3 flex-1">
+                    <div className="w-3 h-3 bg-gray-600 rounded-full flex-shrink-0"></div>
                     <div>
                       <p className="text-sm font-medium text-gray-900">Term 1</p>
-                      <p className="text-sm text-gray-600">{termData[0]?.percentage || "--"}</p>
+                      <p className="text-sm text-gray-600">{termData[0]?.percentage || "--"}%</p>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-gray-500 rounded-full"></div>
+                  <div className="flex items-center space-x-3 bg-gray-50 rounded-lg p-3 flex-1">
+                    <div className="w-3 h-3 bg-gray-500 rounded-full flex-shrink-0"></div>
                     <div>
                       <p className="text-sm font-medium text-gray-900">Term 2</p>
-                      <p className="text-sm text-gray-600">{termData[1]?.percentage || "--"}</p>
+                      <p className="text-sm text-gray-600">{termData[1]?.percentage || "--"}%</p>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-black rounded-full"></div>
+                  <div className="flex items-center space-x-3 bg-gray-50 rounded-lg p-3 flex-1">
+                    <div className="w-3 h-3 bg-gray-700 rounded-full flex-shrink-0"></div>
                     <div>
                       <p className="text-sm font-medium text-gray-900">Term 3</p>
-                      <p className="text-sm text-gray-600">{termData[2]?.percentage || "--"}</p>
+                      <p className="text-sm text-gray-600">{termData[2]?.percentage || "--"}%</p>
                     </div>
                   </div>
                 </div>
                 
-                                 {/* Term Modal */}
-                 {showTermModal && (
-                   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-                     <div className="bg-white rounded-lg shadow-lg p-6 max-w-lg w-full relative">
-                       <button
-                         className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
-                         onClick={() => setShowTermModal(false)}
-                         aria-label="Close"
-                       >
-                         &times;
-                       </button>
-                       <h4 className="text-lg font-semibold mb-4">Edit Term Performance</h4>
-                       <div className="space-y-2">
-                         {editTermData.map((row, idx) => (
-                           <div key={idx} className="flex gap-2 items-center">
-                             <input
-                               type="text"
-                               className="border rounded px-2 py-1 w-24"
-                               placeholder="Term"
-                               value={row.term}
-                               onChange={e => handleTermChange(idx, 'term', e.target.value)}
-                             />
-                             <input
-                               type="number"
-                               className="border rounded px-2 py-1 w-24"
-                               placeholder="Percentage"
-                               value={row.percentage}
-                               onChange={e => handleTermChange(idx, 'percentage', e.target.value)}
-                               min="0"
-                               max="100"
-                             />
-                           </div>
-                         ))}
-                       </div>
-                       <div className="flex justify-end gap-2 mt-4">
-                         <button
-                           className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
-                           onClick={handleSaveTermData}
-                         >
-                           Save
-                         </button>
-                         <button
-                           className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
-                           onClick={() => setShowTermModal(false)}
-                         >
-                           Cancel
-                         </button>
-                       </div>
-                     </div>
-                   </div>
-                 )}
-
-                 {/* Extracurricular Activities Modal */}
-                 {showExtracurricularModal && (
-                   <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-                     <div className="bg-white rounded-lg shadow-lg p-6 max-w-lg w-full relative">
-                       <button
-                         className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
-                         onClick={() => setShowExtracurricularModal(false)}
-                         aria-label="Close"
-                       >
-                         &times;
-                       </button>
-                       <h4 className="text-lg font-semibold mb-4">Edit Extracurricular Activities</h4>
-                       <div className="space-y-3">
-                         {editExtracurricularActivities.map((row, idx) => (
-                           <div key={idx} className="flex gap-2 items-center">
-                             <input
-                               type="text"
-                               className="border rounded px-2 py-1 flex-1"
-                               placeholder="Activity"
-                               value={row.activity}
-                               onChange={e => handleExtracurricularChange(idx, 'activity', e.target.value)}
-                             />
-                             <input
-                               type="text"
-                               className="border rounded px-2 py-1 flex-1"
-                               placeholder="Role"
-                               value={row.role}
-                               onChange={e => handleExtracurricularChange(idx, 'role', e.target.value)}
-                             />
-                             <button
-                               className="px-2 py-1 text-red-600 hover:text-red-800"
-                               onClick={() => handleRemoveExtracurricularRow(idx)}
-                             >
-                               ×
-                             </button>
-                           </div>
-                         ))}
-                       </div>
-                       <div className="flex justify-between mt-4">
-                         <button
-                           className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                           onClick={handleAddExtracurricularRow}
-                         >
-                           Add Activity
-                         </button>
-                         <div className="flex gap-2">
-                           <button
-                             className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
-                             onClick={handleSaveExtracurricularActivities}
-                           >
-                             Save
-                           </button>
-                           <button
-                             className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
-                             onClick={() => setShowExtracurricularModal(false)}
-                           >
-                             Cancel
-                           </button>
-                         </div>
-                       </div>
-                     </div>
-                   </div>
-                 )}
-
-                                   {/* Certifications Modal */}
-                  {showCertificationsModal && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-                      <div className="bg-white rounded-lg shadow-lg p-6 max-w-lg w-full relative">
-                        <button
-                          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
-                          onClick={() => setShowCertificationsModal(false)}
-                          aria-label="Close"
-                        >
-                          &times;
-                        </button>
-                        <h4 className="text-lg font-semibold mb-4">Edit Certifications</h4>
-                        <div className="space-y-3">
-                          {editCertifications.map((cert, idx) => (
-                            <div key={idx} className="flex gap-2 items-center">
-                              <input
-                                type="text"
-                                className="border rounded px-2 py-1 flex-1"
-                                placeholder="Certification name"
-                                value={cert}
-                                onChange={e => handleCertificationChange(idx, e.target.value)}
-                              />
-                              <button
-                                className="px-2 py-1 text-red-600 hover:text-red-800"
-                                onClick={() => handleRemoveCertificationRow(idx)}
-                              >
-                                ×
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                        <div className="flex justify-between mt-4">
-                          <button
-                            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                            onClick={handleAddCertificationRow}
-                          >
-                            Add Certification
-                          </button>
-                          <div className="flex gap-2">
-                            <button
-                              className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
-                              onClick={handleSaveCertifications}
-                            >
-                              Save
-                            </button>
-                            <button
-                              className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
-                              onClick={() => setShowCertificationsModal(false)}
-                            >
-                              Cancel
-                            </button>
+                {/* Term Modal */}
+                {showTermModal && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white rounded-xl shadow-2xl p-8 max-w-lg w-full relative m-4">
+                      <button
+                        className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl transition-colors"
+                        onClick={() => setShowTermModal(false)}
+                        aria-label="Close"
+                      >
+                        &times;
+                      </button>
+                      <h4 className="text-xl font-semibold mb-6 text-gray-900">Edit Term Performance</h4>
+                      <div className="space-y-3">
+                        {editTermData.map((row, idx) => (
+                          <div key={idx} className="flex gap-3 items-center">
+                            <input
+                              type="text"
+                              className="border border-gray-300 rounded-lg px-3 py-2 w-24 focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                              placeholder="Term"
+                              value={row.term}
+                              onChange={e => handleTermChange(idx, 'term', e.target.value)}
+                            />
+                            <input
+                              type="number"
+                              className="border border-gray-300 rounded-lg px-3 py-2 w-24 focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                              placeholder="Percentage"
+                              value={row.percentage}
+                              onChange={e => handleTermChange(idx, 'percentage', e.target.value)}
+                              min="0"
+                              max="100"
+                            />
                           </div>
-                        </div>
+                        ))}
+                      </div>
+                      <div className="flex justify-end gap-3 mt-6">
+                        <button
+                          className="px-6 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors"
+                          onClick={handleSaveTermData}
+                        >
+                          Save
+                        </button>
+                        <button
+                          className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+                          onClick={() => setShowTermModal(false)}
+                        >
+                          Cancel
+                        </button>
                       </div>
                     </div>
-                  )}
-
-                  {/* Subjects Modal */}
-                  {showSubjectsModal && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-                      <div className="bg-white rounded-lg shadow-lg p-6 max-w-lg w-full relative">
-                        <button
-                          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
-                          onClick={() => setShowSubjectsModal(false)}
-                          aria-label="Close"
-                        >
-                          &times;
-                        </button>
-                        <h4 className="text-lg font-semibold mb-4">Add Marks to Gain Better Insight</h4>
-                        <div className="space-y-3">
-                          {editSubjects.map((subject, idx) => (
-                            <div key={idx} className="flex gap-2 items-center">
-                              <input
-                                type="text"
-                                className="border rounded px-2 py-1 flex-1"
-                                placeholder="Subject name"
-                                value={subject.name}
-                                onChange={e => handleSubjectChange(idx, 'name', e.target.value)}
-                              />
-                              <input
-                                type="number"
-                                className="border rounded px-2 py-1 w-20"
-                                placeholder="Marks %"
-                                value={subject.marks}
-                                onChange={e => handleSubjectChange(idx, 'marks', e.target.value)}
-                                min="0"
-                                max="100"
-                              />
-                              <button
-                                className="px-2 py-1 text-red-600 hover:text-red-800"
-                                onClick={() => handleRemoveSubjectRow(idx)}
-                              >
-                                ×
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                        <div className="flex justify-between mt-4">
-                          <button
-                            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                            onClick={handleAddSubjectRow}
-                          >
-                            Add Subject
-                          </button>
-                          <div className="flex gap-2">
-                            <button
-                              className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
-                              onClick={handleSaveSubjects}
-                            >
-                              Save
-                            </button>
-                            <button
-                              className="px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300"
-                              onClick={() => setShowSubjectsModal(false)}
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                  </div>
+                )}
               </div>
 
-                             {/* Top Subjects Section */}
-               <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-                 <div className="flex items-center justify-between mb-2">
-                   <h2 className="text-lg font-semibold text-gray-900">Top Subjects</h2>
-                   <button className="px-3 py-1 text-sm bg-black text-white rounded hover:bg-gray-800" onClick={handleOpenSubjectsModal}>
-                     Update
-                   </button>
-                 </div>
-                 <p className="text-sm text-gray-600 mb-4">
-                   Below are the student's highest scoring subjects
-                 </p>
-                 <div className="space-y-3">
-                   {subjects.length > 0 ? (
-                     subjects.map((subject, index) => (
-                       <div key={index} className="flex items-center justify-between">
-                         <div className="flex items-center space-x-3">
-                           <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
-                           <span className="text-sm text-gray-700">{subject.name}</span>
-                         </div>
-                         <span className="text-sm font-medium text-gray-900">{subject.marks}%</span>
-                       </div>
-                     ))
-                   ) : (
-                     <div className="text-gray-500 text-sm">No subjects added yet.</div>
-                   )}
-                 </div>
-               </div>
-
-              {/* Extracurricular Activities Section */}
-              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-                <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-lg font-semibold text-gray-900">Extracurricular Activities</h2>
-                                     <button className="px-3 py-1 text-sm bg-black text-white rounded hover:bg-gray-800" onClick={handleOpenExtracurricularModal}>
+              {/* Top Subjects Section */}
+              <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-semibold text-gray-900">Top Subjects</h2>
+                  <button className="px-4 py-2 text-sm bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors shadow-sm" onClick={handleOpenSubjectsModal}>
                     Update
                   </button>
                 </div>
-                <p className="text-sm text-gray-600 mb-4">
-                  The following are the student's activities and roles.
-                </p>
-                <div className="space-y-3">
+                <div className="space-y-4">
+                  {subjects.length > 0 ? (
+                    subjects.map((subject, index) => (
+                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-3 h-3 bg-gray-400 rounded-full flex-shrink-0"></div>
+                          <span className="text-sm text-gray-700 font-medium">{subject.name}</span>
+                        </div>
+                        <span className="text-sm font-semibold text-gray-900 bg-white px-3 py-1 rounded-full">{subject.marks}%</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="text-gray-400 text-sm italic text-center py-8 bg-gray-50 rounded-lg border border-gray-100">
+                      No subjects added yet. Click above to add your subjects.
+                    </div>
+                  )}
+                </div>
+                
+                {/* Subjects Modal */}
+                {showSubjectsModal && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white rounded-xl shadow-2xl p-8 max-w-lg w-full relative m-4">
+                      <button
+                        className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl transition-colors"
+                        onClick={() => setShowSubjectsModal(false)}
+                        aria-label="Close"
+                      >
+                        &times;
+                      </button>
+                      <h4 className="text-xl font-semibold mb-6 text-gray-900">Add Marks to Gain Better Insight</h4>
+                      <div className="space-y-3">
+                        {editSubjects.map((subject, idx) => (
+                          <div key={idx} className="flex gap-3 items-center">
+                            <input
+                              type="text"
+                              className="border border-gray-300 rounded-lg px-3 py-2 flex-1 focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                              placeholder="Subject name"
+                              value={subject.name}
+                              onChange={e => handleSubjectChange(idx, 'name', e.target.value)}
+                            />
+                            <input
+                              type="number"
+                              className="border border-gray-300 rounded-lg px-3 py-2 w-20 focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                              placeholder="Marks %"
+                              value={subject.marks}
+                              onChange={e => handleSubjectChange(idx, 'marks', e.target.value)}
+                              min="0"
+                              max="100"
+                            />
+                            <button
+                              className="text-red-500 hover:text-red-700 text-xl p-1"
+                              onClick={() => handleRemoveSubjectRow(idx)}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                        <button
+                          className="mt-4 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                          onClick={handleAddSubjectRow}
+                        >
+                          Add Subject
+                        </button>
+                      </div>
+                      <div className="flex justify-end gap-3 mt-6">
+                        <button
+                          className="px-6 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors"
+                          onClick={handleSaveSubjects}
+                        >
+                          Save
+                        </button>
+                        <button
+                          className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+                          onClick={() => setShowSubjectsModal(false)}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Extracurricular Activities Section */}
+              <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-semibold text-gray-900">Extracurricular Activities</h2>
+                  <button className="px-4 py-2 text-sm bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors shadow-sm" onClick={handleOpenExtracurricularModal}>
+                    Update
+                  </button>
+                </div>
+                <div className="space-y-4">
                   {extracurricularActivities.length > 0 ? (
                     extracurricularActivities.map((activity, index) => (
-                      <div key={index} className="flex items-start space-x-3">
-                        <div className="w-3 h-3 bg-gray-300 rounded-full mt-1"></div>
+                      <div key={index} className="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors">
+                        <div className="w-3 h-3 bg-gray-400 rounded-full mt-1 flex-shrink-0"></div>
                         <div>
                           <p className="text-sm font-medium text-gray-900">{activity.activity}</p>
-                          <p className="text-xs text-gray-600">- {activity.role}</p>
+                          <p className="text-xs text-gray-600 mt-1">- {activity.role}</p>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <div className="text-gray-500 text-sm">No extracurricular activities added yet.</div>
+                    <div className="text-gray-400 text-sm italic text-center py-8 bg-gray-50 rounded-lg border border-gray-100">
+                      No extracurricular activities added yet.
+                    </div>
                   )}
                 </div>
+
+                {/* Extracurricular Activities Modal */}
+                {showExtracurricularModal && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white rounded-xl shadow-2xl p-8 max-w-lg w-full relative m-4">
+                      <button
+                        className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl transition-colors"
+                        onClick={() => setShowExtracurricularModal(false)}
+                        aria-label="Close"
+                      >
+                        &times;
+                      </button>
+                      <h4 className="text-xl font-semibold mb-6 text-gray-900">Edit Extracurricular Activities</h4>
+                      <div className="space-y-3">
+                        {editExtracurricularActivities.map((row, idx) => (
+                          <div key={idx} className="flex gap-3 items-center">
+                            <input
+                              type="text"
+                              className="border border-gray-300 rounded-lg px-3 py-2 flex-1 focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                              placeholder="Activity"
+                              value={row.activity}
+                              onChange={e => handleExtracurricularChange(idx, 'activity', e.target.value)}
+                            />
+                            <input
+                              type="text"
+                              className="border border-gray-300 rounded-lg px-3 py-2 flex-1 focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                              placeholder="Role"
+                              value={row.role}
+                              onChange={e => handleExtracurricularChange(idx, 'role', e.target.value)}
+                            />
+                            <button
+                              className="text-red-500 hover:text-red-700 text-xl p-1"
+                              onClick={() => handleRemoveExtracurricularRow(idx)}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                        <button
+                          className="mt-4 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                          onClick={handleAddExtracurricularRow}
+                        >
+                          Add Activity
+                        </button>
+                      </div>
+                      <div className="flex justify-end gap-3 mt-6">
+                        <button
+                          className="px-6 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors"
+                          onClick={handleSaveExtracurricularActivities}
+                        >
+                          Save
+                        </button>
+                        <button
+                          className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+                          onClick={() => setShowExtracurricularModal(false)}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Certifications Section */}
-              <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 lg:col-span-2">
-                <div className="flex items-center justify-between mb-2">
-                  <h2 className="text-lg font-semibold text-gray-900">Certifications</h2>
-                                     <button className="px-3 py-1 text-sm bg-black text-white rounded hover:bg-gray-800" onClick={handleOpenCertificationsModal}>
+              <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 lg:col-span-2 hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-semibold text-gray-900">Certifications</h2>
+                  <button className="px-4 py-2 text-sm bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors shadow-sm" onClick={handleOpenCertificationsModal}>
                     Update
                   </button>
                 </div>
-                <p className="text-sm text-gray-600 mb-4">
-                  The following certifications have been completed
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {certifications.length > 0 ? (
                     certifications.map((cert, index) => (
-                      <div key={index} className="flex items-center space-x-3">
-                        <div className="w-3 h-3 bg-gray-300 rounded-full"></div>
-                        <span className="text-sm text-gray-700">{cert}</span>
+                      <div key={index} className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors">
+                        <div className="w-3 h-3 bg-gray-400 rounded-full flex-shrink-0"></div>
+                        <span className="text-sm text-gray-700 font-medium">{cert}</span>
                       </div>
                     ))
                   ) : (
-                    <div className="text-gray-500 text-sm">No certifications added yet.</div>
+                    <div className="text-gray-400 text-sm italic text-center py-8 bg-gray-50 rounded-lg border border-gray-100 md:col-span-2">
+                      No certifications added yet. Click above to add your certifications.
+                    </div>
                   )}
                 </div>
+
+                {/* Certifications Modal */}
+                {showCertificationsModal && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white rounded-xl shadow-2xl p-8 max-w-lg w-full relative m-4">
+                      <button
+                        className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl transition-colors"
+                        onClick={() => setShowCertificationsModal(false)}
+                        aria-label="Close"
+                      >
+                        &times;
+                      </button>
+                      <h4 className="text-xl font-semibold mb-6 text-gray-900">Edit Certifications</h4>
+                      <div className="space-y-3">
+                        {editCertifications.map((cert, idx) => (
+                          <div key={idx} className="flex gap-3 items-center">
+                            <input
+                              type="text"
+                              className="border border-gray-300 rounded-lg px-3 py-2 flex-1 focus:ring-2 focus:ring-gray-500 focus:border-transparent"
+                              placeholder="Certification name"
+                              value={cert}
+                              onChange={e => handleCertificationChange(idx, e.target.value)}
+                            />
+                            <button
+                              className="text-red-500 hover:text-red-700 text-xl p-1"
+                              onClick={() => handleRemoveCertificationRow(idx)}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                        <button
+                          className="mt-4 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+                          onClick={handleAddCertificationRow}
+                        >
+                          Add Certification
+                        </button>
+                      </div>
+                      <div className="flex justify-end gap-3 mt-6">
+                        <button
+                          className="px-6 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors"
+                          onClick={handleSaveCertifications}
+                        >
+                          Save
+                        </button>
+                        <button
+                          className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+                          onClick={() => setShowCertificationsModal(false)}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
             </div>
@@ -868,4 +759,4 @@ export default function StudentDashboard() {
       </div>
     </div>
   );
-} 
+}
