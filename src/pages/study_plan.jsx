@@ -127,15 +127,37 @@ Study techniques include active recall methods, mind mapping for complex topics,
 
   const fetchUserData = async () => {
     try {
-      const response = await fetch(`${API_ENDPOINTS.USER}?email=${encodeURIComponent(userEmail)}`);
+      // Get study plan and tasks from backend
+      const response = await fetch(`${API_ENDPOINTS.STUDY_PLAN}?email=${encodeURIComponent(userEmail)}`);
       const data = await response.json();
-      
-      if (data.studyPlan) {
-        setStudyPlan(data.studyPlan);
-        setTasks(data.studyPlan.tasks || []);
+
+      // Set overall percentage
+      if (data.overall_percentage !== undefined && data.overall_percentage !== null) {
+        setStudyPlan(prev => ({
+          ...prev,
+          current_performance: { "Overall Percentage": `${data.overall_percentage}%` }
+        }));
+      }
+
+      // Set study plan content
+      if (data.study_plan) {
+        setStudyPlan(prev => ({
+          ...prev,
+          plan_content: data.study_plan
+        }));
+      }
+
+      // Merge tasks from quiz_results with existing tasks
+      if (Array.isArray(data.tasks) && data.tasks.length > 0) {
+        setTasks(prevTasks => {
+          // Avoid duplicates by id
+          const existingIds = new Set(prevTasks.map(t => t.id));
+          const newTasks = data.tasks.filter(t => !existingIds.has(t.id));
+          return [...prevTasks, ...newTasks];
+        });
       }
     } catch (error) {
-      console.error("Error fetching user data:", error);
+      console.error("Error fetching study plan data:", error);
     }
   };
 
@@ -443,7 +465,7 @@ Study techniques include active recall methods, mind mapping for complex topics,
               <div className="bg-white rounded-lg border border-gray-200 p-6 mb-6">
                 <div className="text-center py-8">
                   <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">No Study Plan Yet</h3>
                   <p className="text-gray-600 mb-4">
@@ -609,4 +631,4 @@ Study techniques include active recall methods, mind mapping for complex topics,
       </div>
     </div>
   );
-} 
+}

@@ -5,7 +5,7 @@ import axios from "axios";
 // import QuizModal from '../components/QuizModal';
 
 // Message component for user and AI messages
-function Message({ text, isUser, animate }) {
+function Message({ text, isUser, animate, showSaveButton, onSave }) {
   const [visibleWords, setVisibleWords] = useState(animate ? 0 : text.split(" ").length);
   const words = text.split(" ");
   const timerRef = useRef();
@@ -33,18 +33,50 @@ function Message({ text, isUser, animate }) {
     );
   }
 
-  // AI message with animation, plain left-aligned text
+  // For bot messages, format plan/bullets
   return (
     <div className="text-black leading-relaxed font-sans" style={{ fontFamily: "Inter, sans-serif" }}>
-      {words.map((word, idx) => (
-        <span
-          key={idx}
-          className={`inline-block transition-opacity duration-300 ${idx < visibleWords ? "opacity-100" : "opacity-0"}`}
-          style={{ marginRight: "0.25em" }}
-        >
-          {word}
-        </span>
-      ))}
+      {formatBotMessage(text)}
+      {showSaveButton && (
+        <div className="mt-4 flex gap-2">
+          <button
+            className="px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
+            onClick={() => onSave(text)}
+          >
+            Yes, Save This Plan
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function formatBotMessage(text) {
+  // Replace Markdown bold (**HEADING**) with <strong>
+  let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  // Split into lines
+  const lines = formatted.split('\n');
+  const mainText = [];
+  const bullets = [];
+  let inBullets = false;
+  for (const line of lines) {
+    if (line.trim().startsWith('- ')) {
+      inBullets = true;
+      bullets.push(line.trim().replace(/^- /, ''));
+    } else if (line.trim() !== '') {
+      if (!inBullets) mainText.push(line);
+    }
+  }
+  return (
+    <div>
+      <div dangerouslySetInnerHTML={{ __html: mainText.join(' ') }} />
+      {bullets.length > 0 && (
+        <ul className="list-disc pl-6 mt-2">
+          {bullets.map((item, idx) => (
+            <li key={idx}>{item}</li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
@@ -61,6 +93,8 @@ export default function MentalHealthSI() {
   // const [showQuizModal, setShowQuizModal] = useState(false);
   const [showChatPage, setShowChatPage] = useState(false); // NEW: controls which page is shown
   const [fadeOutPrompt, setFadeOutPrompt] = useState(false); // NEW: for fade animation
+  const [inputDisabled, setInputDisabled] = useState(false); // NEW: controls input field
+  const [planSaved, setPlanSaved] = useState(false);
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
@@ -190,9 +224,51 @@ export default function MentalHealthSI() {
       navigate("/quiz");
       return;
     }
+    if (prompt.includes("academic journey")) {
+      // Do nothing here, handled directly in the button
+      return;
+    }
     setInputMessage(prompt);
     setShowSuggestedPrompts(false);
     setShowChatPage(true);
+  };
+
+  const handleAcademicPlanningClick = async () => {
+    setShowSuggestedPrompts(false);
+    setShowChatPage(true);
+    setLoading(true);
+    setInputDisabled(true); // Disable input while loading plan
+    try {
+      const res = await axios.post(
+        "/mental_health_chat",
+        { message: "academic planning" },
+        { withCredentials: true }
+      );
+      const reply = res.data.reply;
+      setMessages((prev) => [...prev, { text: reply, sender: "bot" }]);
+    } catch (error) {
+      setMessages((prev) => [
+        ...prev,
+        { text: "Could not generate academic plan. Please try again.", sender: "bot" }
+      ]);
+    } finally {
+      setLoading(false);
+      setInputDisabled(false); // Enable input after plan is shown
+    }
+  };
+
+  // Save plan to backend
+  const handleSavePlan = async (planText) => {
+    try {
+      await axios.post(
+        "http://localhost:5001/user/save-academic-plan",
+        { email: userEmail, academic_plan: planText },
+        { withCredentials: true }
+      );
+      setPlanSaved(true);
+    } catch (error) {
+      alert("Could not save your plan. Please try again.");
+    }
   };
 
   return (
@@ -352,7 +428,7 @@ export default function MentalHealthSI() {
 
                 <div 
                   className="bg-white rounded-lg border border-gray-200 p-6 cursor-pointer hover:border-gray-300 transition-colors"
-                  onClick={() => handleSuggestedPrompt("I need help planning my academic journey and creating a study plan.")}
+                  onClick={handleAcademicPlanningClick}
                 >
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
@@ -393,6 +469,8 @@ export default function MentalHealthSI() {
                       text={message.text}
                       isUser={message.sender === "user"}
                       animate={message.sender === "bot" && index === messages.length - 1}
+                      showSaveButton={message.sender === "bot" && index === messages.length - 1 && !planSaved}
+                      onSave={handleSavePlan}
                     />
                   ))}
                   {loading && (
@@ -413,10 +491,11 @@ export default function MentalHealthSI() {
                       placeholder="Type your message..."
                       className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent font-sans"
                       style={{ fontFamily: "Inter, sans-serif" }}
+                      disabled={inputDisabled || loading}
                     />
                     <button
                       type="submit"
-                      disabled={loading || !inputMessage.trim()}
+                      disabled={inputDisabled || loading || !inputMessage.trim()}
                       className="px-6 py-2 bg-black text-white rounded-lg hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed font-sans"
                       style={{ fontFamily: "Inter, sans-serif" }}
                     >

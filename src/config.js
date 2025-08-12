@@ -20,7 +20,7 @@ export const API_ENDPOINTS = {
   TERM_DATA_UPDATE: `${API_BASE_URL}/user/term-data`,
   EXTRACURRICULAR_UPDATE: `${API_BASE_URL}/user/extracurricular`,
   SUBJECTS_UPDATE: `${API_BASE_URL}/user/subjects`,
-  STUDY_PLAN_UPDATE: `${API_BASE_URL}/user/study-plan`,
+  STUDY_PLAN: "http://localhost:5001/user/study-plan",
   BACKEND: "http://localhost:5001", // or your backend URL
   QUIZ_RESULT: "http://localhost:5001/user/quiz-result",
 };

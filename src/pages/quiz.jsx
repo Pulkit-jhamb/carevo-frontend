@@ -104,7 +104,7 @@ function AnimatedText({ text, className = "" }) {
 }
 
 // Enhanced AnimatedText component with character-by-character animation
-function EnhancedAnimatedText({ text, className = "", delay = 40 }) {
+function EnhancedAnimatedText({ text, className = "", delay = 10 }) {
   const [visibleChars, setVisibleChars] = useState(0);
   
   useEffect(() => {
@@ -141,14 +141,26 @@ function EnhancedAnimatedText({ text, className = "", delay = 40 }) {
 // Enhanced results display component
 function EnhancedResultsDisplay({ report, onRetake, userEmail }) {
   const results = parseEnhancedReport(report);
-  
+
+  // Utility to remove Markdown bold (**text**) for display
+  const stripMarkdownBold = (text) =>
+    typeof text === "string" ? text.replace(/\*\*(.*?)\*\*/g, "$1") : text;
+
+  // Utility to extract bullet points (lines starting with * or -)
+  function extractBullets(text) {
+    return text
+      .split('\n')
+      .map(line => line.trim())
+      .filter(line => /^(\*|-)\s+/.test(line))
+      .map(line => line.replace(/^(\*|-)\s+/, ''));
+  }
+
   const handleSaveResults = async () => {
     try {
       const resultData = {
         email: userEmail,
         quiz_result: results
       };
-      
       await axios.post('/user/quiz-result', resultData);
       alert('Results saved to your profile!');
     } catch (error) {
@@ -166,7 +178,7 @@ function EnhancedResultsDisplay({ report, onRetake, userEmail }) {
         </h1>
         {results.headline && (
           <h2 className="text-2xl font-semibold text-blue-600 mb-6">
-            <EnhancedAnimatedText text={results.headline} />
+            <EnhancedAnimatedText text={stripMarkdownBold(results.headline)} />
           </h2>
         )}
       </div>
@@ -176,8 +188,9 @@ function EnhancedResultsDisplay({ report, onRetake, userEmail }) {
         <div className="mb-10 w-full bg-gray-50 rounded-lg p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-3">Executive Summary</h3>
           <EnhancedAnimatedText 
-            text={results.summary} 
+            text={stripMarkdownBold(results.summary)} 
             className="text-base text-gray-800 leading-relaxed"
+            delay={5}
           />
         </div>
       )}
@@ -194,7 +207,7 @@ function EnhancedResultsDisplay({ report, onRetake, userEmail }) {
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
                   <span className="text-blue-800 font-medium">
-                    <EnhancedAnimatedText text={capability} delay={20} />
+                    <EnhancedAnimatedText text={stripMarkdownBold(capability)} delay={20} />
                   </span>
                 </div>
               </div>
@@ -208,12 +221,25 @@ function EnhancedResultsDisplay({ report, onRetake, userEmail }) {
       {/* Recommended Path */}
       {results.recommendedPath && (
         <div className="mb-10 w-full">
-          <h3 className="text-xl font-semibold text-gray-900 mb-4">Recommended Career Path</h3>
+          {/* Fix heading: strip ** and animate */}
+          <h3 className="text-xl font-semibold text-gray-900 mb-4">
+            <EnhancedAnimatedText text={stripMarkdownBold("Recommended Career Path")} delay={10} />
+          </h3>
           <div className="bg-green-50 rounded-lg p-6 border border-green-200">
+            {/* Show the intro sentence animated */}
             <EnhancedAnimatedText 
-              text={results.recommendedPath} 
-              className="text-base text-green-800 leading-relaxed"
+              text={stripMarkdownBold(results.recommendedPath.split('*')[0].trim())} 
+              className="text-base text-green-800 leading-relaxed mb-4"
+              delay={10}
             />
+            {/* Show bullet points animated */}
+            <ul className="list-disc pl-6 text-green-800">
+              {extractBullets(results.recommendedPath).map((item, idx) => (
+                <li key={idx}>
+                  <EnhancedAnimatedText text={stripMarkdownBold(item)} delay={10} />
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       )}
@@ -226,7 +252,7 @@ function EnhancedResultsDisplay({ report, onRetake, userEmail }) {
           <h3 className="text-xl font-semibold text-gray-900 mb-4">Your Key Strengths</h3>
           <div className="bg-yellow-50 rounded-lg p-6 border border-yellow-200">
             <EnhancedAnimatedText 
-              text={results.strengths} 
+              text={stripMarkdownBold(results.strengths)} 
               className="text-base text-yellow-800 leading-relaxed"
             />
           </div>
@@ -241,7 +267,7 @@ function EnhancedResultsDisplay({ report, onRetake, userEmail }) {
             {results.growthAreas.map((area, idx) => (
               <div key={idx} className="bg-orange-50 rounded-lg p-4 border border-orange-200">
                 <span className="text-orange-800 font-medium capitalize">
-                  <EnhancedAnimatedText text={area} delay={20} />
+                  <EnhancedAnimatedText text={stripMarkdownBold(area)} delay={20} />
                 </span>
               </div>
             ))}
@@ -265,7 +291,7 @@ function EnhancedResultsDisplay({ report, onRetake, userEmail }) {
                     </div>
                   </div>
                   <span className="text-purple-800 text-sm leading-relaxed">
-                    <EnhancedAnimatedText text={step} delay={15} />
+                    <EnhancedAnimatedText text={stripMarkdownBold(step)} delay={15} />
                   </span>
                 </div>
               </div>
@@ -323,6 +349,15 @@ function extractRecommendedPath(recommendations) {
   const lines = recommendations.split("\n").filter(l => l.trim());
   const first = lines[0] || "";
   return first.replace(/\*\*/g, "").trim();
+}
+
+function extractBullets(text) {
+  // Match lines starting with * or - and trim them
+  return text
+    .split('\n')
+    .map(line => line.trim())
+    .filter(line => /^(\*|-)\s+/.test(line))
+    .map(line => line.replace(/^(\*|-)\s+/, ''));
 }
 
 export default function Quiz() {
