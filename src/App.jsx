@@ -77,7 +77,7 @@ function ProtectedRoute({ children }) {
   // Prevent going back to login page when authenticated
   useEffect(() => {
     if (isAuthenticated && (location.pathname === '/login' || location.pathname === '/signup')) {
-      navigate('/dashboard', { replace: true });
+      navigate('/carevo-homepage', { replace: true });
     }
   }, [isAuthenticated, location.pathname, navigate]);
 
@@ -147,7 +147,7 @@ function PublicRoute({ children }) {
         
         // If authenticated, redirect to dashboard
         if (response.data.authenticated) {
-          navigate('/dashboard', { replace: true });
+          navigate('/carevo-homepage', { replace: true });
         }
       } catch (error) {
         setIsAuthenticated(false);
@@ -239,11 +239,11 @@ function AppRoutes() {
       {/* Catch all route - redirect to dashboard for authenticated users */}
       <Route path="*" element={
         <ProtectedRoute>
-          <Navigate to="/dashboard" replace />
+          <Navigate to="/carevo-homepage" replace />
         </ProtectedRoute>
       } />
       
       
     </Routes>
   );
-} 
+}

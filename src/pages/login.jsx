@@ -33,7 +33,7 @@ export default function Login() {
         console.log("Login - Setting userType:", res.data.user?.studentType);
         setError("");
         // Replace the current history entry to prevent back button issues
-        navigate("/dashboard", { replace: true });
+        navigate("/home");
       }
     } catch (err) {
       setError(err.response?.data?.message || "Login failed. Try again.");

@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { API_ENDPOINTS } from '../config';
 import axios from "axios";
 import Sidebar from "./sidebar"; // Import the Sidebar component
-// import QuizModal from '../components/QuizModal';
 
 // Message component for user and AI messages
 function Message({ text, isUser, animate, showSaveButton, onSave }) {
@@ -53,9 +52,7 @@ function Message({ text, isUser, animate, showSaveButton, onSave }) {
 }
 
 function formatBotMessage(text) {
-  // Replace Markdown bold (**HEADING**) with <strong>
   let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-  // Split into lines
   const lines = formatted.split('\n');
   const mainText = [];
   const bullets = [];
@@ -90,11 +87,10 @@ export default function MentalHealthSI() {
   const [loading, setLoading] = useState(false);
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
-  const [isCollapsed, setIsCollapsed] = useState(false); // State for sidebar collapse
-  // const [showQuizModal, setShowQuizModal] = useState(false);
-  const [showChatPage, setShowChatPage] = useState(false); // NEW: controls which page is shown
-  const [fadeOutPrompt, setFadeOutPrompt] = useState(false); // NEW: for fade animation
-  const [inputDisabled, setInputDisabled] = useState(false); // NEW: controls input field
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [showChatPage, setShowChatPage] = useState(false);
+  const [fadeOutPrompt, setFadeOutPrompt] = useState(false);
+  const [inputDisabled, setInputDisabled] = useState(false);
   const [planSaved, setPlanSaved] = useState(false);
   const messagesEndRef = useRef(null);
 
@@ -124,7 +120,6 @@ export default function MentalHealthSI() {
     scrollToBottom();
   }, [messages]);
 
-  // When user sends a message from prompt page, fade out and show chat page
   const handlePromptSend = async (e) => {
     e.preventDefault();
     if (!inputMessage.trim() || loading) return;
@@ -134,10 +129,9 @@ export default function MentalHealthSI() {
       setShowChatPage(true);
       setFadeOutPrompt(false);
       sendMessage(e);
-    }, 400); // 400ms fade duration
+    }, 400);
   };
 
-  // Normal chat send
   const sendMessage = async (e) => {
     if (e) e.preventDefault();
     if (!inputMessage.trim() || loading) return;
@@ -155,26 +149,55 @@ export default function MentalHealthSI() {
       });
 
       const data = await res.json();
-      const botMessage = { sender: "bot", text: data.response || data.error || "Sorry, I couldn't process that." };
+      const botMessage = { sender: "bot", text: data.response || data.error || "Sorry, I couldn't process that.", isAcademicPlan: false };
       setMessages(prev => [...prev, botMessage]);
     } catch (err) {
-      const errorMessage = { sender: "bot", text: "Sorry, there was an error processing your request." };
+      const errorMessage = { sender: "bot", text: "Sorry, there was an error processing your request.", isAcademicPlan: false };
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setLoading(false);
     }
   };
 
-  // Replace handleSuggestedPrompt for Career Exploration to navigate to quiz
-  const handleSuggestedPrompt = (prompt) => {
+  const handleSuggestedPrompt = async (prompt) => {
     if (prompt.includes("career exploration quiz")) {
       navigate("/quiz");
       return;
     }
+
     if (prompt.includes("academic journey")) {
-      // Do nothing here, handled directly in the button
       return;
     }
+
+    // NEW: Feeling Anxious case - disable input until backend responds
+    if (prompt.includes("feeling anxious")) {
+      setShowSuggestedPrompts(false);
+      setShowChatPage(true);
+      setLoading(true);
+      setInputDisabled(true);
+      try {
+        const res = await axios.post(
+          "/mental_health_chat",
+          { message: "feeling anxious" },
+          { withCredentials: true }
+        );
+        const reply = res.data.reply;
+        setMessages((prev) => [
+          ...prev,
+          { text: reply, sender: "bot", isAcademicPlan: false }
+        ]);
+      } catch (error) {
+        setMessages((prev) => [
+          ...prev,
+          { text: "Could not process your request. Please try again.", sender: "bot", isAcademicPlan: false }
+        ]);
+      } finally {
+        setLoading(false);
+        setInputDisabled(false);
+      }
+      return;
+    }
+
     setInputMessage(prompt);
     setShowSuggestedPrompts(false);
     setShowChatPage(true);
@@ -184,7 +207,7 @@ export default function MentalHealthSI() {
     setShowSuggestedPrompts(false);
     setShowChatPage(true);
     setLoading(true);
-    setInputDisabled(true); // Disable input while loading plan
+    setInputDisabled(true);
     try {
       const res = await axios.post(
         "/mental_health_chat",
@@ -192,19 +215,21 @@ export default function MentalHealthSI() {
         { withCredentials: true }
       );
       const reply = res.data.reply;
-      setMessages((prev) => [...prev, { text: reply, sender: "bot" }]);
+      setMessages((prev) => [
+        ...prev,
+        { text: reply, sender: "bot", isAcademicPlan: true }
+      ]);
     } catch (error) {
       setMessages((prev) => [
         ...prev,
-        { text: "Could not generate academic plan. Please try again.", sender: "bot" }
+        { text: "Could not generate academic plan. Please try again.", sender: "bot", isAcademicPlan: true }
       ]);
     } finally {
       setLoading(false);
-      setInputDisabled(false); // Enable input after plan is shown
+      setInputDisabled(false);
     }
   };
 
-  // Save plan to backend
   const handleSavePlan = async (planText) => {
     try {
       await axios.post(
@@ -220,14 +245,10 @@ export default function MentalHealthSI() {
 
   return (
     <div className="flex h-screen bg-white font-sans" style={{ fontFamily: "Inter, sans-serif" }}>
-      {/* Use the imported Sidebar component */}
       <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
       
-      {/* Main Content */}
       <div className={`flex-1 flex flex-col transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
-        {/* Chat Content */}
         <div className="flex-1 flex flex-col">
-          {/* Prompt Page */}
           {showSuggestedPrompts && !showChatPage && (
             <div
               className={`flex-1 flex flex-col items-center justify-center p-6 transition-opacity duration-400 ${fadeOutPrompt ? "opacity-0" : "opacity-100"}`}
@@ -238,7 +259,6 @@ export default function MentalHealthSI() {
                 <p className="text-lg text-gray-600 mb-8">I'm here to assist you with academic guidance, career planning, and more.</p>
               </div>
 
-              {/* Search Bar */}
               <div className="w-full max-w-2xl mb-8">
                 <form onSubmit={handlePromptSend}>
                   <div className="relative">
@@ -255,7 +275,6 @@ export default function MentalHealthSI() {
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center justify-center bg-gray-200 rounded-full p-2 hover:bg-gray-300 transition"
                       aria-label="Send"
                     >
-                      {/* Send icon */}
                       <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 12h14M12 5l7 7-7 7" />
                       </svg>
@@ -264,7 +283,6 @@ export default function MentalHealthSI() {
                 </form>
               </div>
 
-              {/* Suggested Prompts */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl w-full">
                 <div 
                   className="bg-white rounded-lg border border-gray-200 p-6 cursor-pointer hover:border-gray-300 transition-colors"
@@ -312,10 +330,8 @@ export default function MentalHealthSI() {
             </div>
           )}
 
-          {/* Chat Page */}
           {showChatPage && (
             <div className="flex-1 flex flex-col animate-fade-in">
-              {/* Messages */}
               <div className="flex-1 overflow-y-auto px-0 py-6" style={{ background: "#fff" }}>
                 <div className="max-w-2xl mx-auto flex flex-col gap-6">
                   {messages.map((message, index) => (
@@ -324,7 +340,12 @@ export default function MentalHealthSI() {
                       text={message.text}
                       isUser={message.sender === "user"}
                       animate={message.sender === "bot" && index === messages.length - 1}
-                      showSaveButton={message.sender === "bot" && index === messages.length - 1 && !planSaved}
+                      showSaveButton={
+                        message.sender === "bot" &&
+                        index === messages.length - 1 &&
+                        !planSaved &&
+                        message.isAcademicPlan
+                      }
                       onSave={handleSavePlan}
                     />
                   ))}
@@ -335,7 +356,6 @@ export default function MentalHealthSI() {
                 </div>
               </div>
 
-              {/* Input - fixed at bottom */}
               <div className="border-t border-gray-200 p-4 bg-white sticky bottom-0 left-0 w-full">
                 <div className="max-w-2xl mx-auto">
                   <form onSubmit={sendMessage} className="flex gap-3">
@@ -363,10 +383,7 @@ export default function MentalHealthSI() {
           )}
         </div>
       </div>
-      {/* Quiz Modal */}
-      {/* <QuizModal isOpen={showQuizModal} onClose={() => setShowQuizModal(false)} /> */}
 
-      {/* Fade-in animation for chat page */}
       <style>
         {`
           .animate-fade-in {

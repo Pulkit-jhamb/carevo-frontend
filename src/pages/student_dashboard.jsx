@@ -33,29 +33,23 @@ export default function StudentDashboard() {
       .then((res) => res.json())
       .then((data) => {
         setUser(data);
-        setTermData(data.termData || [
-          { term: "Term 1", percentage: "" },
-          { term: "Term 2", percentage: "" },
-          { term: "Term 3", percentage: "" }
-        ]);
-        setExtracurricularActivities(data.extracurricularActivities || [
-          { activity: "School Debate Team", role: "Vice Captain" },
-          { activity: "Science Club", role: "Event Organizer" },
-          { activity: "Dance Troupe", role: "Lead Performer" },
-          { activity: "Environment Club", role: "Member" }
-        ]);
-        setCertifications(data.certifications || [
-          "Microsoft Office Specialist",
-          "Python Basics - Code.org",
-          "Creative Writing Workshop",
-          "Math Olympiad Level 1"
-        ]);
-        setSubjects(data.subjects || [
-          { name: "Mathematics", marks: 95 },
-          { name: "Science", marks: 88 },
-          { name: "Computer Applications", marks: 92 },
-          { name: "English", marks: 85 }
-        ]);
+
+        // If no termData, initialize with 4 empty terms
+        setTermData(
+          data.termData && data.termData.length === 4
+            ? data.termData
+            : [
+                { term: "Term 1", percentage: "" },
+                { term: "Term 2", percentage: "" },
+                { term: "Term 3", percentage: "" },
+                { term: "Term 4", percentage: "" }
+              ]
+        );
+
+        // Remove default values, show update prompt if empty
+        setExtracurricularActivities(data.extracurricularActivities || []);
+        setCertifications(data.certifications || []);
+        setSubjects(data.subjects || []);
       })
       .catch((err) => console.error("Error fetching user:", err));
   }, []);
@@ -114,10 +108,11 @@ export default function StudentDashboard() {
   }
 
   const handleOpenTermModal = () => {
-    setEditTermData(termData.length ? [...termData] : [
+    setEditTermData(termData.length === 4 ? [...termData] : [
       { term: "Term 1", percentage: "" },
       { term: "Term 2", percentage: "" },
-      { term: "Term 3", percentage: "" }
+      { term: "Term 3", percentage: "" },
+      { term: "Term 4", percentage: "" }
     ]);
     setShowTermModal(true);
   };
@@ -416,7 +411,7 @@ export default function StudentDashboard() {
                   </div>
                 </div>
                 
-                {/* Performance Data */}
+                {/* Performance Data - FIXED TO SHOW 4 TERMS */}
                 <div className="flex justify-between gap-4">
                   <div className="flex items-center space-x-3 bg-gray-50 rounded-lg p-3 flex-1">
                     <div className="w-3 h-3 bg-gray-600 rounded-full flex-shrink-0"></div>
@@ -437,6 +432,13 @@ export default function StudentDashboard() {
                     <div>
                       <p className="text-sm font-medium text-gray-900">Term 3</p>
                       <p className="text-sm text-gray-600">{termData[2]?.percentage || "--"}%</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-3 bg-gray-50 rounded-lg p-3 flex-1">
+                    <div className="w-3 h-3 bg-gray-800 rounded-full flex-shrink-0"></div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Term 4</p>
+                      <p className="text-sm text-gray-600">{termData[3]?.percentage || "--"}%</p>
                     </div>
                   </div>
                 </div>
@@ -515,7 +517,7 @@ export default function StudentDashboard() {
                     ))
                   ) : (
                     <div className="text-gray-400 text-sm italic text-center py-8 bg-gray-50 rounded-lg border border-gray-100">
-                      No subjects added yet. Click above to add your subjects.
+                      Please update your profile to add your subjects.
                     </div>
                   )}
                 </div>
@@ -606,7 +608,7 @@ export default function StudentDashboard() {
                     ))
                   ) : (
                     <div className="text-gray-400 text-sm italic text-center py-8 bg-gray-50 rounded-lg border border-gray-100">
-                      No extracurricular activities added yet.
+                      Please update your profile to add extracurricular activities.
                     </div>
                   )}
                 </div>
@@ -692,7 +694,7 @@ export default function StudentDashboard() {
                     ))
                   ) : (
                     <div className="text-gray-400 text-sm italic text-center py-8 bg-gray-50 rounded-lg border border-gray-100 md:col-span-2">
-                      No certifications added yet. Click above to add your certifications.
+                      Please update your profile to add certifications.
                     </div>
                   )}
                 </div>
