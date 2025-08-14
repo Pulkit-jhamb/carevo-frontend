@@ -142,11 +142,12 @@ export default function MentalHealthSI() {
     setLoading(true);
 
     try {
-      const res = await fetch(API_ENDPOINTS.AI, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: inputMessage }),
-      });
+    const res = await fetch(API_ENDPOINTS.AI, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include", // ✅ This sends cookies along
+      body: JSON.stringify({ prompt: inputMessage }),
+    });
 
       const data = await res.json();
       const botMessage = { sender: "bot", text: data.response || data.error || "Sorry, I couldn't process that.", isAcademicPlan: false };
