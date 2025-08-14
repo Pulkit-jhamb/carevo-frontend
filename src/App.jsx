@@ -13,7 +13,7 @@ import axios from 'axios';
 import { API_ENDPOINTS } from './config';
 import { useAuthRedirect } from './hooks/useAuthRedirect';
 import CarevoHomepage from './pages/home';
-
+import StudentOnboardingForm from './pages/onboarding';
 
 function UserIcon() {
   return (
@@ -240,6 +240,13 @@ function AppRoutes() {
       <Route path="*" element={
         <ProtectedRoute>
           <Navigate to="/carevo-homepage" replace />
+        </ProtectedRoute>
+      } />
+
+      {/* Onboarding route - no sidebar */}
+      <Route path="/onboarding" element={
+        <ProtectedRoute>
+          <StudentOnboardingForm />
         </ProtectedRoute>
       } />
       
