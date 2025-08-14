@@ -178,7 +178,7 @@ function EnhancedResultsDisplay({ report, onRetake, userEmail }) {
           Your Personality Profile
         </h1>
         {results.headline && (
-          <h2 className="text-2xl font-semibold text-blue-600 mb-6">
+          <h2 className="text-2xl font-semibold text-gray-500 mb-6">
             <EnhancedAnimatedText text={stripMarkdownBold(results.headline)} />
           </h2>
         )}
@@ -204,10 +204,10 @@ function EnhancedResultsDisplay({ report, onRetake, userEmail }) {
           <h3 className="text-xl font-semibold text-gray-900 mb-4">Your Top Capabilities</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {results.topCapabilities.map((capability, idx) => (
-              <div key={idx} className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+              <div key={idx} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
                 <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
-                  <span className="text-blue-800 font-medium">
+                  <div className="w-3 h-3 bg-gray-400 rounded-full"></div>
+                  <span className="text-gray-600 font-medium">
                     <EnhancedAnimatedText text={stripMarkdownBold(capability)} delay={20} />
                   </span>
                 </div>
@@ -326,7 +326,7 @@ function EnhancedResultsDisplay({ report, onRetake, userEmail }) {
           Retake Quiz
         </button>
         <button
-          className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition"
+          className="px-8 py-3 bg-gray-500 text-white rounded-lg font-semibold hover:bg-gray-600 transition"
           onClick={handleSaveResults}
         >
           Save Results
@@ -520,8 +520,8 @@ export default function Quiz() {
                     <div className="text-gray-500 text-lg">Loading personalized questions...</div>
                   ) : (
                     <div>
-                      <div className="mb-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                        <p className="text-blue-800 text-sm">
+                      <div className="mb-8 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                        <p className="text-gray-600 text-sm">
                           <strong>Note:</strong> This quiz has been personalized based on your academic profile and background. 
                           Your responses will help us provide tailored career guidance and insights.
                         </p>
