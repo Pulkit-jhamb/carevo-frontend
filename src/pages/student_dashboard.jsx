@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { API_ENDPOINTS } from "../config";
 import axios from "axios";
-import Sidebar from "./Sidebar"; // Import the Sidebar component
+import Sidebar from "./sidebar"; // Import the Sidebar component
 
 export default function StudentDashboard() {
   const [user, setUser] = useState(null);
