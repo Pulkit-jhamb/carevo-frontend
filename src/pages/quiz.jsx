@@ -4,9 +4,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "./sidebar"; // Import the Sidebar component
 
-// After your imports, add:
-axios.defaults.baseURL = 'http://localhost:5001';
-axios.defaults.withCredentials = true;
+// Remove hardcoded URLs - use config instead
 
 // Enhanced parsing function for new JSON structure
 function parseEnhancedReport(report) {
@@ -378,10 +376,8 @@ export default function Quiz() {
       setLoading(true);
       setError("");
       try {
-        // Use full URL for auth check
-        const response = await axios.get("http://localhost:5001/auth/status", {
-          withCredentials: true
-        });
+        // Use config URL for auth check
+        const response = await axios.get(API_ENDPOINTS.AUTH_STATUS);
         
         console.log("Auth response:", response.data); // Debug log
         
@@ -389,11 +385,9 @@ export default function Quiz() {
           setUserName(response.data.user.name || "User");
           setUserEmail(response.data.user.email);
   
-          // Use full URL for quiz generation
-          const quizRes = await axios.post("http://localhost:5001/quiz/generate", {
+          // Use config URL for quiz generation
+          const quizRes = await axios.post(`${API_ENDPOINTS.BACKEND}/quiz/generate`, {
             studentId: response.data.user.email
-          }, {
-            withCredentials: true  // Add this!
           });
           
           console.log("Quiz response:", quizRes.data); // Debug log
@@ -433,12 +427,10 @@ export default function Quiz() {
     setLoading(true);
   
     try {
-      const res = await axios.post("http://localhost:5001/quiz/submit", {
+      const res = await axios.post(`${API_ENDPOINTS.BACKEND}/quiz/submit`, {
         studentId: userEmail,
         quizId,
         answers,
-      }, {
-        withCredentials: true  // Add this!
       });
       
       setReport(JSON.stringify(res.data));
@@ -465,9 +457,8 @@ export default function Quiz() {
     const fetchQuizResult = async () => {
       if (!userEmail) return;
       try {
-        const res = await axios.get("http://localhost:5001/quiz/result", {
-          params: { studentId: userEmail },
-          withCredentials: true
+        const res = await axios.get(`${API_ENDPOINTS.BACKEND}/quiz/result`, {
+          params: { studentId: userEmail }
         });
         if (res.data) {
           setReport(JSON.stringify(res.data));

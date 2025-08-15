@@ -1,6 +1,8 @@
 // API Configuration
 // const API_BASE_URL = 'https://carevo-backend.onrender.com';
-const API_BASE_URL = 'http://localhost:5001';
+//  const API_BASE_URL = 'http://localhost:5001';
+ const API_BASE_URL = 'https://carevo-backend-8vv2.onrender.com/';
+
 
 export const API_ENDPOINTS = {
   LOGIN: `${API_BASE_URL}/login`,
@@ -20,9 +22,9 @@ export const API_ENDPOINTS = {
   TERM_DATA_UPDATE: `${API_BASE_URL}/user/term-data`,
   EXTRACURRICULAR_UPDATE: `${API_BASE_URL}/user/extracurricular`,
   SUBJECTS_UPDATE: `${API_BASE_URL}/user/subjects`,
-  STUDY_PLAN: "http://localhost:5001/user/study-plan",
-  BACKEND: "http://localhost:5001", // or your backend URL
-  QUIZ_RESULT: "http://localhost:5001/user/quiz-result",
+  STUDY_PLAN: `${API_BASE_URL}/user/study-plan`,
+  BACKEND: API_BASE_URL,
+  QUIZ_RESULT: `${API_BASE_URL}/user/quiz-result`,
 };
 
 export default API_BASE_URL;
