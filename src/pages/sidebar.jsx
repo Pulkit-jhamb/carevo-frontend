@@ -24,9 +24,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
   useEffect(() => {
     const getUserInfo = async () => {
       try {
-        const response = await axios.get(API_ENDPOINTS.AUTH_STATUS, {
-          withCredentials: true
-        });
+        const response = await axios.get(API_ENDPOINTS.AUTH_STATUS);
         if (response.data.authenticated && response.data.user) {
           setUserName(response.data.user.name || "User");
           setUserEmail(response.data.user.email);
@@ -42,9 +40,8 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
   // Handle logout
   const handleLogout = async () => {
     try {
-      await axios.post(API_ENDPOINTS.LOGOUT, {}, {
-        withCredentials: true
-      });
+      await axios.post(API_ENDPOINTS.LOGOUT);
+      localStorage.removeItem("authToken");
       localStorage.removeItem("userEmail");
       localStorage.removeItem("userName");
       localStorage.removeItem("userType");
