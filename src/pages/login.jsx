@@ -12,30 +12,43 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (!email || !password) {
       setError("Please enter both email and password.");
       return;
     }
-
+  
     try {
       const res = await axios.post(API_ENDPOINTS.LOGIN, {
         email,
         password,
-      }, {
-        withCredentials: true // Important for cookies
       });
-
+  
       if (res.status === 200) {
+        // 🚨 KEY CHANGE: Get token from response body, not cookies
+        const { token, user } = res.data;
+        
+        // Store token and user data in localStorage
+        localStorage.setItem("authToken", token);  // 🚨 Store the actual token
         localStorage.setItem("userEmail", email);
-        localStorage.setItem("userName", res.data.user?.name || "");
-        localStorage.setItem("userType", res.data.user?.studentType || "");
-        console.log("Login - Setting userType:", res.data.user?.studentType);
+        localStorage.setItem("userName", user?.name || "");
+        localStorage.setItem("userType", user?.studentType || "");
+        
+        console.log("Login successful - token stored in localStorage");
         setError("");
-        // Replace the current history entry to prevent back button issues
-        navigate("/home");
+        
+        // Navigate to dashboard
+        navigate("/carevo-homepage", { replace: true });
       }
     } catch (err) {
+      console.error("Login error:", err);
+      
+      // Clear any existing data on failure
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("userEmail");
+      localStorage.removeItem("userName");
+      localStorage.removeItem("userType");
+      
       setError(err.response?.data?.message || "Login failed. Try again.");
     }
   };

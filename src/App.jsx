@@ -14,6 +14,8 @@ import { API_ENDPOINTS } from './config';
 import { useAuthRedirect } from './hooks/useAuthRedirect';
 import CarevoHomepage from './pages/home';
 import StudentOnboardingForm from './pages/onboarding';
+// 🚨 NEW IMPORT - Add this line
+import { setupAxiosInterceptors } from './utils/axiosConfig';
 
 function UserIcon() {
   return (
@@ -50,7 +52,7 @@ function MainLayout() {
   );
 }
 
-// Protected Route Component
+// 🚨 UPDATED PROTECTED ROUTE COMPONENT
 function ProtectedRoute({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -59,12 +61,36 @@ function ProtectedRoute({ children }) {
 
   useEffect(() => {
     const checkAuth = async () => {
+      const token = localStorage.getItem('authToken');
+      
+      if (!token) {
+        console.log('❌ No token found');
+        setIsAuthenticated(false);
+        setLoading(false);
+        return;
+      }
+
       try {
-        const response = await axios.get(API_ENDPOINTS.AUTH_STATUS, {
-          withCredentials: true
-        });
-        setIsAuthenticated(response.data.authenticated);
+        // The axios interceptor will automatically add the token header
+        const response = await axios.get(API_ENDPOINTS.AUTH_STATUS);
+        
+        if (response.data.authenticated) {
+          console.log('✅ Protected route: User authenticated');
+          setIsAuthenticated(true);
+        } else {
+          console.log('❌ Protected route: User not authenticated');
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('userEmail');
+          localStorage.removeItem('userName');
+          localStorage.removeItem('userType');
+          setIsAuthenticated(false);
+        }
       } catch (error) {
+        console.error('🚨 Protected route auth check failed:', error);
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userEmail');
+        localStorage.removeItem('userName');
+        localStorage.removeItem('userType');
         setIsAuthenticated(false);
       } finally {
         setLoading(false);
@@ -131,7 +157,7 @@ function DashboardSelector() {
   }
 }
 
-// Public Route Component - redirects authenticated users to chat
+// 🚨 UPDATED PUBLIC ROUTE COMPONENT
 function PublicRoute({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -139,18 +165,38 @@ function PublicRoute({ children }) {
 
   useEffect(() => {
     const checkAuth = async () => {
+      const token = localStorage.getItem('authToken');
+      
+      if (!token) {
+        setIsAuthenticated(false);
+        setLoading(false);
+        return;
+      }
+
       try {
-        const response = await axios.get(API_ENDPOINTS.AUTH_STATUS, {
-          withCredentials: true
-        });
-        setIsAuthenticated(response.data.authenticated);
+        // The axios interceptor will automatically add the token header
+        const response = await axios.get(API_ENDPOINTS.AUTH_STATUS);
         
-        // If authenticated, redirect to dashboard
         if (response.data.authenticated) {
+          setIsAuthenticated(true);
+          // If authenticated, redirect to dashboard
           navigate('/carevo-homepage', { replace: true });
+        } else {
+          setIsAuthenticated(false);
+          // Clear token if not valid
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('userEmail');
+          localStorage.removeItem('userName');
+          localStorage.removeItem('userType');
         }
       } catch (error) {
+        console.error('Public route auth check failed:', error);
         setIsAuthenticated(false);
+        // Clear token on error
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userEmail');
+        localStorage.removeItem('userName');
+        localStorage.removeItem('userType');
       } finally {
         setLoading(false);
       }
@@ -174,6 +220,12 @@ function PublicRoute({ children }) {
 }
 
 export default function App() {
+  // 🚨 NEW: Set up axios interceptors when app starts
+  useEffect(() => {
+    setupAxiosInterceptors();
+    console.log('✅ Axios interceptors set up');
+  }, []);
+
   return (
     <Router>
       <AppRoutes />
@@ -188,7 +240,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<Landing_page />} />
       
-      {/* Public routes - redirect authenticated users to chat */}
+      {/* Public routes - redirect authenticated users to dashboard */}
       <Route path="/login" element={
         <PublicRoute>
           <Login />
@@ -236,13 +288,6 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       
-      {/* Catch all route - redirect to dashboard for authenticated users */}
-      <Route path="*" element={
-        <ProtectedRoute>
-          <Navigate to="/carevo-homepage" replace />
-        </ProtectedRoute>
-      } />
-
       {/* Onboarding route - no sidebar */}
       <Route path="/onboarding" element={
         <ProtectedRoute>
@@ -250,7 +295,12 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       
-      
+      {/* Catch all route - redirect to dashboard for authenticated users */}
+      <Route path="*" element={
+        <ProtectedRoute>
+          <Navigate to="/carevo-homepage" replace />
+        </ProtectedRoute>
+      } />
     </Routes>
   );
 }
