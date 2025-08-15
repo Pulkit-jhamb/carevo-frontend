@@ -39,17 +39,22 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
 
   // Handle logout
   const handleLogout = async () => {
+    // Clear localStorage immediately to prevent race conditions
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("userEmail");
+    localStorage.removeItem("userName");
+    localStorage.removeItem("userType");
+    
     try {
+      // Call backend logout (optional since JWT is stateless)
       await axios.post(API_ENDPOINTS.LOGOUT);
-      localStorage.removeItem("authToken");
-      localStorage.removeItem("userEmail");
-      localStorage.removeItem("userName");
-      localStorage.removeItem("userType");
-      navigate("/login");
     } catch (error) {
       console.error("Logout failed:", error);
-      navigate("/login");
+      // Continue with logout even if backend call fails
     }
+    
+    // Navigate to login
+    navigate("/login", { replace: true });
   };
 
   // Navigation items with functional routes
