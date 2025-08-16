@@ -4,24 +4,128 @@ import { API_ENDPOINTS } from '../config';
 import axios from "axios";
 import Sidebar from "./sidebar"; // Import the Sidebar component
 
+// Move formatBotText here, and make it return HTML string (not JSX)
+function formatBotText(rawText) {
+  let formatted = rawText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>');
+  formatted = formatted.replace(/\*{3,}/g, '');
+  formatted = formatted.replace(/(?<!<[^>]*?)\*(?![^<]*?>)/g, '');
+
+  const lines = formatted.split('\n');
+  let html = '';
+  let inUl = false;
+  let inOl = false;
+  let justClosedList = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i];
+
+    // Heading (supports #, ##, ###)
+    const headingMatch = line.match(/^(#{1,6})\s+(.*)$/);
+    if (headingMatch) {
+      if (inUl) { html += '</ul>'; inUl = false; }
+      if (inOl) { html += '</ol>'; inOl = false; }
+      const level = headingMatch[1].length;
+      const content = headingMatch[2];
+      html += `<h${level} class="font-bold mt-4 mb-2">${content}</h${level}>`;
+      justClosedList = false;
+      continue;
+    }
+
+    // Bullet list (handle lines that are just "-" or "•" and merge with next line)
+    if (/^\s*[\-\u2022]\s*$/.test(line) && lines[i + 1] && lines[i + 1].trim() !== '') {
+      // Merge this bullet marker with the next line as the content
+      if (!inUl) {
+        if (inOl) { html += '</ol>'; inOl = false; }
+        html += '<ul class="list-disc pl-6 mt-2">';
+        inUl = true;
+      }
+      html += `<li>${lines[i + 1]}</li>`;
+      i++; // Skip the next line since we've used it
+      justClosedList = false;
+      continue;
+    }
+    // Bullet list (normal case)
+    if (/^\s*[\-\u2022]\s+/.test(line)) {
+      if (!inUl) {
+        if (inOl) { html += '</ol>'; inOl = false; }
+        html += '<ul class="list-disc pl-6 mt-2">';
+        inUl = true;
+      }
+      html += `<li>${line.replace(/^\s*[\-\u2022]\s+/, '')}</li>`;
+      justClosedList = false;
+      continue;
+    }
+    // Numbered list (handle lines that are just "1." and merge with next line)
+    if (/^\s*\d+\.\s*$/.test(line) && lines[i + 1] && lines[i + 1].trim() !== '') {
+      if (!inOl) {
+        if (inUl) { html += '</ul>'; inUl = false; }
+        html += '<ol class="list-decimal pl-6 mt-2">';
+        inOl = true;
+      }
+      html += `<li>${lines[i + 1]}</li>`;
+      i++;
+      justClosedList = false;
+      continue;
+    }
+    // Numbered list (normal case)
+    if (/^\s*\d+\.\s+/.test(line)) {
+      if (!inOl) {
+        if (inUl) { html += '</ul>'; inUl = false; }
+        html += '<ol class="list-decimal pl-6 mt-2">';
+        inOl = true;
+      }
+      html += `<li>${line.replace(/^\s*\d+\.\s+/, '')}</li>`;
+      justClosedList = false;
+      continue;
+    }
+    // Normal text
+    if (line.trim() !== '') {
+      if (inUl) { html += '</ul>'; inUl = false; justClosedList = true; }
+      if (inOl) { html += '</ol>'; inOl = false; justClosedList = true; }
+      html += `<div>${line}</div>`;
+      justClosedList = false;
+      continue;
+    }
+    // Empty line
+    if (inUl) { html += '</ul>'; inUl = false; justClosedList = true; }
+    if (inOl) { html += '</ol>'; inOl = false; justClosedList = true; }
+    // Only add <br/> if previous line was not empty and not just after closing a list
+    if (!justClosedList && i > 0 && lines[i - 1].trim() !== '') {
+      html += '<br/>';
+    }
+    justClosedList = false;
+  }
+  if (inUl) html += '</ul>';
+  if (inOl) html += '</ol>';
+  return html;
+}
+
+// Helper to split HTML into tokens (tags, words, and <br/>)
+function splitHtmlToTokens(html) {
+  const regex = /(<br\s*\/?>|<[^>]+>|[^<>\s]+|\s+)/g;
+  return html.match(regex) || [];
+}
+
 // Message component for user and AI messages
 function Message({ text, isUser, animate, showSaveButton, onSave }) {
-  const [visibleWords, setVisibleWords] = useState(animate ? 0 : text.split(" ").length);
-  const words = text.split(" ");
+  const formattedHtml = !isUser ? formatBotText(text) : text;
+  const tokens = !isUser ? splitHtmlToTokens(formattedHtml) : [text];
+  const [visibleTokens, setVisibleTokens] = useState(animate ? 0 : tokens.length);
   const timerRef = useRef();
 
   useEffect(() => {
     if (!animate) return;
-    setVisibleWords(0);
+    setVisibleTokens(0);
     timerRef.current = setInterval(() => {
-      setVisibleWords((v) => {
-        if (v < words.length) return v + 1;
+      setVisibleTokens((v) => {
+        if (v < tokens.length) return v + 1;
         clearInterval(timerRef.current);
         return v;
       });
-    }, 100); // Optimal timing for readability
+    }, 40);
     return () => clearInterval(timerRef.current);
-  }, [text, animate, words.length]);
+  }, [text, animate, tokens.length]);
 
   if (isUser) {
     return (
@@ -33,28 +137,35 @@ function Message({ text, isUser, animate, showSaveButton, onSave }) {
     );
   }
 
-  // For bot messages with word-by-word animation
   return (
     <div className="text-black leading-relaxed font-sans" style={{ fontFamily: "Inter, sans-serif" }}>
       {animate ? (
-        <div>
-          {words.map((word, index) => (
-            <span 
-              key={index} 
-              className="inline opacity-0"
-              style={{
-                animation: index < visibleWords ? 'fadeInWord 0.4s ease-out forwards' : 'none',
-                animationDelay: `${index * 100}ms`
-              }}
-            >
-              {word}{index < words.length - 1 ? ' ' : ''}
-            </span>
-          ))}
-        </div>
+        <span>
+          {tokens.slice(0, visibleTokens).map((token, idx) => {
+            if (token.match(/^<br\s*\/?>$/)) {
+              return <br key={idx} />;
+            } else if (token.match(/^<[^>]+>$/)) {
+              return <span key={idx} dangerouslySetInnerHTML={{ __html: token }} />;
+            } else {
+              return (
+                <span
+                  key={idx}
+                  className="inline opacity-0"
+                  style={{
+                    animation: 'fadeInWord 0.4s ease-out forwards',
+                    animationDelay: `0ms`
+                  }}
+                >
+                  {token}
+                </span>
+              );
+            }
+          })}
+        </span>
       ) : (
-        formatBotMessage(text)
+        <div dangerouslySetInnerHTML={{ __html: formattedHtml }} />
       )}
-      {showSaveButton && visibleWords >= words.length && (
+      {showSaveButton && visibleTokens >= tokens.length && (
         <div className="mt-4 flex gap-2">
           <button
             className="px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
@@ -63,43 +174,6 @@ function Message({ text, isUser, animate, showSaveButton, onSave }) {
             Yes, Save This Plan
           </button>
         </div>
-      )}
-    </div>
-  );
-}
-
-function formatBotMessage(text) {
-  // First preserve proper formatting, then remove standalone asterisks
-  let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); // Bold formatting
-  formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>'); // Italic formatting
-  
-  // Remove remaining standalone asterisks that aren't part of formatting
-  formatted = formatted.replace(/\*{3,}/g, ''); // Remove 3+ asterisks
-  formatted = formatted.replace(/(?<!<[^>]*?)\*(?![^<]*?>)/g, ''); // Remove standalone asterisks not in HTML tags
-  
-  const lines = formatted.split('\n');
-  const mainText = [];
-  const bullets = [];
-  let inBullets = false;
-  
-  for (const line of lines) {
-    if (line.trim().startsWith('- ')) {
-      inBullets = true;
-      bullets.push(line.trim().replace(/^- /, ''));
-    } else if (line.trim() !== '') {
-      if (!inBullets) mainText.push(line);
-    }
-  }
-  
-  return (
-    <div>
-      <div dangerouslySetInnerHTML={{ __html: mainText.join(' ') }} />
-      {bullets.length > 0 && (
-        <ul className="list-disc pl-6 mt-2">
-          {bullets.map((item, idx) => (
-            <li key={idx} dangerouslySetInnerHTML={{ __html: item }} />
-          ))}
-        </ul>
       )}
     </div>
   );
@@ -188,7 +262,11 @@ export default function MentalHealthSI() {
       });
 
       const data = await res.json();
-      const botMessage = { sender: "bot", text: data.response || data.error || "Sorry, I couldn't process that.", isAcademicPlan: false };
+      const botMessage = { 
+        sender: "bot", 
+        text: data.response || data.error || "Sorry, I couldn't process that.", 
+        isAcademicPlan: false 
+      };
       setMessages(prev => [...prev, botMessage]);
     } catch (err) {
       const errorMessage = { sender: "bot", text: "Sorry, there was an error processing your request.", isAcademicPlan: false };
@@ -226,7 +304,11 @@ export default function MentalHealthSI() {
       });
 
       const data = await res.json();
-      const botMessage = { sender: "bot", text: data.response || data.error || "Sorry, I couldn't process that.", isAcademicPlan: false };
+      const botMessage = { 
+        sender: "bot", 
+        text: data.response || data.error || "Sorry, I couldn't process that.", 
+        isAcademicPlan: false 
+      };
       setMessages(prev => [...prev, botMessage]);
     } catch (err) {
       const errorMessage = { sender: "bot", text: "Sorry, there was an error processing your request.", isAcademicPlan: false };
@@ -367,7 +449,7 @@ export default function MentalHealthSI() {
           {showChatPage && (
             <div className="flex-1 flex flex-col animate-fade-in">
               {/* Back Button */}
-              <div className="bg-white px-6 py-4 flex items-center">
+              <div className="sticky top-0 z-10 bg-white px-6 py-4 flex items-center">
                 <button 
                   onClick={() => {
                     setShowChatPage(false);
