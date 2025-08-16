@@ -260,96 +260,86 @@ export default function StudentDashboard() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-gray-100 to-gray-200">
+    <div className="flex min-h-screen bg-white">
       {/* Imported Sidebar */}
       <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
 
       {/* Main Content */}
       <div className={`flex-1 flex flex-col transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
         {/* Top Header */}
-        <div className="bg-white border-b border-gray-200 px-8 py-6 flex items-center justify-between shadow-sm">
+        <div className="bg-white px-8 py-6 flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 mb-1">Student Dashboard</h1>
             <p className="text-gray-600">Welcome back, {userName}</p>
-          </div>
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={handleLogout}
-              className="px-6 py-3 text-sm font-medium text-white bg-gray-700 rounded-lg hover:bg-gray-800 transition-colors flex items-center gap-2 shadow-sm"
-            >
-              LOGOUT
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
-            </button>
           </div>
         </div>
 
         {/* Dashboard Content */}
         <div className="flex-1 p-8 overflow-y-auto bg-transparent">
           <div className="max-w-7xl mx-auto">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              
-              {/* About Section */}
-              <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
-                <h2 className="text-xl font-semibold text-gray-900 mb-6">About</h2>
-                <div className="flex items-start space-x-6">
-                  <div className="w-28 h-28 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full flex items-center justify-center shadow-inner">
-                    <svg className="w-14 h-14 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                    </svg>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                      {user?.name || "Aanya Mehra"}
-                    </h3>
-                    <p className="text-gray-700 font-medium mb-1 text-lg">
-                      {user?.institute || "SPRINGDALE HIGH SCHOOL"}
-                    </p>
-                    <p className="text-gray-600 mb-4">
-                      {user?.year ? `Year ${user.year}` : "10TH GRADE"}
-                    </p>
-                    {user?.conclusion ? (
-                      <>
-                        <div
-                          className="bg-gray-50 rounded-lg p-4 text-gray-800 text-sm cursor-pointer border border-gray-100 hover:bg-gray-100 transition-colors"
-                          style={{
-                            whiteSpace: 'pre-line',
-                          }}
-                          title="Click to view full conclusion"
-                          onClick={() => setShowConclusionModal(true)}
-                        >
-                          {getConclusionPreview(user.conclusion)}
-                        </div>
-                        {showConclusionModal && (
-                          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-                            <div className="bg-white rounded-xl shadow-2xl p-8 max-w-lg w-full relative m-4">
-                              <button
-                                className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl transition-colors"
-                                onClick={() => setShowConclusionModal(false)}
-                                aria-label="Close"
-                              >
-                                &times;
-                              </button>
-                              <h4 className="text-xl font-semibold mb-4 text-gray-900">Conclusion</h4>
-                              <div className="text-gray-800 whitespace-pre-line leading-relaxed">
-                                {user.conclusion}
+            <div className="space-y-8">
+              {/* First Row - About and Academic Performance */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* About Section */}
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-8 hover:shadow-lg transition-all duration-300">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-6">About</h2>
+                  <div className="flex items-start space-x-6">
+                    <div className="w-28 h-28 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full flex items-center justify-center shadow-inner">
+                      <svg className="w-14 h-14 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                        {user?.name || "Aanya Mehra"}
+                      </h3>
+                      <p className="text-gray-700 font-medium mb-1 text-lg">
+                        {user?.institute || "SPRINGDALE HIGH SCHOOL"}
+                      </p>
+                      <p className="text-gray-600 mb-4">
+                        {user?.year ? `Year ${user.year}` : "10TH GRADE"}
+                      </p>
+                      {user?.conclusion ? (
+                        <>
+                          <div
+                            className="bg-gray-50 rounded-lg p-4 text-gray-800 text-sm cursor-pointer hover:bg-gray-100 transition-colors"
+                            style={{
+                              whiteSpace: 'pre-line',
+                            }}
+                            title="Click to view full conclusion"
+                            onClick={() => setShowConclusionModal(true)}
+                          >
+                            {getConclusionPreview(user.conclusion)}
+                          </div>
+                          {showConclusionModal && (
+                            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                              <div className="bg-white rounded-xl shadow-2xl p-8 max-w-lg w-full relative m-4">
+                                <button
+                                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 text-2xl transition-colors"
+                                  onClick={() => setShowConclusionModal(false)}
+                                  aria-label="Close"
+                                >
+                                  &times;
+                                </button>
+                                <h4 className="text-xl font-semibold mb-4 text-gray-900">Conclusion</h4>
+                                <div className="text-gray-800 whitespace-pre-line leading-relaxed">
+                                  {user.conclusion}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <div className="bg-gray-50 rounded-lg p-4 text-gray-400 text-sm border border-gray-100">
-                        No conclusion available yet.
-                      </div>
-                    )}
+                          )}
+                        </>
+                      ) : (
+                        <div className="bg-gray-50 rounded-lg p-4 text-gray-400 text-sm">
+                          No conclusion available yet.
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* Academic Performance Section */}
-              <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                {/* Academic Performance Section */}
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-8 hover:shadow-lg transition-all duration-300">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-semibold text-gray-900">Academic Performance</h2>
                   <button className="px-4 py-2 text-sm bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors shadow-sm" onClick={handleOpenTermModal}>
@@ -494,10 +484,13 @@ export default function StudentDashboard() {
                     </div>
                   </div>
                 )}
+                </div>
               </div>
 
-              {/* Top Subjects Section */}
-              <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+              {/* Second Row - Top Subjects, Extracurricular Activities, and Certifications */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* Top Subjects Section */}
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-8 hover:shadow-lg transition-all duration-300">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-semibold text-gray-900">Top Subjects</h2>
                   <button className="px-4 py-2 text-sm bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors shadow-sm" onClick={handleOpenSubjectsModal}>
@@ -507,7 +500,7 @@ export default function StudentDashboard() {
                 <div className="space-y-4">
                   {subjects.length > 0 ? (
                     subjects.map((subject, index) => (
-                      <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors">
+                      <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                         <div className="flex items-center space-x-4">
                           <div className="w-3 h-3 bg-gray-400 rounded-full flex-shrink-0"></div>
                           <span className="text-sm text-gray-700 font-medium">{subject.name}</span>
@@ -516,7 +509,7 @@ export default function StudentDashboard() {
                       </div>
                     ))
                   ) : (
-                    <div className="text-gray-400 text-sm italic text-center py-8 bg-gray-50 rounded-lg border border-gray-100">
+                    <div className="text-gray-400 text-sm italic text-center py-8 bg-gray-50 rounded-lg">
                       Please update your profile to add your subjects.
                     </div>
                   )}
@@ -585,10 +578,10 @@ export default function StudentDashboard() {
                     </div>
                   </div>
                 )}
-              </div>
+                </div>
 
-              {/* Extracurricular Activities Section */}
-              <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                {/* Extracurricular Activities Section */}
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-8 hover:shadow-lg transition-all duration-300">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-semibold text-gray-900">Extracurricular Activities</h2>
                   <button className="px-4 py-2 text-sm bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors shadow-sm" onClick={handleOpenExtracurricularModal}>
@@ -598,7 +591,7 @@ export default function StudentDashboard() {
                 <div className="space-y-4">
                   {extracurricularActivities.length > 0 ? (
                     extracurricularActivities.map((activity, index) => (
-                      <div key={index} className="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors">
+                      <div key={index} className="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                         <div className="w-3 h-3 bg-gray-400 rounded-full mt-1 flex-shrink-0"></div>
                         <div>
                           <p className="text-sm font-medium text-gray-900">{activity.activity}</p>
@@ -607,7 +600,7 @@ export default function StudentDashboard() {
                       </div>
                     ))
                   ) : (
-                    <div className="text-gray-400 text-sm italic text-center py-8 bg-gray-50 rounded-lg border border-gray-100">
+                    <div className="text-gray-400 text-sm italic text-center py-8 bg-gray-50 rounded-lg">
                       Please update your profile to add extracurricular activities.
                     </div>
                   )}
@@ -674,26 +667,26 @@ export default function StudentDashboard() {
                     </div>
                   </div>
                 )}
-              </div>
+                </div>
 
-              {/* Certifications Section */}
-              <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 lg:col-span-2 hover:shadow-md transition-shadow">
+                {/* Certifications Section */}
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-8 hover:shadow-lg transition-all duration-300">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-semibold text-gray-900">Certifications</h2>
                   <button className="px-4 py-2 text-sm bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors shadow-sm" onClick={handleOpenCertificationsModal}>
                     Update
                   </button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4">
                   {certifications.length > 0 ? (
                     certifications.map((cert, index) => (
-                      <div key={index} className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors">
+                      <div key={index} className="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                         <div className="w-3 h-3 bg-gray-400 rounded-full flex-shrink-0"></div>
                         <span className="text-sm text-gray-700 font-medium">{cert}</span>
                       </div>
                     ))
                   ) : (
-                    <div className="text-gray-400 text-sm italic text-center py-8 bg-gray-50 rounded-lg border border-gray-100 md:col-span-2">
+                    <div className="text-gray-400 text-sm italic text-center py-8 bg-gray-50 rounded-lg">
                       Please update your profile to add certifications.
                     </div>
                   )}
@@ -753,6 +746,7 @@ export default function StudentDashboard() {
                     </div>
                   </div>
                 )}
+                </div>
               </div>
 
             </div>
