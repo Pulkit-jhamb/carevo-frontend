@@ -142,10 +142,13 @@ export default function MentalHealthSI() {
     setLoading(true);
 
     try {
+    const token = localStorage.getItem('authToken');
     const res = await fetch(API_ENDPOINTS.AI, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include", // ✅ This sends cookies along
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
       body: JSON.stringify({ prompt: inputMessage }),
     });
 
