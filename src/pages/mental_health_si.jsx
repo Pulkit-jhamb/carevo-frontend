@@ -137,20 +137,29 @@ export default function MentalHealthSI() {
     if (!inputMessage.trim() || loading) return;
 
     const userMessage = { sender: "user", text: inputMessage };
-    setMessages(prev => [...prev, userMessage]);
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
     setInputMessage("");
     setLoading(true);
 
     try {
-    const token = localStorage.getItem('authToken');
-    const res = await fetch(API_ENDPOINTS.AI, {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
-      body: JSON.stringify({ prompt: inputMessage }),
-    });
+      const token = localStorage.getItem('authToken');
+      
+      // Build conversation context
+      const conversationHistory = updatedMessages.map(msg => 
+        `${msg.sender === 'user' ? 'User' : 'Assistant'}: ${msg.text}`
+      ).join('\n');
+      
+      const contextualPrompt = `Previous conversation:\n${conversationHistory}\n\nCurrent message: ${inputMessage}`;
+      
+      const res = await fetch(API_ENDPOINTS.AI, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ prompt: contextualPrompt }),
+      });
 
       const data = await res.json();
       const botMessage = { sender: "bot", text: data.response || data.error || "Sorry, I couldn't process that.", isAcademicPlan: false };
@@ -164,47 +173,42 @@ export default function MentalHealthSI() {
   };
 
   const handleSuggestedPrompt = async (prompt) => {
-    if (prompt.includes("career exploration quiz")) {
-      navigate("/quiz");
-      return;
-    }
-
-    if (prompt.includes("academic journey")) {
-      return;
-    }
-
-    // NEW: Feeling Anxious case - disable input until backend responds
-    if (prompt.includes("feeling anxious")) {
-      setShowSuggestedPrompts(false);
-      setShowChatPage(true);
-      setLoading(true);
-      setInputDisabled(true);
-      try {
-        const res = await axios.post(
-          "/mental_health_chat",
-          { message: "feeling anxious" },
-          { withCredentials: true }
-        );
-        const reply = res.data.reply;
-        setMessages((prev) => [
-          ...prev,
-          { text: reply, sender: "bot", isAcademicPlan: false }
-        ]);
-      } catch (error) {
-        setMessages((prev) => [
-          ...prev,
-          { text: "Could not process your request. Please try again.", sender: "bot", isAcademicPlan: false }
-        ]);
-      } finally {
-        setLoading(false);
-        setInputDisabled(false);
-      }
-      return;
-    }
-
-    setInputMessage(prompt);
     setShowSuggestedPrompts(false);
     setShowChatPage(true);
+    setLoading(true);
+    setInputDisabled(true);
+
+    try {
+      const token = localStorage.getItem('authToken');
+      
+      // Build conversation context if there are existing messages
+      let contextualPrompt = prompt;
+      if (messages.length > 0) {
+        const conversationHistory = messages.map(msg => 
+          `${msg.sender === 'user' ? 'User' : 'Assistant'}: ${msg.text}`
+        ).join('\n');
+        contextualPrompt = `Previous conversation:\n${conversationHistory}\n\nNew request: ${prompt}`;
+      }
+      
+      const res = await fetch(API_ENDPOINTS.AI, {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ prompt: contextualPrompt }),
+      });
+
+      const data = await res.json();
+      const botMessage = { sender: "bot", text: data.response || data.error || "Sorry, I couldn't process that.", isAcademicPlan: false };
+      setMessages(prev => [...prev, botMessage]);
+    } catch (err) {
+      const errorMessage = { sender: "bot", text: "Sorry, there was an error processing your request.", isAcademicPlan: false };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setLoading(false);
+      setInputDisabled(false);
+    }
   };
 
   const handleAcademicPlanningClick = async () => {
@@ -290,37 +294,37 @@ export default function MentalHealthSI() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl w-full">
                 <div 
                   className="bg-white rounded-lg border border-gray-200 p-6 cursor-pointer hover:border-gray-300 transition-colors"
-                  onClick={() => handleSuggestedPrompt("I want to take a career exploration quiz to understand my strengths and interests better.")}
+                  onClick={() => handleSuggestedPrompt("Based on my profile, academic performance, projects, certifications, and extracurricular activities, analyze my strengths and capabilities. Suggest specific activities, skills to develop, and areas where I can excel. Provide actionable recommendations to refine and enhance my abilities for personal and professional growth.")}
                 >
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
                       <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
                     </div>
-                    <h3 className="font-semibold text-gray-900">Career Exploration</h3>
+                    <h3 className="font-semibold text-gray-900">Refine Your Capabilities</h3>
                   </div>
-                  <p className="text-sm text-gray-600">Take our comprehensive career quiz to discover your strengths, interests, and potential career paths.</p>
+                  <p className="text-sm text-gray-600">Get personalized suggestions on activities and skills you'll excel at based on your profile and achievements.</p>
                 </div>
 
                 <div 
                   className="bg-white rounded-lg border border-gray-200 p-6 cursor-pointer hover:border-gray-300 transition-colors"
-                  onClick={handleAcademicPlanningClick}
+                  onClick={() => handleSuggestedPrompt("Based on my current academic level and grade, provide career path recommendations. If I'm below 10th grade, suggest whether I should choose Science, Commerce, or Arts stream you have to specifically choose 1 out of the three for me. If I'm in 11th/12th grade, first ask about my current stream (Science/Commerce/Arts) and then recommend specific career options, colleges, and future prospects aligned with my interests and academic performance.")}
                 >
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                       <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                       </svg>
                     </div>
-                    <h3 className="font-semibold text-gray-900">Academic Planning</h3>
+                    <h3 className="font-semibold text-gray-900">Career Path Recommendations</h3>
                   </div>
-                  <p className="text-sm text-gray-600">Get personalized guidance for your academic journey and create effective study plans.</p>
+                  <p className="text-sm text-gray-600">Get personalized career guidance based on your grade level, stream, and academic performance.</p>
                 </div>
 
                 <div 
                   className="bg-white rounded-lg border border-gray-200 p-6 cursor-pointer hover:border-gray-300 transition-colors"
-                  onClick={() => handleSuggestedPrompt("I'm feeling anxious about my studies and need help managing stress.")}
+                  onClick={() => handleSuggestedPrompt("I'm feeling anxious about my academic performance and future. Help me manage this stress and anxiety. Provide practical strategies for maintaining mental well-being, dealing with academic pressure, and building confidence. Give me personalized advice based on my current situation and academic profile.")}
                 >
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
