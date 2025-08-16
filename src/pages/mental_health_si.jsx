@@ -19,9 +19,9 @@ function Message({ text, isUser, animate, showSaveButton, onSave }) {
         clearInterval(timerRef.current);
         return v;
       });
-    }, 50);
+    }, 100); // Optimal timing for readability
     return () => clearInterval(timerRef.current);
-  }, [text, animate]);
+  }, [text, animate, words.length]);
 
   if (isUser) {
     return (
@@ -33,11 +33,28 @@ function Message({ text, isUser, animate, showSaveButton, onSave }) {
     );
   }
 
-  // For bot messages, format plan/bullets
+  // For bot messages with word-by-word animation
   return (
     <div className="text-black leading-relaxed font-sans" style={{ fontFamily: "Inter, sans-serif" }}>
-      {formatBotMessage(text)}
-      {showSaveButton && (
+      {animate ? (
+        <div>
+          {words.map((word, index) => (
+            <span 
+              key={index} 
+              className="inline opacity-0"
+              style={{
+                animation: index < visibleWords ? 'fadeInWord 0.4s ease-out forwards' : 'none',
+                animationDelay: `${index * 100}ms`
+              }}
+            >
+              {word}{index < words.length - 1 ? ' ' : ''}
+            </span>
+          ))}
+        </div>
+      ) : (
+        formatBotMessage(text)
+      )}
+      {showSaveButton && visibleWords >= words.length && (
         <div className="mt-4 flex gap-2">
           <button
             className="px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
@@ -52,11 +69,19 @@ function Message({ text, isUser, animate, showSaveButton, onSave }) {
 }
 
 function formatBotMessage(text) {
-  let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+  // First preserve proper formatting, then remove standalone asterisks
+  let formatted = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'); // Bold formatting
+  formatted = formatted.replace(/\*(.*?)\*/g, '<em>$1</em>'); // Italic formatting
+  
+  // Remove remaining standalone asterisks that aren't part of formatting
+  formatted = formatted.replace(/\*{3,}/g, ''); // Remove 3+ asterisks
+  formatted = formatted.replace(/(?<!<[^>]*?)\*(?![^<]*?>)/g, ''); // Remove standalone asterisks not in HTML tags
+  
   const lines = formatted.split('\n');
   const mainText = [];
   const bullets = [];
   let inBullets = false;
+  
   for (const line of lines) {
     if (line.trim().startsWith('- ')) {
       inBullets = true;
@@ -65,13 +90,14 @@ function formatBotMessage(text) {
       if (!inBullets) mainText.push(line);
     }
   }
+  
   return (
     <div>
       <div dangerouslySetInnerHTML={{ __html: mainText.join(' ') }} />
       {bullets.length > 0 && (
         <ul className="list-disc pl-6 mt-2">
           {bullets.map((item, idx) => (
-            <li key={idx}>{item}</li>
+            <li key={idx} dangerouslySetInnerHTML={{ __html: item }} />
           ))}
         </ul>
       )}
@@ -324,7 +350,7 @@ export default function MentalHealthSI() {
 
                 <div 
                   className="bg-white rounded-lg border border-gray-200 p-6 cursor-pointer hover:border-gray-300 transition-colors"
-                  onClick={() => handleSuggestedPrompt("I'm feeling anxious about my academic performance and future. Help me manage this stress and anxiety. Provide practical strategies for maintaining mental well-being, dealing with academic pressure, and building confidence. Give me personalized advice based on my current situation and academic profile.")}
+                  onClick={() => handleSuggestedPrompt("I'm feeling anxious . Help me manage this stress and anxiety.give me consolation . Provide practical strategies for maintaining mental well-being and building confidence. ask me what is wrong with my life and try to help me in less than 100 words and give constant formating and dont use * or ** for formatting")}
                 >
                   <div className="flex items-center gap-3 mb-3">
                     <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -340,6 +366,22 @@ export default function MentalHealthSI() {
 
           {showChatPage && (
             <div className="flex-1 flex flex-col animate-fade-in">
+              {/* Back Button */}
+              <div className="bg-white px-6 py-4 flex items-center">
+                <button 
+                  onClick={() => {
+                    setShowChatPage(false);
+                    setShowSuggestedPrompts(true);
+                    setMessages([]);
+                  }}
+                  className="flex items-center gap-2 text-gray-600 hover:text-gray-800 transition-colors"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                  <span className="font-medium">Back</span>
+                </button>
+              </div>
               <div className="flex-1 overflow-y-auto px-0 py-6" style={{ background: "#fff" }}>
                 <div className="max-w-2xl mx-auto flex flex-col gap-6">
                   {messages.map((message, index) => (
@@ -400,6 +442,16 @@ export default function MentalHealthSI() {
           @keyframes fadeIn {
             from { opacity: 0 }
             to { opacity: 1 }
+          }
+          @keyframes fadeInWord {
+            from { 
+              opacity: 0;
+              transform: translateY(8px);
+            }
+            to { 
+              opacity: 1;
+              transform: translateY(0);
+            }
           }
         `}
       </style>
