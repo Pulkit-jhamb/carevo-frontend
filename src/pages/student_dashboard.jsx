@@ -8,6 +8,7 @@ export default function StudentDashboard() {
   const [user, setUser] = useState(null);
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const [showConclusionModal, setShowConclusionModal] = useState(false);
   const [showTermModal, setShowTermModal] = useState(false);
   const [showExtracurricularModal, setShowExtracurricularModal] = useState(false);
@@ -27,7 +28,10 @@ export default function StudentDashboard() {
 
   useEffect(() => {
     const email = localStorage.getItem("userEmail");
-    if (!email) return;
+    if (!email) {
+      setIsLoading(false);
+      return;
+    }
 
     fetch(`${API_ENDPOINTS.USER}?email=${encodeURIComponent(email)}`)
       .then((res) => res.json())
@@ -50,8 +54,12 @@ export default function StudentDashboard() {
         setExtracurricularActivities(data.extracurricularActivities || []);
         setCertifications(data.certifications || []);
         setSubjects(data.subjects || []);
+        setIsLoading(false);
       })
-      .catch((err) => console.error("Error fetching user:", err));
+      .catch((err) => {
+        console.error("Error fetching user:", err);
+        setIsLoading(false);
+      });
   }, []);
 
   useEffect(() => {
@@ -61,7 +69,7 @@ export default function StudentDashboard() {
           withCredentials: true
         });
         if (response.data.authenticated && response.data.user) {
-          setUserName(response.data.user.name || "Aanya Mehra");
+          setUserName(response.data.user.name || "");
           setUserEmail(response.data.user.email);
         }
       } catch (error) {
@@ -266,6 +274,15 @@ export default function StudentDashboard() {
 
       {/* Main Content */}
       <div className={`flex-1 flex flex-col transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
+        {/* Loading State */}
+        {isLoading && (
+          <div className="fixed inset-0 bg-white bg-opacity-90 flex items-center justify-center z-50">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+              <p className="text-gray-600 text-lg">Loading your dashboard...</p>
+            </div>
+          </div>
+        )}
         {/* Top Header */}
         <div className="bg-white border-b border-gray-200 px-8 py-6 flex items-center justify-between shadow-sm">
           <div>
@@ -301,13 +318,13 @@ export default function StudentDashboard() {
                   </div>
                   <div className="flex-1">
                     <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                      {user?.name || "Aanya Mehra"}
+                      {user?.name || userName || "Student"}
                     </h3>
                     <p className="text-gray-700 font-medium mb-1 text-lg">
-                      {user?.institute || "SPRINGDALE HIGH SCHOOL"}
+                      {user?.institute || "School"}
                     </p>
                     <p className="text-gray-600 mb-4">
-                      {user?.year ? `Year ${user.year}` : "10TH GRADE"}
+                      {user?.class ? `Class ${user.class}` : user?.year ? `Year ${user.year}` : "Grade"}
                     </p>
                     {user?.conclusion ? (
                       <>
