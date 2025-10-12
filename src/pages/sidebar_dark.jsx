@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import axios from 'axios';
 import { API_ENDPOINTS } from '../config';
 import { 
@@ -12,11 +12,10 @@ import {
   LogOut,
   Menu,
   LayoutDashboard,
-  GraduationCap,
   FolderOpen
 } from 'lucide-react';
 
-const Sidebar = ({ isCollapsed, setIsCollapsed, isDarkMode = false }) => {
+const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [userName, setUserName] = useState("");
@@ -66,15 +65,14 @@ const Sidebar = ({ isCollapsed, setIsCollapsed, isDarkMode = false }) => {
     { icon: User, label: 'Quiz', path: '/quiz', active: location.pathname === '/quiz' },
     { icon: MessageSquare, label: 'Chat', path: '/chat', active: location.pathname === '/chat' },
     { icon: BookOpen, label: 'Study Plan', path: '/study-plan', active: location.pathname === '/study-plan' },
-    { icon: GraduationCap, label: 'Classroom', path: '/classroom', active: location.pathname === '/classroom' || location.pathname === '/classroom-dark' },
-    { icon: FolderOpen, label: 'Inventory', path: '/inventory', active: location.pathname === '/inventory' || location.pathname === '/inventory-dark' }
+    { icon: BookOpen, label: 'Classroom', path: '/classroom', active: location.pathname === '/classroom' || location.pathname === '/classroom-dark' },
+    { icon: FolderOpen, label: 'Inventory', path: '/inventory-dark', active: location.pathname === '/inventory-dark' || location.pathname === '/inventory' }
   ];
 
   const settingsItems = [
     { icon: Settings, label: 'Settings', path: '#' },
     { icon: HelpCircle, label: 'Help', path: '#' }
   ];
-
 
   // Handle navigation
   const handleNavigation = (path) => {
@@ -84,9 +82,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed, isDarkMode = false }) => {
   };
 
   return (
-    <div className={`fixed left-0 top-0 h-screen z-40 transition-all duration-300 flex flex-col ${isCollapsed ? 'w-16' : 'w-64'} ${
-      isDarkMode ? 'bg-gray-900' : 'bg-gray-50'
-    }`}>
+    <div className={`fixed left-0 top-0 h-screen z-40 transition-all duration-300 flex flex-col ${isCollapsed ? 'w-16' : 'w-64'}`} style={{ backgroundColor: '#1a1a1a' }}>
       {/* Logo */}
       <div className="p-6">
         {isCollapsed ? (
@@ -96,13 +92,9 @@ const Sidebar = ({ isCollapsed, setIsCollapsed, isDarkMode = false }) => {
             </div>
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className={`p-1 rounded transition-colors ${
-                isDarkMode 
-                  ? 'hover:bg-gray-200 text-gray-300' 
-                  : 'hover:bg-gray-600 hover:text-white text-gray-600'
-              }`}
+              className="p-1 rounded hover:bg-gray-200 transition-colors"
             >
-              <Menu className="w-4 h-4" />
+              <Menu className="w-4 h-4 text-gray-300" />
             </button>
           </div>
         ) : (
@@ -111,19 +103,13 @@ const Sidebar = ({ isCollapsed, setIsCollapsed, isDarkMode = false }) => {
               <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center">
                 <span className="text-white text-sm font-bold">C</span>
               </div>
-              <span className={`text-xl font-semibold ${
-                isDarkMode ? 'text-white' : 'text-gray-900'
-              }`}>Carevo</span>
+              <span className="text-xl font-semibold text-white">Carevo</span>
             </div>
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className={`p-1 rounded transition-colors ${
-                isDarkMode 
-                  ? 'hover:bg-gray-200 text-gray-300' 
-                  : 'hover:bg-gray-600 hover:text-white text-gray-600'
-              }`}
+              className="p-1 rounded hover:bg-gray-200 transition-colors"
             >
-              <Menu className="w-4 h-4" />
+              <Menu className="w-4 h-4 text-gray-300" />
             </button>
           </div>
         )}
@@ -132,9 +118,7 @@ const Sidebar = ({ isCollapsed, setIsCollapsed, isDarkMode = false }) => {
       {/* Navigation */}
       <div className="flex-1 px-4 py-6">
         <div className="mb-8">
-          {!isCollapsed && <h3 className={`text-xs font-medium uppercase tracking-wider mb-4 ${
-            isDarkMode ? 'text-gray-400' : 'text-gray-500'
-          }`}>Navigation</h3>}
+          {!isCollapsed && <h3 className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-4">Navigation</h3>}
           <nav className="space-y-2">
             {sidebarItems.map((item, index) => (
               <button
@@ -142,20 +126,13 @@ const Sidebar = ({ isCollapsed, setIsCollapsed, isDarkMode = false }) => {
                 onClick={() => handleNavigation(item.path)}
                 className={`w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors text-left ${
                   item.active
-                    ? (isDarkMode ? 'bg-gray-700 text-white' : 'bg-gray-200 text-gray-900')
-                    : (isDarkMode ? 'text-gray-300 hover:text-white hover:bg-gray-700' : 'text-gray-600 hover:text-white hover:bg-gray-600')
+                    ? 'bg-gray-700 text-white'
+                    : 'text-gray-300 hover:text-white hover:bg-gray-700'
                 } ${isCollapsed ? 'justify-center' : 'justify-start'}`}
                 title={isCollapsed ? item.label : ""}
               >
-                <item.icon className={`w-5 h-5 flex-shrink-0 ${isCollapsed ? '' : 'mr-3'} ${
-                  isDarkMode ? 'text-white' : ''
-                }`} />
+                <item.icon className={`w-5 h-5 flex-shrink-0 ${isCollapsed ? '' : 'mr-3'} text-white`} />
                 {!isCollapsed && <span>{item.label}</span>}
-                {item.badge && (
-                  <span className="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-0.5 min-w-[20px] text-center">
-                    {item.badge}
-                  </span>
-                )}
               </button>
             ))}
           </nav>
@@ -163,21 +140,15 @@ const Sidebar = ({ isCollapsed, setIsCollapsed, isDarkMode = false }) => {
 
         {!isCollapsed && (
           <div>
-            <h3 className={`text-xs font-medium uppercase tracking-wider mb-4 ${
-              isDarkMode ? 'text-gray-400' : 'text-gray-500'
-            }`}>Settings & Help</h3>
+            <h3 className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-4">Settings & Help</h3>
             <nav className="space-y-2">
               {settingsItems.map((item, index) => (
                 <button
                   key={index}
                   onClick={() => handleNavigation(item.path)}
-                  className={`w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors text-left ${
-                    isDarkMode ? 'text-gray-300 hover:text-white hover:bg-gray-700' : 'text-gray-600 hover:text-white hover:bg-gray-600'
-                  }`}
+                  className="w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors text-left"
                 >
-                  <item.icon className={`w-5 h-5 mr-3 flex-shrink-0 ${
-                    isDarkMode ? 'text-white' : ''
-                  }`} />
+                  <item.icon className="w-5 h-5 mr-3 flex-shrink-0 text-white" />
                   <span>{item.label}</span>
                 </button>
               ))}
@@ -190,35 +161,27 @@ const Sidebar = ({ isCollapsed, setIsCollapsed, isDarkMode = false }) => {
       <div className="p-4">
         {isCollapsed ? (
           <div className="flex flex-col items-center space-y-2">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-              isDarkMode ? 'bg-gray-700' : 'bg-gray-300'
-            }`}>
-              <span className={`text-sm font-medium ${
-                isDarkMode ? 'text-white' : 'text-gray-700'
-              }`}>
+            <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center">
+              <span className="text-white text-sm font-medium">
                 {userName.charAt(0).toUpperCase()}
               </span>
             </div>
             <button 
               onClick={handleLogout}
-              className={`p-1 ${
-                isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-400 hover:text-gray-600'
-              }`}
+              className="p-1 text-gray-400 hover:text-white"
               title="Logout"
             >
-              <LogOut className={`w-4 h-4 ${isDarkMode ? 'text-white' : ''}`} />
+              <LogOut className="w-4 h-4 text-white" />
             </button>
           </div>
         ) : (
           <div className="flex items-center justify-end">
             <button 
               onClick={handleLogout}
-              className={`p-1 flex-shrink-0 ${
-                isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-400 hover:text-gray-600'
-              }`}
+              className="p-1 text-gray-400 hover:text-white flex-shrink-0"
               title="Logout"
             >
-              <LogOut className={`w-4 h-4 ${isDarkMode ? 'text-white' : ''}`} />
+              <LogOut className="w-4 h-4 text-white" />
             </button>
           </div>
         )}

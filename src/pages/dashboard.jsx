@@ -25,6 +25,12 @@ export default function StudentDashboard() {
   const [isCollapsed, setIsCollapsed] = useState(false); // State for sidebar collapse
   const location = useLocation();
   const navigate = useNavigate();
+  // Simple dark-mode detection: treat /dashboarddark route as dark mode
+  const isDarkMode = location.pathname.includes('dark');
+
+  const getCardClassesLocal = () => {
+    return `rounded-xl p-8 shadow-sm border transition-colors ${isDarkMode ? 'bg-gray-900 border-gray-800 text-white' : 'bg-white border-gray-200 text-gray-900'}`;
+  };
 
   useEffect(() => {
     const email = localStorage.getItem("userEmail");
@@ -268,7 +274,7 @@ export default function StudentDashboard() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               
               {/* About Section */}
-              <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+              <div className={getCardClassesLocal()}>
                 <h2 className="text-xl font-semibold text-gray-900 mb-6">About</h2>
                 <div className="flex items-start space-x-6">
                   <div className="w-28 h-28 bg-gradient-to-br from-gray-200 to-gray-300 rounded-full flex items-center justify-center shadow-inner">
@@ -326,7 +332,7 @@ export default function StudentDashboard() {
               </div>
 
               {/* CGPA Section */}
-              <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+              <div className={getCardClassesLocal()}>
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-semibold text-gray-900">CGPA</h2>
                   <div className="flex gap-3">
@@ -466,7 +472,7 @@ export default function StudentDashboard() {
               </div>
 
               {/* Project Section */}
-              <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+              <div className={getCardClassesLocal()}>
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-semibold text-gray-900">Projects</h2>
                   <button className="px-4 py-2 text-sm bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors shadow-sm" onClick={handleOpenProjectsModal}>
@@ -475,16 +481,16 @@ export default function StudentDashboard() {
                 </div>
                 <div className="space-y-4">
                   {projects.length === 0 ? (
-                    <div className="text-gray-400 text-sm italic text-center py-8 bg-gray-50 rounded-lg border border-gray-100">
+                    <div className={`${isDarkMode ? 'text-gray-300 bg-gray-800 border border-gray-700' : 'text-gray-400 bg-gray-50 border border-gray-100'} text-sm italic text-center py-8 rounded-lg`}>
                       No projects added yet. Click above to add your first project.
                     </div>
                   ) : (
                     projects.map((project, index) => (
-                      <div key={index} className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors">
+                      <div key={index} className={`flex items-center space-x-4 p-3 rounded-lg transition-colors ${isDarkMode ? 'bg-gray-800 border border-gray-700 text-white hover:bg-gray-800' : 'bg-gray-50 border border-gray-100 hover:bg-gray-100'}`}>
                         <div className="w-3 h-3 bg-gray-400 rounded-full flex-shrink-0"></div>
-                        <span className="text-sm text-gray-700 font-medium">
+                        <span className={`text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>
                           {project.link ? (
-                            <a href={project.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800 transition-colors">{project.name}</a>
+                            <a href={project.link} target="_blank" rel="noopener noreferrer" className={`${isDarkMode ? 'text-blue-300' : 'text-blue-600'} underline hover:text-blue-800 transition-colors`}>{project.name}</a>
                           ) : (
                             project.name
                           )}
@@ -558,7 +564,7 @@ export default function StudentDashboard() {
               </div>
 
               {/* Experiences Section */}
-              <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+              <div className={getCardClassesLocal()}>
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-semibold text-gray-900">Experiences</h2>
                   <button className="px-4 py-2 text-sm bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors shadow-sm" onClick={handleOpenExperiencesModal}>
@@ -567,22 +573,22 @@ export default function StudentDashboard() {
                 </div>
                 <div className="space-y-4" style={{ maxHeight: '280px', overflowY: 'auto' }}>
                   {experiences.length === 0 ? (
-                    <div className="text-gray-400 text-sm italic text-center py-8 bg-gray-50 rounded-lg border border-gray-100">
+                    <div className={`${isDarkMode ? 'text-gray-300 bg-gray-800 border border-gray-700' : 'text-gray-400 bg-gray-50 border border-gray-100'} text-sm italic text-center py-8 rounded-lg`}>
                       Update your experience to showcase your journey.
                     </div>
                   ) : (
                     experiences.map((exp, index) => {
                       const isLong = exp.content && exp.content.length > 120;
                       return (
-                        <div key={index} className="p-4 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors">
-                          <span className="text-sm font-semibold text-gray-800 block mb-2">
+                        <div key={index} className={`p-4 rounded-lg transition-colors ${isDarkMode ? 'bg-gray-800 border border-gray-700 text-white hover:bg-gray-800' : 'bg-gray-50 border border-gray-100 hover:bg-gray-100'}`}>
+                          <span className={`text-sm font-semibold block mb-2 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>
                             {exp.link ? (
-                              <a href={exp.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800 transition-colors">{exp.heading}</a>
+                              <a href={exp.link} target="_blank" rel="noopener noreferrer" className={`${isDarkMode ? 'text-blue-300' : 'text-blue-600'} underline hover:text-blue-800 transition-colors`}>{exp.heading}</a>
                             ) : (
                               exp.heading
                             )}
                           </span>
-                          <span className="text-xs text-gray-600" style={{
+                          <span className={`${isDarkMode ? 'text-gray-300' : 'text-gray-600'} text-xs`} style={{
                             display: '-webkit-box',
                             WebkitLineClamp: 2,
                             WebkitBoxOrient: 'vertical',
@@ -593,7 +599,7 @@ export default function StudentDashboard() {
                           }}>
                             {isLong ? exp.content.slice(0, 120) + '...' : exp.content}
                             {isLong && (
-                              <button className="text-blue-500 ml-2 text-xs underline hover:text-blue-700 transition-colors" onClick={() => setShowExperienceDetail({ open: true, exp })}>
+                              <button className={`${isDarkMode ? 'text-blue-300' : 'text-blue-500'} ml-2 text-xs underline hover:text-blue-700 transition-colors`} onClick={() => setShowExperienceDetail({ open: true, exp })}>
                                 View more
                               </button>
                             )}
@@ -699,7 +705,7 @@ export default function StudentDashboard() {
               </div>
 
               {/* Certifications Section */}
-              <div className="bg-white rounded-xl p-8 shadow-sm border border-gray-200 lg:col-span-2 hover:shadow-md transition-shadow">
+              <div className={getCardClassesLocal()}>
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-semibold text-gray-900">Certifications</h2>
                   <button className="px-4 py-2 text-sm bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition-colors shadow-sm" onClick={handleOpenCertificationsModal}>
@@ -708,16 +714,16 @@ export default function StudentDashboard() {
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {certifications.length === 0 ? (
-                    <div className="text-gray-400 text-sm italic text-center py-8 bg-gray-50 rounded-lg border border-gray-100 md:col-span-2">
+                    <div className={`${isDarkMode ? 'text-gray-300 bg-gray-800 border border-gray-700' : 'text-gray-400 bg-gray-50 border border-gray-100'} text-sm italic text-center py-8 rounded-lg md:col-span-2`}>
                       No certifications added yet. Click above to add your certifications.
                     </div>
                   ) : (
                     certifications.map((cert, index) => (
-                      <div key={index} className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg border border-gray-100 hover:bg-gray-100 transition-colors">
+                      <div key={index} className={`flex items-center space-x-4 p-3 rounded-lg transition-colors ${isDarkMode ? 'bg-gray-800 border border-gray-700 text-white hover:bg-gray-800' : 'bg-gray-50 border border-gray-100 hover:bg-gray-100'}`}>
                         <div className="w-3 h-3 bg-gray-400 rounded-full flex-shrink-0"></div>
-                        <span className="text-sm text-gray-700 font-medium">
+                        <span className={`text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>
                           {cert.link ? (
-                            <a href={cert.link} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline hover:text-blue-800 transition-colors">{cert.name}</a>
+                            <a href={cert.link} target="_blank" rel="noopener noreferrer" className={`${isDarkMode ? 'text-blue-300' : 'text-blue-600'} underline hover:text-blue-800 transition-colors`}>{cert.name}</a>
                           ) : (
                             cert.name
                           )}

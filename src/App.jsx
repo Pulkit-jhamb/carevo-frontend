@@ -3,19 +3,36 @@ import Landing_page from './pages/landing_page';
 import Quiz from './pages/quiz';
 import Dashboard from './pages/dashboard';
 import StudentDashboard from './pages/student_dashboard';
+import StudentDashboardDark from './pages/student_dashboard_dark';
 import Login from './pages/login';
 import Signup from './pages/signup';
 import MentalHealthChatbot from './pages/mental_health_si';
 import StudyPlan from './pages/study_plan';
 import React, { useState, useEffect } from 'react';
-// import Sidebar from './pages/sidebar';
 import axios from 'axios';
 import { API_ENDPOINTS } from './config';
 import { useAuthRedirect } from './hooks/useAuthRedirect';
 import CarevoHomepage from './pages/home';
 import StudentOnboardingForm from './pages/onboarding';
-// 🚨 NEW IMPORT - Add this line
 import { setupAxiosInterceptors } from './utils/axiosConfig';
+import Classroom from './pages/classroom';
+import ClassroomLight from './pages/classroom_light';
+import InventoryLight from './pages/inventory_light';
+import InventoryDark from './pages/inventory_dark';
+import QuizDark from './pages/quiz_dark';
+import MentalHealthDark from './pages/mental_health_dark';
+import CollegeDashboardLight from './pages/college_dashbpard_lt';
+import CollegeDashboardDark from './pages/college_dashboard_dark';
+import CommunityLight from './pages/community_light';
+import CommunityDark from './pages/community_dark';
+import NotabilityLight from './pages/notability_light';
+import NotabilityDark from './pages/notability_dark';
+import PlacementLight from './pages/placement_light';
+import PlacementDark from './pages/placement_dark';
+import QuizCollegeLight from './pages/quiz_college_light';
+import QuizCollegeDark from './pages/quiz_college_dark';
+import ResumeCollegeLight from './pages/resume_college_light';
+import ResumeCollegeDark from './pages/resume_college_dark';
 
 function UserIcon() {
   return (
@@ -125,14 +142,13 @@ function ProtectedRoute({ children }) {
   return children;
 }
 
-// Dashboard Selector Component
+// Dashboard Selector Component - REMOVED theme toggle
 function DashboardSelector() {
   const [userType, setUserType] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const type = localStorage.getItem("userType");
-    console.log("DashboardSelector - userType from localStorage:", type);
     setUserType(type);
     setLoading(false);
   }, []);
@@ -149,11 +165,11 @@ function DashboardSelector() {
   }
 
   // Show student dashboard for school students, college dashboard for college students
-  console.log("UserType detected:", userType); // Debug log
   if (userType === "school") {
     return <StudentDashboard />;
   } else {
-    return <Dashboard />;
+    // College students get the new college dashboard (light mode by default)
+    return <CollegeDashboardLight />;
   }
 }
 
@@ -234,8 +250,7 @@ export default function App() {
 }
 
 function AppRoutes() {
-  useAuthRedirect(); // Use the custom hook for auth redirects
-  
+  useAuthRedirect();
   return (
     <Routes>
       <Route path="/" element={<Landing_page />} />
@@ -258,21 +273,24 @@ function AppRoutes() {
           <DashboardSelector />
         </ProtectedRoute>
       } />
-      
-      {/* Quiz route - has its own sidebar */}
-      <Route path="/quiz" element={
+      <Route path="/dashboard-dark" element={
         <ProtectedRoute>
-          <Quiz />
+          <StudentDashboardDark />
         </ProtectedRoute>
       } />
       
-      {/* Chat route without MainLayout since it has its own sidebar */}
-      <Route path="/chat" element={
+      {/* College Dashboard routes */}
+      <Route path="/college-dashboard-light" element={
         <ProtectedRoute>
-          <MentalHealthChatbot />
+          <CollegeDashboardLight />
         </ProtectedRoute>
       } />
-
+      <Route path="/college-dashboard-dark" element={
+        <ProtectedRoute>
+          <CollegeDashboardDark />
+        </ProtectedRoute>
+      } />
+      
       {/* Carevo Homepage route - no sidebar */}
       <Route path="/carevo-homepage" element={
         <ProtectedRoute>
@@ -292,6 +310,114 @@ function AppRoutes() {
       <Route path="/onboarding" element={
         <ProtectedRoute>
           <StudentOnboardingForm />
+        </ProtectedRoute>
+      } />
+      
+      {/* Classroom routes - have their own sidebars */}
+      <Route path="/classroom" element={
+        <ProtectedRoute>
+          <ClassroomLight />
+        </ProtectedRoute>
+      } />
+      <Route path="/classroom-dark" element={
+        <ProtectedRoute>
+          <Classroom />
+        </ProtectedRoute>
+      } />
+      
+      {/* Inventory routes - have their own sidebars */}
+      <Route path="/inventory" element={
+        <ProtectedRoute>
+          <InventoryLight />
+        </ProtectedRoute>
+      } />
+      <Route path="/inventory-dark" element={
+        <ProtectedRoute>
+          <InventoryDark />
+        </ProtectedRoute>
+      } />
+      
+      {/* Quiz routes - have their own sidebars */}
+      <Route path="/quiz" element={
+        <ProtectedRoute>
+          <Quiz />
+        </ProtectedRoute>
+      } />
+      <Route path="/quiz-dark" element={
+        <ProtectedRoute>
+          <QuizDark />
+        </ProtectedRoute>
+      } />
+      
+      {/* Mental Health routes - have their own sidebars */}
+      <Route path="/chat" element={
+        <ProtectedRoute>
+          <MentalHealthChatbot />
+        </ProtectedRoute>
+      } />
+      <Route path="/mental-health-dark" element={
+        <ProtectedRoute>
+          <MentalHealthDark />
+        </ProtectedRoute>
+      } />
+      
+      {/* Community routes - have their own sidebars */}
+      <Route path="/community" element={
+        <ProtectedRoute>
+          <CommunityLight />
+        </ProtectedRoute>
+      } />
+      <Route path="/community-dark" element={
+        <ProtectedRoute>
+          <CommunityDark />
+        </ProtectedRoute>
+      } />
+      
+      {/* Notability routes - have their own sidebars */}
+      <Route path="/notability-light" element={
+        <ProtectedRoute>
+          <NotabilityLight />
+        </ProtectedRoute>
+      } />
+      <Route path="/notability-dark" element={
+        <ProtectedRoute>
+          <NotabilityDark />
+        </ProtectedRoute>
+      } />
+      
+      {/* Placement routes - have their own sidebars */}
+      <Route path="/placement-light" element={
+        <ProtectedRoute>
+          <PlacementLight />
+        </ProtectedRoute>
+      } />
+      <Route path="/placement-dark" element={
+        <ProtectedRoute>
+          <PlacementDark />
+        </ProtectedRoute>
+      } />
+      
+      {/* College Quiz routes - have their own sidebars */}
+      <Route path="/quiz-college-light" element={
+        <ProtectedRoute>
+          <QuizCollegeLight />
+        </ProtectedRoute>
+      } />
+      <Route path="/quiz-college-dark" element={
+        <ProtectedRoute>
+          <QuizCollegeDark />
+        </ProtectedRoute>
+      } />
+      
+      {/* College Resume routes - have their own sidebars */}
+      <Route path="/resume-college-light" element={
+        <ProtectedRoute>
+          <ResumeCollegeLight />
+        </ProtectedRoute>
+      } />
+      <Route path="/resume-college-dark" element={
+        <ProtectedRoute>
+          <ResumeCollegeDark />
         </ProtectedRoute>
       } />
       
