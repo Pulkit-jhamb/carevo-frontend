@@ -25,6 +25,14 @@ export const API_ENDPOINTS = {
   STUDY_PLAN: `${API_BASE_URL}/user/study-plan`,
   BACKEND: API_BASE_URL,
   QUIZ_RESULT: `${API_BASE_URL}/user/quiz-result`,
+  // New endpoints for enhanced dashboard functionality
+  PROJECTS: `${API_BASE_URL}/user/projects`,
+  WORK_EXPERIENCE: `${API_BASE_URL}/user/work-experience`,
+  EVENTS: `${API_BASE_URL}/user/events`,
+  SEMESTERS: `${API_BASE_URL}/user/semesters`,
+  CURRENT_DATE: `${API_BASE_URL}/current-date`,
+  // Psychometric Quiz endpoints (using existing AI endpoint)
+  GENERATE_REPORT: `${API_BASE_URL}/psychometric/generate-report`,
 };
 
 export default API_BASE_URL;

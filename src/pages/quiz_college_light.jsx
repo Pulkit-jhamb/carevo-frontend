@@ -69,12 +69,35 @@ export default function QuizCollegeLight() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [parsedReport, setParsedReport] = useState(null);
+  const [quizQuestions, setQuizQuestions] = useState([]);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [answers, setAnswers] = useState({});
+  const [quizStarted, setQuizStarted] = useState(false);
+  const [quizCompleted, setQuizCompleted] = useState(false);
+  const [timeRemaining, setTimeRemaining] = useState(30 * 60); // 30 minutes
   const navigate = useNavigate();
 
   // Theme toggle handler
   const handleToggleTheme = () => {
     navigate("/quiz-college-dark");
   };
+
+  // Timer effect for quiz
+  useEffect(() => {
+    let timer;
+    if (quizStarted && !quizCompleted && timeRemaining > 0) {
+      timer = setInterval(() => {
+        setTimeRemaining(prev => {
+          if (prev <= 1) {
+            handleSubmitQuiz();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [quizStarted, quizCompleted, timeRemaining]);
 
   useEffect(() => {
     const getUserInfo = async () => {
@@ -111,7 +134,13 @@ export default function QuizCollegeLight() {
       .catch((err) => console.error("Error fetching user:", err));
   }, []);
 
-  const handleGenerateReport = async () => {
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const generateQuiz = async () => {
     if (!user?.email) {
       setError("User email not found");
       return;
@@ -121,24 +150,176 @@ export default function QuizCollegeLight() {
     setError("");
 
     try {
-      const response = await axios.post(API_ENDPOINTS.GENERATE_REPORT, {
+      // Use the existing AI endpoint that was working before
+      const prompt = `Generate a 30-question psychometric assessment for a college student with the following profile:
+      
+      Name: ${user.name}
+      Major: ${user.major || 'Not specified'}
+      Year: ${user.year || 'Not specified'}
+      Institute: ${user.institute || 'Not specified'}
+      
+      Please create exactly 30 multiple-choice questions that assess:
+      1. Personality traits (Big Five personality model)
+      2. Career interests and preferences
+      3. Learning styles
+      4. Work environment preferences
+      5. Leadership and teamwork tendencies
+      6. Problem-solving approaches
+      7. Communication styles
+      8. Stress management and resilience
+      
+      Format each question as a JSON object with:
+      - question: "The question text"
+      - options: ["Option A", "Option B", "Option C", "Option D"]
+      
+      Return the response as a JSON array of 30 question objects. Make the questions relevant to a ${user.major || 'college'} student.`;
+
+      const response = await axios.post(API_ENDPOINTS.AI, {
+        prompt: prompt,
         email: user.email
       });
 
-      if (response.data.success) {
-        const newReport = response.data.report;
-        setReport(newReport);
-        const parsed = parseEnhancedReport(newReport);
-        setParsedReport(parsed);
+      if (response.data && response.data.response) {
+        try {
+          // Parse the AI response to extract questions
+          let aiResponse = response.data.response;
+          
+          // Clean up the response if it has markdown formatting
+          if (aiResponse.includes('```json')) {
+            aiResponse = aiResponse.split('```json')[1].split('```')[0];
+          } else if (aiResponse.includes('```')) {
+            aiResponse = aiResponse.split('```')[1].split('```')[0];
+          }
+          
+          const questions = JSON.parse(aiResponse.trim());
+          
+          if (Array.isArray(questions) && questions.length > 0) {
+            setQuizQuestions(questions.slice(0, 30)); // Ensure exactly 30 questions
+            setQuizStarted(true);
+            setTimeRemaining(30 * 60); // Reset timer
+          } else {
+            throw new Error("Invalid question format received");
+          }
+        } catch (parseError) {
+          console.error("Error parsing AI response:", parseError);
+          setError("Failed to parse quiz questions. Please try again.");
+        }
       } else {
-        setError(response.data.message || "Failed to generate report");
+        setError("No response received from AI service");
       }
     } catch (err) {
-      console.error("Error generating report:", err);
-      setError("Failed to generate report. Please try again.");
+      console.error("Error generating quiz:", err);
+      setError("Failed to generate personalized quiz. Please try again.");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAnswerSelect = (questionIndex, answer) => {
+    setAnswers(prev => ({
+      ...prev,
+      [questionIndex]: answer
+    }));
+  };
+
+  const handleNextQuestion = () => {
+    if (currentQuestionIndex < quizQuestions.length - 1) {
+      setCurrentQuestionIndex(prev => prev + 1);
+    }
+  };
+
+  const handlePreviousQuestion = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(prev => prev - 1);
+    }
+  };
+
+  const handleSubmitQuiz = async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      // Prepare answers summary for the AI
+      const answersText = Object.entries(answers).map(([questionIndex, answer]) => {
+        const question = quizQuestions[parseInt(questionIndex)];
+        return `Q${parseInt(questionIndex) + 1}: ${question?.question}\nAnswer: ${answer}`;
+      }).join('\n\n');
+
+      const prompt = `Based on the following psychometric assessment responses from ${user.name}, a ${user.major || 'college'} student at ${user.institute || 'their institute'}, generate a comprehensive career and personality analysis report.
+
+Assessment Responses:
+${answersText}
+
+Student Profile:
+- Name: ${user.name}
+- Major: ${user.major || 'Not specified'}
+- Year: ${user.year || 'Not specified'}
+- Institute: ${user.institute || 'Not specified'}
+- Time Spent: ${Math.round(((30 * 60) - timeRemaining) / 60)} minutes
+
+Please provide a detailed analysis in JSON format with the following structure:
+{
+  "headline": "Brief headline about their personality type or career fit",
+  "summary": "Comprehensive summary of their personality and career potential",
+  "top_capabilities": ["capability1", "capability2", "capability3", "capability4", "capability5"],
+  "recommended_path": "Detailed career path recommendation based on their responses",
+  "strengths": "Key strengths identified from the assessment",
+  "growth_areas": ["area1", "area2", "area3"],
+  "suggested_next_steps": ["step1", "step2", "step3", "step4"],
+  "confidence": "high"
+}
+
+Make the analysis specific to their major (${user.major || 'their field of study'}) and provide actionable insights.`;
+
+      const response = await axios.post(API_ENDPOINTS.AI, {
+        prompt: prompt,
+        email: user.email
+      });
+
+      if (response.data && response.data.response) {
+        try {
+          let aiResponse = response.data.response;
+          
+          // Clean up the response if it has markdown formatting
+          if (aiResponse.includes('```json')) {
+            aiResponse = aiResponse.split('```json')[1].split('```')[0];
+          } else if (aiResponse.includes('```')) {
+            aiResponse = aiResponse.split('```')[1].split('```')[0];
+          }
+          
+          const reportData = JSON.parse(aiResponse.trim());
+          const reportText = JSON.stringify(reportData);
+          
+          setReport(reportText);
+          const parsed = parseEnhancedReport(reportText);
+          setParsedReport(parsed);
+          setQuizCompleted(true);
+        } catch (parseError) {
+          console.error("Error parsing AI report:", parseError);
+          // Fallback to raw response
+          setReport(response.data.response);
+          const parsed = parseEnhancedReport(response.data.response);
+          setParsedReport(parsed);
+          setQuizCompleted(true);
+        }
+      } else {
+        setError("No response received from AI service");
+      }
+    } catch (err) {
+      console.error("Error submitting quiz:", err);
+      setError("Failed to submit quiz. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getProgressPercentage = () => {
+    if (!quizQuestions.length) return 0;
+    return ((currentQuestionIndex + 1) / quizQuestions.length) * 100;
+  };
+
+  const getAnsweredCount = () => {
+    return Object.keys(answers).length;
   };
 
   const getConfidenceColor = (confidence) => {
@@ -158,8 +339,15 @@ export default function QuizCollegeLight() {
         {/* Header */}
         <div className="bg-white border-b border-gray-200 px-8 py-5 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Psychometric Assessment</h1>
-            <p className="text-gray-600 mt-1">Discover your career potential and strengths</p>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {quizStarted && !quizCompleted ? "Psychometric Quiz" : "Psychometric Assessment"}
+            </h1>
+            <p className="text-gray-600 mt-1">
+              {quizStarted && !quizCompleted 
+                ? `Question ${currentQuestionIndex + 1} of ${quizQuestions.length} • Time: ${formatTime(timeRemaining)}`
+                : "Discover your career potential and strengths"
+              }
+            </p>
           </div>
           <div className="flex items-center gap-4">
             {/* Theme toggle button */}
@@ -186,24 +374,42 @@ export default function QuizCollegeLight() {
         {/* Main Content */}
         <div className="flex-1 p-8 overflow-y-auto">
           <div className="max-w-4xl mx-auto">
-            {!parsedReport ? (
+            {!quizStarted && !parsedReport ? (
               <div className="text-center py-12">
                 <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
                   <div className="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
                     <svg className="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                   </div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-4">Ready for Your Assessment?</h2>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">30-Question Psychometric Assessment</h2>
                   <p className="text-gray-600 mb-8 max-w-md mx-auto">
-                    Get personalized insights about your career potential, strengths, and recommended paths based on your profile and interests.
+                    Take a personalized 30-question assessment based on your profile: {user?.major} at {user?.institute}. 
+                    Get insights about your personality, career preferences, and growth opportunities.
                   </p>
+                  
+                  {/* Assessment Info */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <div className="text-blue-600 font-semibold">Duration</div>
+                      <div className="text-gray-700">30 Minutes</div>
+                    </div>
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <div className="text-green-600 font-semibold">Questions</div>
+                      <div className="text-gray-700">30 Personalized</div>
+                    </div>
+                    <div className="bg-purple-50 p-4 rounded-lg">
+                      <div className="text-purple-600 font-semibold">Analysis</div>
+                      <div className="text-gray-700">Detailed Report</div>
+                    </div>
+                  </div>
+
                   <button
-                    onClick={handleGenerateReport}
+                    onClick={generateQuiz}
                     disabled={loading}
                     className="px-8 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
-                    {loading ? "Generating Report..." : "Generate Assessment Report"}
+                    {loading ? "Generating Your Quiz..." : "Start Psychometric Assessment"}
                   </button>
                   {error && (
                     <div className="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -211,6 +417,102 @@ export default function QuizCollegeLight() {
                     </div>
                   )}
                 </div>
+              </div>
+            ) : quizStarted && !quizCompleted ? (
+              // Quiz Interface
+              <div>
+                {/* Quiz Header with Timer */}
+                <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-6 mb-6">
+                  <div className="flex justify-between items-center mb-4">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Question {currentQuestionIndex + 1} of {quizQuestions.length}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {getAnsweredCount()} / {quizQuestions.length} answered
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 text-orange-600">
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                      </svg>
+                      <span className="font-mono text-lg">{formatTime(timeRemaining)}</span>
+                    </div>
+                  </div>
+                  
+                  {/* Progress Bar */}
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${getProgressPercentage()}%` }}
+                    ></div>
+                  </div>
+                </div>
+
+                {/* Current Question */}
+                {quizQuestions[currentQuestionIndex] && (
+                  <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8">
+                    <h2 className="text-xl font-bold text-gray-900 mb-6">
+                      {quizQuestions[currentQuestionIndex].question}
+                    </h2>
+                    
+                    {/* Answer Options */}
+                    <div className="space-y-3 mb-8">
+                      {quizQuestions[currentQuestionIndex].options?.map((option, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleAnswerSelect(currentQuestionIndex, option)}
+                          className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
+                            answers[currentQuestionIndex] === option
+                              ? 'border-blue-500 bg-blue-50 text-blue-900'
+                              : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                          }`}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`w-4 h-4 rounded-full border-2 ${
+                              answers[currentQuestionIndex] === option
+                                ? 'border-blue-500 bg-blue-500'
+                                : 'border-gray-300'
+                            }`}>
+                              {answers[currentQuestionIndex] === option && (
+                                <div className="w-2 h-2 bg-white rounded-full m-0.5"></div>
+                              )}
+                            </div>
+                            <span>{option}</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Navigation */}
+                    <div className="flex justify-between">
+                      <button
+                        onClick={handlePreviousQuestion}
+                        disabled={currentQuestionIndex === 0}
+                        className="px-6 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        Previous
+                      </button>
+
+                      {currentQuestionIndex === quizQuestions.length - 1 ? (
+                        <button
+                          onClick={handleSubmitQuiz}
+                          disabled={loading || getAnsweredCount() < quizQuestions.length}
+                          className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                          {loading ? "Submitting..." : "Submit Assessment"}
+                        </button>
+                      ) : (
+                        <button
+                          onClick={handleNextQuestion}
+                          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                          Next
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="space-y-6">

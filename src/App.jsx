@@ -1,8 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, Outlet, Navigate, useLocation, useNavigate } from 'react-router-dom';
-import Landing_page from './pages/landing_page';
 import Quiz from './pages/quiz';
 import Dashboard from './pages/dashboard';
 import StudentDashboard from './pages/student_dashboard';
+import StudentDashboardSimple from './pages/student_dashboard_simple';
+import TestDashboard from './pages/test_dashboard';
 import StudentDashboardDark from './pages/student_dashboard_dark';
 import Login from './pages/login';
 import Signup from './pages/signup';
@@ -12,7 +13,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_ENDPOINTS } from './config';
 import { useAuthRedirect } from './hooks/useAuthRedirect';
-import CarevoHomepage from './pages/home';
 import StudentOnboardingForm from './pages/onboarding';
 import { setupAxiosInterceptors } from './utils/axiosConfig';
 import Classroom from './pages/classroom';
@@ -21,6 +21,8 @@ import InventoryLight from './pages/inventory_light';
 import InventoryDark from './pages/inventory_dark';
 import QuizDark from './pages/quiz_dark';
 import MentalHealthDark from './pages/mental_health_dark';
+import MentalHealthCollegeLight from './pages/mental_health_college_light';
+import MentalHealthCollegeDark from './pages/mental_health_college_dark';
 import CollegeDashboardLight from './pages/college_dashbpard_lt';
 import CollegeDashboardDark from './pages/college_dashboard_dark';
 import CommunityLight from './pages/community_light';
@@ -120,7 +122,7 @@ function ProtectedRoute({ children }) {
   // Prevent going back to login page when authenticated
   useEffect(() => {
     if (isAuthenticated && (location.pathname === '/login' || location.pathname === '/signup')) {
-      navigate('/carevo-homepage', { replace: true });
+      navigate('/dashboard', { replace: true });
     }
   }, [isAuthenticated, location.pathname, navigate]);
 
@@ -158,18 +160,20 @@ function DashboardSelector() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#f7f9fb] via-[#e0e7ef] to-[#c7d2fe]">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading...</p>
+          <p className="text-gray-600">Loading dashboard...</p>
         </div>
       </div>
     );
   }
-
+  
   // Show student dashboard for school students, college dashboard for college students
   if (userType === "school") {
     return <StudentDashboard />;
-  } else {
-    // College students get the new college dashboard (light mode by default)
+  } else if (userType === "college") {
     return <CollegeDashboardLight />;
+  } else {
+    // Fallback: if userType is null, undefined, or unexpected value
+    return <StudentDashboard />;
   }
 }
 
@@ -196,7 +200,7 @@ function PublicRoute({ children }) {
         if (response.data.authenticated) {
           setIsAuthenticated(true);
           // If authenticated, redirect to dashboard
-          navigate('/carevo-homepage', { replace: true });
+          navigate('/dashboard', { replace: true });
         } else {
           setIsAuthenticated(false);
           // Clear token if not valid
@@ -253,7 +257,7 @@ function AppRoutes() {
   useAuthRedirect();
   return (
     <Routes>
-      <Route path="/" element={<Landing_page />} />
+      <Route path="/" element={<Navigate to="/login" replace />} />
       
       {/* Public routes - redirect authenticated users to dashboard */}
       <Route path="/login" element={
@@ -279,6 +283,23 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       
+      {/* Direct student dashboard routes for testing */}
+      <Route path="/student-dashboard" element={
+        <ProtectedRoute>
+          <StudentDashboard />
+        </ProtectedRoute>
+      } />
+      <Route path="/student-dashboard-simple" element={
+        <ProtectedRoute>
+          <StudentDashboardSimple />
+        </ProtectedRoute>
+      } />
+      <Route path="/test-dashboard" element={
+        <ProtectedRoute>
+          <TestDashboard />
+        </ProtectedRoute>
+      } />
+      
       {/* College Dashboard routes */}
       <Route path="/college-dashboard-light" element={
         <ProtectedRoute>
@@ -291,12 +312,6 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       
-      {/* Carevo Homepage route - no sidebar */}
-      <Route path="/carevo-homepage" element={
-        <ProtectedRoute>
-          <CarevoHomepage />
-        </ProtectedRoute>
-      } />
         
 
       {/* Study Plan route - has its own sidebar */}
@@ -358,6 +373,18 @@ function AppRoutes() {
       <Route path="/mental-health-dark" element={
         <ProtectedRoute>
           <MentalHealthDark />
+        </ProtectedRoute>
+      } />
+      
+      {/* College Mental Health routes - have their own college sidebars */}
+      <Route path="/mental-health-college-light" element={
+        <ProtectedRoute>
+          <MentalHealthCollegeLight />
+        </ProtectedRoute>
+      } />
+      <Route path="/mental-health-college-dark" element={
+        <ProtectedRoute>
+          <MentalHealthCollegeDark />
         </ProtectedRoute>
       } />
       
@@ -424,7 +451,7 @@ function AppRoutes() {
       {/* Catch all route - redirect to dashboard for authenticated users */}
       <Route path="*" element={
         <ProtectedRoute>
-          <Navigate to="/carevo-homepage" replace />
+          <Navigate to="/dashboard" replace />
         </ProtectedRoute>
       } />
     </Routes>

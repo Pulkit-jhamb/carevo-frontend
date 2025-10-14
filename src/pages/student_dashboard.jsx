@@ -49,14 +49,27 @@ export default function StudentDashboard() {
 
   useEffect(() => {
     const email = localStorage.getItem("userEmail");
+    
+    // Always set loading to false after a short delay to prevent infinite loading
+    const loadingTimeout = setTimeout(() => {
+      setIsLoading(false);
+    }, 3000);
+    
     if (!email) {
+      clearTimeout(loadingTimeout);
       setIsLoading(false);
       return;
     }
 
     fetch(`${API_ENDPOINTS.USER}?email=${encodeURIComponent(email)}`)
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        return res.json();
+      })
       .then((data) => {
+        clearTimeout(loadingTimeout);
         setUser(data);
         setTermData(
           data.termData && data.termData.length === 4
@@ -77,8 +90,11 @@ export default function StudentDashboard() {
       })
       .catch((err) => {
         console.error("Error fetching user:", err);
+        clearTimeout(loadingTimeout);
         setIsLoading(false);
       });
+
+    return () => clearTimeout(loadingTimeout);
   }, []);
 
   useEffect(() => {
@@ -405,25 +421,24 @@ export default function StudentDashboard() {
     }`;
   };
 
+  // Fallback render in case of issues
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900 mx-auto mb-4"></div>
+          <p className="text-lg text-gray-600">Loading your dashboard...</p>
+          <p className="text-sm text-gray-500 mt-2">If this takes too long, please refresh the page</p>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div className={`flex min-h-screen ${isDarkMode ? 'bg-black text-white' : 'bg-white text-gray-900'}`}>
       <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} isDarkMode={isDarkMode} />
 
       <div className={`flex-1 flex flex-col transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
-        {isLoading && (
-          <div className={`fixed inset-0 bg-opacity-90 flex items-center justify-center z-50 ${
-            isDarkMode ? 'bg-black' : 'bg-white'
-          }`}>
-            <div className="text-center">
-              <div className={`animate-spin rounded-full h-12 w-12 border-b-2 mx-auto mb-4 ${
-                isDarkMode ? 'border-white' : 'border-gray-900'
-              }`}></div>
-              <p className={`text-lg ${isDarkMode ? 'text-white' : 'text-gray-600'}`}>
-                Loading your dashboard...
-              </p>
-            </div>
-          </div>
-        )}
 
         {/* Top Header */}
         <div className={`px-6 py-4 flex items-center justify-between border-b transition-colors ${

@@ -27,6 +27,7 @@ export default function NotabilityDark() {
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
   const navigate = useNavigate();
 
   // Theme toggle handler
@@ -51,6 +52,32 @@ export default function NotabilityDark() {
     getUserInfo();
   }, [navigate]);
 
+  // Google Drive file mapping
+  const driveFileMapping = {
+    'Circuit Analysis': '1VG8bqShVweH1rSY1q3IRt-H7-kGjSPSB',
+    'Data Structures': '1kf2KKV8LIvBaFkwMFUg6d_BDRAwsj1so',
+    'Algorithms': '1ADaNtXO8N5_igylfFFblDUf32BIF9tuk', // dynamic programming
+    'Digital Electronics': '1ijsiMiRs1uqPcBx5sxynrRc5JCtM1IjV', // logic gates
+    'Mathematics II': '1TgBOd_RvD-_pswrEpNEDptoSnT-2Ln4-',
+    'Machine Learning': '1Zr93aNQctJC576_TQ02gx7DldyT0rLsy', // deep learning
+    'Operating Systems': '1yc5VnMfVVRxV02L2wwAcv1RD7AV4x6Xe',
+    'Robotics Dynamics': '1fzvZpsBaWAKRILfbzqFH5gdynotAiBk8', // robotics
+    'Software Engineering': '19ZL8vlx0_F9j61Y1J7U_0l_687IlTYYv',
+    'Database Systems': '1QU04OGbTfmHK6K2o0XpsXinMU76Q6P7p', // sql
+    'Stress Analysis': '15_lvKD92wwOe_ZipMgzUju_Ao8Tp9zd7',
+    'Thermodynamics': '1ZzTxcg-f36M7HGU_WEQ9mGXUqu6M6fEM',
+    'UI/UX Design': '1xkIcIpbCp4IlM39RRL-SNPVZDWsc_ypO'
+  };
+
+  // Function to open Google Drive file in new tab
+  const openDriveFile = (title) => {
+    const fileId = driveFileMapping[title];
+    if (fileId) {
+      const driveUrl = `https://drive.google.com/file/d/${fileId}/view`;
+      window.open(driveUrl, '_blank');
+    }
+  };
+
   // Sample trending notes
   const trendingNotes = [
     {
@@ -60,7 +87,8 @@ export default function NotabilityDark() {
       author: 'Harshit Dua',
       tag: '#Trending 1',
       type: 'document',
-      thumbnail: '/api/placeholder/300/400'
+      thumbnail: 'https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=300&h=400&fit=crop&crop=center',
+      icon: '📐'
     },
     {
       id: 2,
@@ -69,7 +97,8 @@ export default function NotabilityDark() {
       author: 'Harshit Dua',
       tag: '#Trending 2',
       type: 'document',
-      thumbnail: '/api/placeholder/300/400'
+      thumbnail: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=300&h=400&fit=crop&crop=center',
+      icon: '🤖'
     },
     {
       id: 3,
@@ -78,7 +107,8 @@ export default function NotabilityDark() {
       author: 'Dhiren Goel',
       tag: '#Trending 3',
       type: 'document',
-      thumbnail: '/api/placeholder/300/400'
+      thumbnail: 'https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=300&h=400&fit=crop&crop=center',
+      icon: '⚡'
     },
     {
       id: 4,
@@ -87,7 +117,8 @@ export default function NotabilityDark() {
       author: 'Pulkit Jamb',
       tag: '#Trending 4',
       type: 'document',
-      thumbnail: '/api/placeholder/300/400'
+      thumbnail: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=300&h=400&fit=crop&crop=center',
+      icon: '🎨'
     },
     {
       id: 5,
@@ -96,7 +127,8 @@ export default function NotabilityDark() {
       author: 'Arjun Singh',
       tag: '#Trending 5',
       type: 'document',
-      thumbnail: '/api/placeholder/300/400'
+      thumbnail: 'https://images.unsplash.com/photo-1518186285589-2f7649de83e0?w=300&h=400&fit=crop&crop=center',
+      icon: '🌳'
     }
   ];
 
@@ -109,7 +141,8 @@ export default function NotabilityDark() {
       author: 'Priya Sharma',
       uploadDate: '2 hours ago',
       type: 'video',
-      thumbnail: '/api/placeholder/300/400'
+      thumbnail: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=300&h=400&fit=crop&crop=center',
+      icon: '🧠'
     },
     {
       id: 7,
@@ -118,7 +151,8 @@ export default function NotabilityDark() {
       author: 'Rahul Kumar',
       uploadDate: '5 hours ago',
       type: 'document',
-      thumbnail: '/api/placeholder/300/400'
+      thumbnail: 'https://images.unsplash.com/photo-1544383835-bda2bc66a55d?w=300&h=400&fit=crop&crop=center',
+      icon: '🗄️'
     },
     {
       id: 8,
@@ -127,7 +161,8 @@ export default function NotabilityDark() {
       author: 'Sneha Patel',
       uploadDate: '1 day ago',
       type: 'presentation',
-      thumbnail: '/api/placeholder/300/400'
+      thumbnail: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?w=300&h=400&fit=crop&crop=center',
+      icon: '🌐'
     },
     {
       id: 9,
@@ -136,7 +171,8 @@ export default function NotabilityDark() {
       author: 'Vikash Gupta',
       uploadDate: '2 days ago',
       type: 'document',
-      thumbnail: '/api/placeholder/300/400'
+      thumbnail: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=300&h=400&fit=crop&crop=center',
+      icon: '💻'
     },
     {
       id: 10,
@@ -145,7 +181,8 @@ export default function NotabilityDark() {
       author: 'Anita Verma',
       uploadDate: '3 days ago',
       type: 'video',
-      thumbnail: '/api/placeholder/300/400'
+      thumbnail: 'https://images.unsplash.com/photo-1518432031352-d6fc5c10da5a?w=300&h=400&fit=crop&crop=center',
+      icon: '⚙️'
     }
   ];
 
@@ -159,7 +196,8 @@ export default function NotabilityDark() {
       branch: 'Computer Science',
       semester: '5th Semester',
       type: 'document',
-      thumbnail: '/api/placeholder/300/400'
+      thumbnail: 'https://images.unsplash.com/photo-1509228468518-180dd4864904?w=300&h=400&fit=crop&crop=center',
+      icon: '🔄'
     },
     {
       id: 12,
@@ -169,7 +207,8 @@ export default function NotabilityDark() {
       branch: 'Electronics',
       semester: '3rd Semester',
       type: 'presentation',
-      thumbnail: '/api/placeholder/300/400'
+      thumbnail: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=300&h=400&fit=crop&crop=center',
+      icon: '🔌'
     },
     {
       id: 13,
@@ -179,7 +218,8 @@ export default function NotabilityDark() {
       branch: 'Mechanical',
       semester: '4th Semester',
       type: 'document',
-      thumbnail: '/api/placeholder/300/400'
+      thumbnail: 'https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?w=300&h=400&fit=crop&crop=center',
+      icon: '🔥'
     },
     {
       id: 14,
@@ -189,7 +229,8 @@ export default function NotabilityDark() {
       branch: 'Electrical',
       semester: '2nd Semester',
       type: 'video',
-      thumbnail: '/api/placeholder/300/400'
+      thumbnail: 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?w=300&h=400&fit=crop&crop=center',
+      icon: '⚡'
     }
   ];
 
@@ -205,9 +246,19 @@ export default function NotabilityDark() {
   const NoteCard = ({ note, showUploadDate = false, showBranch = false }) => (
     <div className="bg-gray-900 rounded-lg border border-gray-800 overflow-hidden hover:shadow-xl hover:border-gray-700 transition-all duration-300 cursor-pointer group">
       <div className="aspect-[3/4] bg-gray-800 relative overflow-hidden">
+        <img 
+          src={note.thumbnail} 
+          alt={note.title}
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            e.target.style.display = 'none';
+            e.target.nextSibling.style.display = 'flex';
+          }}
+        />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/80"></div>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-16 h-20 bg-gray-700 rounded-lg flex items-center justify-center">
+        <div className="absolute inset-0 hidden items-center justify-center bg-gray-800">
+          <div className="w-16 h-20 bg-gray-700 rounded-lg flex items-center justify-center flex-col gap-2">
+            <span className="text-2xl">{note.icon}</span>
             {getFileIcon(note.type)}
           </div>
         </div>
@@ -217,8 +268,8 @@ export default function NotabilityDark() {
           </button>
         </div>
         <div className="absolute bottom-3 left-3 right-3">
-          <h3 className="text-white font-semibold text-sm mb-1 line-clamp-2">{note.title}</h3>
-          <p className="text-gray-300 text-xs line-clamp-2">{note.subtitle}</p>
+          <h3 className="text-white font-semibold text-sm mb-1 line-clamp-2 drop-shadow-lg">{note.title}</h3>
+          <p className="text-gray-200 text-xs line-clamp-2 drop-shadow-md">{note.subtitle}</p>
         </div>
       </div>
       <div className="p-4">
@@ -245,11 +296,17 @@ export default function NotabilityDark() {
           </div>
         )}
         <div className="flex items-center gap-2 mt-3">
-          <button className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors">
+          <button 
+            onClick={() => openDriveFile(note.title)}
+            className="flex-1 flex items-center justify-center gap-1 px-3 py-2 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700 transition-colors"
+          >
             <Eye className="w-3 h-3" />
             View
           </button>
-          <button className="flex items-center justify-center gap-1 px-3 py-2 bg-gray-800 text-gray-300 rounded-lg text-xs font-medium hover:bg-gray-700 transition-colors">
+          <button 
+            onClick={() => openDriveFile(note.title)}
+            className="flex items-center justify-center gap-1 px-3 py-2 bg-gray-800 text-gray-300 rounded-lg text-xs font-medium hover:bg-gray-700 transition-colors"
+          >
             <Download className="w-3 h-3" />
           </button>
         </div>
@@ -290,7 +347,10 @@ export default function NotabilityDark() {
               <Bell className="w-5 h-5 text-white" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+            <button 
+              onClick={() => setShowUploadModal(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+            >
               <Upload className="w-4 h-4" />
               Upload Notes
             </button>
@@ -343,6 +403,96 @@ export default function NotabilityDark() {
           </div>
         </div>
       </div>
+
+      {/* Upload Modal */}
+      {showUploadModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-gray-900 rounded-lg p-6 w-full max-w-md mx-4 border border-gray-700">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-white">Upload Notes</h3>
+              <button 
+                onClick={() => setShowUploadModal(false)}
+                className="text-gray-400 hover:text-gray-300"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Note Title
+                </label>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border border-gray-600 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter note title"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Subject/Topic
+                </label>
+                <input
+                  type="text"
+                  className="w-full px-3 py-2 border border-gray-600 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="e.g., Machine Learning, Data Structures"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  File Upload
+                </label>
+                <div className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
+                  <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                  <p className="text-sm text-gray-400 mb-2">
+                    Drag and drop your files here, or click to browse
+                  </p>
+                  <input
+                    type="file"
+                    multiple
+                    accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.jpg,.png"
+                    className="hidden"
+                    id="file-upload-dark"
+                  />
+                  <label
+                    htmlFor="file-upload-dark"
+                    className="inline-flex items-center px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 cursor-pointer"
+                  >
+                    Choose Files
+                  </label>
+                  <p className="text-xs text-gray-500 mt-2">
+                    Supported formats: PDF, DOC, PPT, TXT, JPG, PNG
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => setShowUploadModal(false)}
+                  className="flex-1 px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-800 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    // Handle upload logic here
+                    alert('Upload functionality would be implemented here!');
+                    setShowUploadModal(false);
+                  }}
+                  className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Upload
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

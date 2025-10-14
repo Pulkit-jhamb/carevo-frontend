@@ -38,7 +38,7 @@ export default function Login() {
         setError("");
         
         // Navigate to dashboard
-        navigate("/carevo-homepage", { replace: true });
+        navigate("/dashboard", { replace: true });
       }
     } catch (err) {
       console.error("Login error:", err);
@@ -55,14 +55,6 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#f7f9fb] via-[#e0e7ef] to-[#c7d2fe] font-sans relative">
-      <button
-        className="absolute top-8 left-8 text-black text-4xl font-extrabold focus:outline-none bg-transparent p-0 m-0 z-20 hover:text-gray-700 transition-all duration-200"
-        onClick={() => navigate("/")}
-        aria-label="Back to home"
-        style={{ background: "none", border: "none", boxShadow: "none" }}
-      >
-        &larr;
-      </button>
       <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 md:p-10 flex flex-col items-center">
         <img src={carevoLogo} alt="Carevo Logo" className="w-20 h-20 mb-4" />
         <h2 className="text-3xl font-extrabold text-black mb-2">Welcome Back</h2>

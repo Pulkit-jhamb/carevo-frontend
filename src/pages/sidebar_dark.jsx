@@ -3,12 +3,9 @@ import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import axios from 'axios';
 import { API_ENDPOINTS } from '../config';
 import { 
-  Home, 
   User, 
   MessageSquare, 
   BookOpen, 
-  Settings, 
-  HelpCircle,
   LogOut,
   Menu,
   LayoutDashboard,
@@ -60,7 +57,6 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
 
   // Navigation items with functional routes
   const sidebarItems = [
-    { icon: Home, label: 'Home', path: '/carevo-homepage', active: location.pathname === '/carevo-homepage' },
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', active: location.pathname === '/dashboard' },
     { icon: User, label: 'Quiz', path: '/quiz', active: location.pathname === '/quiz' },
     { icon: MessageSquare, label: 'Chat', path: '/chat', active: location.pathname === '/chat' },
@@ -69,10 +65,6 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
     { icon: FolderOpen, label: 'Inventory', path: '/inventory-dark', active: location.pathname === '/inventory-dark' || location.pathname === '/inventory' }
   ];
 
-  const settingsItems = [
-    { icon: Settings, label: 'Settings', path: '#' },
-    { icon: HelpCircle, label: 'Help', path: '#' }
-  ];
 
   // Handle navigation
   const handleNavigation = (path) => {
@@ -138,23 +130,6 @@ const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
           </nav>
         </div>
 
-        {!isCollapsed && (
-          <div>
-            <h3 className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-4">Settings & Help</h3>
-            <nav className="space-y-2">
-              {settingsItems.map((item, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleNavigation(item.path)}
-                  className="w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors text-left"
-                >
-                  <item.icon className="w-5 h-5 mr-3 flex-shrink-0 text-white" />
-                  <span>{item.label}</span>
-                </button>
-              ))}
-            </nav>
-          </div>
-        )}
       </div>
 
       {/* User Profile */}

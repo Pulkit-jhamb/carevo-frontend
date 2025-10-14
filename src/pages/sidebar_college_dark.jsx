@@ -3,12 +3,9 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { API_ENDPOINTS } from '../config';
 import { 
-  Home, 
   User, 
   MessageSquare, 
   BookOpen, 
-  Settings, 
-  HelpCircle,
   LogOut,
   Menu,
   LayoutDashboard,
@@ -60,20 +57,15 @@ const CollegeSidebarDark = ({ isCollapsed, setIsCollapsed }) => {
 
   // Navigation items for college students
   const sidebarItems = [
-    { icon: Home, label: 'Home', path: '/carevo-homepage', active: location.pathname === '/carevo-homepage' },
     { icon: LayoutDashboard, label: 'Dashboard', path: '/college-dashboard-dark', active: location.pathname === '/dashboard' || location.pathname === '/college-dashboard-light' || location.pathname === '/college-dashboard-dark' },
     { icon: User, label: 'Psychometric', path: '/quiz-college-dark', active: location.pathname === '/quiz' || location.pathname === '/quiz-dark' || location.pathname === '/quiz-college-light' || location.pathname === '/quiz-college-dark' },
-    { icon: MessageSquare, label: 'Chat', path: '/mental-health-dark', active: location.pathname === '/chat' || location.pathname === '/mental-health-dark' },
+    { icon: MessageSquare, label: 'Chat', path: '/mental-health-college-dark', active: location.pathname === '/chat' || location.pathname === '/mental-health-college-light' || location.pathname === '/mental-health-college-dark' },
     { icon: FolderOpen, label: 'Notability', path: '/notability-dark', active: location.pathname === '/inventory' || location.pathname === '/inventory-dark' || location.pathname === '/notability-light' || location.pathname === '/notability-dark' },
     { icon: MapPin, label: 'Placement', path: '/placement-dark', active: location.pathname === '/placement' || location.pathname === '/placement-light' || location.pathname === '/placement-dark' },
     { icon: FileText, label: 'Resume', path: '/resume-college-dark', active: location.pathname === '/resume' || location.pathname === '/resume-college-light' || location.pathname === '/resume-college-dark' },
     { icon: Users, label: 'Community', path: '/community-dark', active: location.pathname === '/community' || location.pathname === '/community-dark' }
   ];
 
-  const settingsItems = [
-    { icon: Settings, label: 'Settings', path: '#' },
-    { icon: HelpCircle, label: 'Help', path: '#' }
-  ];
 
   // Handle navigation
   const handleNavigation = (path) => {
@@ -89,7 +81,7 @@ const CollegeSidebarDark = ({ isCollapsed, setIsCollapsed }) => {
         {isCollapsed ? (
           <div className="flex flex-col items-center space-y-3">
             <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-bold">C</span>
+              <span className="text-white text-xs font-bold">Ca</span>
             </div>
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
@@ -100,10 +92,7 @@ const CollegeSidebarDark = ({ isCollapsed, setIsCollapsed }) => {
           </div>
         ) : (
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-bold">C</span>
-              </div>
+            <div className="flex items-center gap-3">
               <span className="text-xl font-semibold text-white">Carevo</span>
             </div>
             <button
@@ -139,23 +128,6 @@ const CollegeSidebarDark = ({ isCollapsed, setIsCollapsed }) => {
           </nav>
         </div>
 
-        {!isCollapsed && (
-          <div>
-            <h3 className="text-xs font-medium text-gray-400 uppercase tracking-wider mb-4">Settings & Help</h3>
-            <nav className="space-y-2">
-              {settingsItems.map((item, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleNavigation(item.path)}
-                  className="w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors text-left"
-                >
-                  <item.icon className="w-5 h-5 mr-3 flex-shrink-0 text-white" />
-                  <span>{item.label}</span>
-                </button>
-              ))}
-            </nav>
-          </div>
-        )}
       </div>
 
       {/* User Profile */}

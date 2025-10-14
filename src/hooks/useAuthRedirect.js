@@ -38,14 +38,14 @@ export const useAuthRedirect = () => {
           
           if (publicRoutes.includes(location.pathname)) {
             console.log('🔄 Redirecting authenticated user from public route');
-            navigate('/carevo-homepage', { replace: true });
+            navigate('/dashboard', { replace: true });
           }
         } else {
           console.log('❌ User is not authenticated');
           clearAuthData();
           
           // If user is not authenticated and on protected routes, redirect to login
-          const protectedRoutes = ['/dashboard', '/quiz', '/chat', '/carevo-homepage', '/study-plan', '/onboarding'];
+          const protectedRoutes = ['/dashboard', '/quiz', '/chat', '/study-plan', '/onboarding'];
           const isProtectedRoute = protectedRoutes.some(route => 
             location.pathname.startsWith(route)
           );
@@ -60,7 +60,7 @@ export const useAuthRedirect = () => {
         clearAuthData();
         
         // If there's an error, assume user is not authenticated
-        const protectedRoutes = ['/dashboard', '/quiz', '/chat', '/carevo-homepage', '/study-plan', '/onboarding'];
+        const protectedRoutes = ['/dashboard', '/quiz', '/chat', '/study-plan', '/onboarding'];
         const isProtectedRoute = protectedRoutes.some(route => 
           location.pathname.startsWith(route)
         );

@@ -30,9 +30,9 @@ export default function PlacementDark() {
   const [selectedBranch, setSelectedBranch] = useState("None");
   const [cgpaFilter, setCgpaFilter] = useState("8.0");
   const [searchCompany, setSearchCompany] = useState("");
+  const [selectedCollege, setSelectedCollege] = useState("Thapar"); // Toggle between Thapar and NSUT
   const navigate = useNavigate();
 
-  // Theme toggle handler
   const handleToggleTheme = () => {
     navigate("/placement-light");
   };
@@ -54,8 +54,8 @@ export default function PlacementDark() {
     getUserInfo();
   }, [navigate]);
 
-  // Sample placement data
-  const placementStats = {
+  // Thapar placement data
+  const thaparStats = {
     totalCompanies: 140,
     avgStipendSecured: "₹50,203",
     avgCTCOffered: "₹14,85,630",
@@ -64,18 +64,34 @@ export default function PlacementDark() {
     studentsSelected: 740
   };
 
-  const distributionData = {
+  // NSUT placement data (based on provided image)
+  const nsutStats = {
+    totalCompanies: 85,
+    avgStipendSecured: "₹45,000",
+    avgCTCOffered: "₹18,50,000",
+    avgPackageSecured: "₹16,25,000",
+    medianPackageSecured: "₹15,00,000",
+    studentsSelected: 420
+  };
+
+  // Current stats based on selected college
+  const placementStats = selectedCollege === "Thapar" ? thaparStats : nsutStats;
+
+  // Distribution data for both colleges
+  const thaparDistribution = {
     intern: 261,
     fte: 261,
     internPTE: 261
   };
 
-  const eligibilityData = {
-    branchEligible: 0,
-    cgpaEligible: 0,
-    avgStipend: "₹0",
-    avgCTC: "₹0"
+  const nsutDistribution = {
+    intern: 180,
+    fte: 200,
+    internPTE: 40
   };
+
+  const distributionData = selectedCollege === "Thapar" ? thaparDistribution : nsutDistribution;
+
 
   const offerTypes = [
     { type: "Intern only", count: 0, ctcRange: "CTC ₹0 - Stipend ₹0" },
@@ -83,8 +99,8 @@ export default function PlacementDark() {
     { type: "Intern + FTE", count: 0, ctcRange: "CTC ₹0 - Stipend ₹0" }
   ];
 
-  // Sample companies data
-  const companiesData = [
+  // Thapar companies data
+  const thaparCompanies = [
     {
       id: 1,
       notificationDate: "13/05/2025",
@@ -142,40 +158,207 @@ export default function PlacementDark() {
     }
   ];
 
+  // NSUT companies data (based on provided image)
+  const nsutCompanies = [
+    {
+      id: 1,
+      notificationDate: "Jul/24",
+      companyName: "Apple",
+      typeOfOffer: "FTE",
+      branchesAllowed: "tech",
+      eligibilityCGPA: "7.2",
+      jobRoles: "SWE",
+      ctcStipend: "CTC ₹1,37,000",
+      studentsSelected: 7
+    },
+    {
+      id: 2,
+      notificationDate: "Jul/24",
+      companyName: "Google Silicon",
+      typeOfOffer: "FTE",
+      branchesAllowed: "core",
+      eligibilityCGPA: "6.2",
+      jobRoles: "Silicon Eng",
+      ctcStipend: "CTC ₹1,14,000",
+      studentsSelected: 8
+    },
+    {
+      id: 3,
+      notificationDate: "Oct/24",
+      companyName: "de shaw",
+      typeOfOffer: "FTE-intern",
+      branchesAllowed: "tech",
+      eligibilityCGPA: "5.5",
+      jobRoles: "SDE",
+      ctcStipend: "CTC ₹2,00,000",
+      studentsSelected: 8
+    },
+    {
+      id: 4,
+      notificationDate: "Jul/24",
+      companyName: "UBER",
+      typeOfOffer: "FTE-intern",
+      branchesAllowed: "tech",
+      eligibilityCGPA: "5.6",
+      jobRoles: "SDE",
+      ctcStipend: "CTC ₹1,77,000",
+      studentsSelected: 8.5
+    },
+    {
+      id: 5,
+      notificationDate: "Jul/24",
+      companyName: "zomato",
+      typeOfOffer: "FTE-intern",
+      branchesAllowed: "tech",
+      eligibilityCGPA: "5.6",
+      jobRoles: "SDE",
+      ctcStipend: "CTC ₹60,000",
+      studentsSelected: 6.5
+    },
+    {
+      id: 6,
+      notificationDate: "Mar/25",
+      companyName: "lti securities HFT",
+      typeOfOffer: "FTE",
+      branchesAllowed: "tech",
+      eligibilityCGPA: "5.4",
+      jobRoles: "full stack dev",
+      ctcStipend: "CTC ₹1,00,000",
+      studentsSelected: 7
+    },
+    {
+      id: 7,
+      notificationDate: "Jul/24",
+      companyName: "Meesho",
+      typeOfOffer: "FTE-intern",
+      branchesAllowed: "tech",
+      eligibilityCGPA: "4.6",
+      jobRoles: "SDE",
+      ctcStipend: "CTC ₹1,00,000",
+      studentsSelected: 6
+    },
+    {
+      id: 8,
+      notificationDate: "Jul/24",
+      companyName: "Amazon****",
+      typeOfOffer: "FTE-intern",
+      branchesAllowed: "tech",
+      eligibilityCGPA: "4.5",
+      jobRoles: "SDE",
+      ctcStipend: "CTC ₹1,10,000",
+      studentsSelected: 7
+    },
+    {
+      id: 9,
+      notificationDate: "Jul/24",
+      companyName: "google",
+      typeOfOffer: "FTE",
+      branchesAllowed: "tech",
+      eligibilityCGPA: "4.4",
+      jobRoles: "SWE",
+      ctcStipend: "CTC ₹1,14,000",
+      studentsSelected: 8
+    },
+    {
+      id: 10,
+      notificationDate: "Aug/24",
+      companyName: "Tower Research",
+      typeOfOffer: "FTE-intern",
+      branchesAllowed: "tech",
+      eligibilityCGPA: "4.4",
+      jobRoles: "SDE",
+      ctcStipend: "CTC ₹1,80,000",
+      studentsSelected: 8
+    }
+  ];
+
+  // Current companies data based on selected college
+  const allCompaniesData = selectedCollege === "Thapar" ? thaparCompanies : nsutCompanies;
+  
+  // Filter companies based on search, branch, and CGPA
+  const companiesData = allCompaniesData.filter(company => {
+    // Search filter
+    const matchesSearch = company.companyName.toLowerCase().includes(searchCompany.toLowerCase());
+    
+    // Branch filter
+    let matchesBranch = true;
+    if (selectedBranch !== "None") {
+      if (selectedCollege === "NSUT") {
+        // For NSUT, map branch selections to their data format
+        const branchMapping = {
+          "CSE": "tech",
+          "IT": "tech", 
+          "ECE": "core",
+          "ME": "core",
+          "EE": "core"
+        };
+        const nsutBranch = branchMapping[selectedBranch];
+        if (nsutBranch) {
+          matchesBranch = company.branchesAllowed.toLowerCase() === nsutBranch;
+        }
+      } else {
+        // For Thapar, use existing logic
+        matchesBranch = company.branchesAllowed.toLowerCase().includes(selectedBranch.toLowerCase()) || 
+                       company.branchesAllowed.includes("All Branches");
+      }
+    }
+    
+    // CGPA filter
+    let matchesCGPA = true;
+    if (cgpaFilter && cgpaFilter !== "") {
+      const filterCGPA = parseFloat(cgpaFilter);
+      if (!isNaN(filterCGPA)) {
+        if (selectedCollege === "NSUT") {
+          // For NSUT, show companies where user's CGPA >= company's minimum requirement
+          const companyCGPA = parseFloat(company.eligibilityCGPA);
+          if (!isNaN(companyCGPA)) {
+            matchesCGPA = filterCGPA >= companyCGPA;
+          }
+        } else {
+          // For Thapar, keep existing logic
+          const companyCGPA = parseFloat(company.eligibilityCGPA);
+          if (!isNaN(companyCGPA)) {
+            matchesCGPA = companyCGPA <= filterCGPA;
+          }
+        }
+      }
+    }
+    
+    return matchesSearch && matchesBranch && matchesCGPA;
+  });
+
   return (
     <div className="flex bg-black min-h-screen">
       <CollegeSidebarDark isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
       
       <div className={`flex-1 flex flex-col transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
-        {/* Header */}
-        <div className="bg-black border-b border-gray-800 px-8 py-5 flex items-center justify-between">
+        <div className="bg-black px-8 py-5 flex items-center justify-between">
           <div className="relative flex-1 max-w-md">
             <input
               type="text"
               placeholder="Search anything"
-              className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-white placeholder-gray-400"
+              className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-white placeholder-gray-400"
             />
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           </div>
           <div className="flex items-center gap-4">
-            {/* Theme toggle button */}
             <button
               onClick={handleToggleTheme}
-              className="p-2 rounded-full bg-gray-800 text-white hover:bg-gray-700 transition-colors"
+              className="p-2 rounded-full bg-gray-900 text-white hover:bg-gray-800 transition-colors"
               title="Switch to Light Mode"
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                 <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd" />
               </svg>
             </button>
-            <button className="p-2 rounded-lg hover:bg-gray-800 transition-colors">
+            <button className="p-2 rounded-lg hover:bg-gray-900 transition-colors">
               <Settings className="w-5 h-5 text-white" />
             </button>
-            <button className="p-2 rounded-lg hover:bg-gray-800 transition-colors relative">
+            <button className="p-2 rounded-lg hover:bg-gray-900 transition-colors relative">
               <Bell className="w-5 h-5 text-white" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
-            <div className="flex items-center gap-2 px-3 py-2 bg-black cursor-pointer hover:bg-gray-900">
+            <div className="flex items-center gap-2 px-3 py-2 bg-gray-900 rounded-lg cursor-pointer hover:bg-gray-800">
               <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center">
                 <span className="text-white text-sm font-medium">
                   {userName.charAt(0).toUpperCase()}
@@ -187,11 +370,9 @@ export default function PlacementDark() {
           </div>
         </div>
 
-        {/* Main Content */}
         <div className="flex-1 p-6 overflow-y-auto bg-black">
           <div className="max-w-7xl mx-auto space-y-6">
             
-            {/* Header Section */}
             <div className="flex items-center justify-between">
               <div>
                 <h1 className="text-3xl font-bold text-white flex items-center gap-2">
@@ -200,11 +381,34 @@ export default function PlacementDark() {
                 </h1>
                 <p className="text-gray-400 text-sm mt-1">Last Updated: 10th Oct 2025</p>
               </div>
+              
+              {/* College Toggle */}
+              <div className="flex items-center gap-2 bg-gray-800 rounded-lg p-1">
+                <button
+                  onClick={() => setSelectedCollege("Thapar")}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    selectedCollege === "Thapar"
+                      ? "bg-gray-700 text-white shadow-sm"
+                      : "text-gray-400 hover:text-white"
+                  }`}
+                >
+                  Thapar
+                </button>
+                <button
+                  onClick={() => setSelectedCollege("NSUT")}
+                  className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                    selectedCollege === "NSUT"
+                      ? "bg-gray-700 text-white shadow-sm"
+                      : "text-gray-400 hover:text-white"
+                  }`}
+                >
+                  NSUT
+                </button>
+              </div>
             </div>
 
-            {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
-              <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
+              <div className="bg-black rounded-lg p-6">
                 <div className="flex items-center gap-3 mb-3">
                   <Building2 className="w-5 h-5 text-blue-400" />
                   <span className="text-sm font-medium text-gray-300">Total Unique Companies</span>
@@ -216,7 +420,7 @@ export default function PlacementDark() {
                 </div>
               </div>
 
-              <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
+              <div className="bg-black rounded-lg p-6">
                 <div className="flex items-center gap-3 mb-3">
                   <TrendingUp className="w-5 h-5 text-green-400" />
                   <span className="text-sm font-medium text-gray-300">Average Stipend Secured</span>
@@ -225,7 +429,7 @@ export default function PlacementDark() {
                 <div className="text-xs text-gray-400">Uses Weighted Averages</div>
               </div>
 
-              <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
+              <div className="bg-black rounded-lg p-6">
                 <div className="flex items-center gap-3 mb-3">
                   <Package className="w-5 h-5 text-purple-400" />
                   <span className="text-sm font-medium text-gray-300">Average CTC Offered</span>
@@ -234,7 +438,7 @@ export default function PlacementDark() {
                 <div className="text-xs text-gray-400">Uses Non-Weighted Average</div>
               </div>
 
-              <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
+              <div className="bg-black rounded-lg p-6">
                 <div className="flex items-center gap-3 mb-3">
                   <DollarSign className="w-5 h-5 text-orange-400" />
                   <span className="text-sm font-medium text-gray-300">Average Package Secured</span>
@@ -243,7 +447,7 @@ export default function PlacementDark() {
                 <div className="text-xs text-gray-400">Uses Weighted Averages</div>
               </div>
 
-              <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
+              <div className="bg-black rounded-lg p-6">
                 <div className="flex items-center gap-3 mb-3">
                   <Users className="w-5 h-5 text-red-400" />
                   <span className="text-sm font-medium text-gray-300">Median Package Secured</span>
@@ -253,10 +457,8 @@ export default function PlacementDark() {
               </div>
             </div>
 
-            {/* Second Row Stats */}
-            <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-              {/* Students Selected */}
-              <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="bg-black rounded-lg p-6">
                 <div className="flex items-center gap-3 mb-3">
                   <GraduationCap className="w-5 h-5 text-blue-400" />
                   <span className="text-sm font-medium text-gray-300">Students Selected</span>
@@ -265,8 +467,7 @@ export default function PlacementDark() {
                 <div className="text-xs text-gray-400">May include Multiple offers to same person</div>
               </div>
 
-              {/* Distribution */}
-              <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
+              <div className="bg-black rounded-lg p-6">
                 <div className="flex items-center gap-3 mb-3">
                   <Briefcase className="w-5 h-5 text-green-400" />
                   <span className="text-sm font-medium text-gray-300">Distribution (Students)</span>
@@ -289,37 +490,9 @@ export default function PlacementDark() {
                   Intern+FTE (subject to Performance) are considered as Intern Only offers
                 </div>
               </div>
-
-              {/* Eligibility Filters */}
-              <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-white mb-4">Eligibility — Branch</h3>
-                    <div className="text-sm text-gray-300 mb-2">Selected: —</div>
-                    <div className="text-sm text-gray-300 mb-2">Companies Eligible: {eligibilityData.branchEligible}</div>
-                    <div className="text-sm text-gray-300 mb-2">Average CTC: {eligibilityData.avgCTC}</div>
-                    <div className="text-sm text-gray-300 mb-2">Average Stipend: {eligibilityData.avgStipend}</div>
-                    <div className="text-xs text-gray-400">Unknown branch info: 0</div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
-                <div className="space-y-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-white mb-4">Eligibility — CGPA</h3>
-                    <div className="text-sm text-gray-300 mb-2">Selected: —</div>
-                    <div className="text-sm text-gray-300 mb-2">Companies Eligible: {eligibilityData.cgpaEligible}</div>
-                    <div className="text-sm text-gray-300 mb-2">Average CTC: {eligibilityData.avgCTC}</div>
-                    <div className="text-sm text-gray-300 mb-2">Average Stipend: {eligibilityData.avgStipend}</div>
-                    <div className="text-xs text-gray-400">Unknown CGPA info: 44</div>
-                  </div>
-                </div>
-              </div>
             </div>
 
-            {/* Placements Data Section */}
-            <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
+            <div className="bg-black rounded-lg p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-white">Placements Data</h2>
                 <div className="relative">
@@ -328,27 +501,38 @@ export default function PlacementDark() {
                     placeholder="Search company"
                     value={searchCompany}
                     onChange={(e) => setSearchCompany(e.target.value)}
-                    className="pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-white placeholder-gray-400"
+                    className="pl-10 pr-4 py-2 bg-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-white placeholder-gray-400"
                   />
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 </div>
               </div>
 
-              {/* Filters */}
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">Choose Branch</label>
                   <select 
                     value={selectedBranch}
                     onChange={(e) => setSelectedBranch(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-white"
+                    className="w-full px-3 py-2 bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-white"
                   >
                     <option value="None">— None —</option>
-                    <option value="CSE">Computer Science</option>
-                    <option value="IT">Information Technology</option>
-                    <option value="ECE">Electronics & Communication</option>
-                    <option value="ME">Mechanical</option>
-                    <option value="EE">Electrical</option>
+                    {selectedCollege === "NSUT" ? (
+                      <>
+                        <option value="CSE">Computer Science (Tech)</option>
+                        <option value="IT">Information Technology (Tech)</option>
+                        <option value="ECE">Electronics & Communication (Core)</option>
+                        <option value="ME">Mechanical (Core)</option>
+                        <option value="EE">Electrical (Core)</option>
+                      </>
+                    ) : (
+                      <>
+                        <option value="CSE">Computer Science</option>
+                        <option value="IT">Information Technology</option>
+                        <option value="ECE">Electronics & Communication</option>
+                        <option value="ME">Mechanical</option>
+                        <option value="EE">Electrical</option>
+                      </>
+                    )}
                   </select>
                 </div>
 
@@ -358,7 +542,7 @@ export default function PlacementDark() {
                     type="text"
                     value={cgpaFilter}
                     onChange={(e) => setCgpaFilter(e.target.value)}
-                    className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-white placeholder-gray-400"
+                    className="w-full px-3 py-2 bg-gray-800 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-white placeholder-gray-400"
                     placeholder="8.0"
                   />
                 </div>
@@ -378,9 +562,8 @@ export default function PlacementDark() {
                 </div>
               </div>
 
-              {/* Offer Types */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                <div className="bg-gray-800 rounded-lg p-4">
+                <div className="bg-gray-900 rounded-lg p-4">
                   <h3 className="font-semibold text-white mb-2">By Offer Type</h3>
                   {offerTypes.map((offer, index) => (
                     <div key={index} className="mb-3">
@@ -392,34 +575,33 @@ export default function PlacementDark() {
                 </div>
               </div>
 
-              {/* Companies Table */}
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse">
+              <div className="overflow-x-auto -mx-6">
+                <table className="w-full">
                   <thead>
-                    <tr className="bg-gray-800 border-b border-gray-700">
-                      <th className="text-left p-3 text-sm font-medium text-gray-300"># ↑↓</th>
-                      <th className="text-left p-3 text-sm font-medium text-gray-300">Notification Date ↑↓</th>
-                      <th className="text-left p-3 text-sm font-medium text-gray-300">Company Name ↑↓</th>
-                      <th className="text-left p-3 text-sm font-medium text-gray-300">Type of Offer ↑↓</th>
-                      <th className="text-left p-3 text-sm font-medium text-gray-300">Branches Allowed ↑↓</th>
-                      <th className="text-left p-3 text-sm font-medium text-gray-300">Eligibility CGPA ↑↓</th>
-                      <th className="text-left p-3 text-sm font-medium text-gray-300">Job Roles ↑↓</th>
-                      <th className="text-left p-3 text-sm font-medium text-gray-300">CTC/Stipend ↑↓</th>
-                      <th className="text-left p-3 text-sm font-medium text-gray-300">Students Selected ↑↓</th>
+                    <tr className="bg-gray-900">
+                      <th className="text-left px-6 py-3 text-sm font-medium text-gray-300"># ↑↓</th>
+                      <th className="text-left px-6 py-3 text-sm font-medium text-gray-300">Notification Date ↑↓</th>
+                      <th className="text-left px-6 py-3 text-sm font-medium text-gray-300">Company Name ↑↓</th>
+                      <th className="text-left px-6 py-3 text-sm font-medium text-gray-300">Type of Offer ↑↓</th>
+                      <th className="text-left px-6 py-3 text-sm font-medium text-gray-300">Branches Allowed ↑↓</th>
+                      <th className="text-left px-6 py-3 text-sm font-medium text-gray-300">Eligibility CGPA ↑↓</th>
+                      <th className="text-left px-6 py-3 text-sm font-medium text-gray-300">Job Roles ↑↓</th>
+                      <th className="text-left px-6 py-3 text-sm font-medium text-gray-300">CTC/Stipend ↑↓</th>
+                      <th className="text-left px-6 py-3 text-sm font-medium text-gray-300">Students Selected ↑↓</th>
                     </tr>
                   </thead>
                   <tbody>
                     {companiesData.map((company, index) => (
-                      <tr key={company.id} className="border-b border-gray-800 hover:bg-gray-800">
-                        <td className="p-3 text-sm text-white">{index + 1}</td>
-                        <td className="p-3 text-sm text-white">{company.notificationDate}</td>
-                        <td className="p-3 text-sm font-medium text-white">{company.companyName}</td>
-                        <td className="p-3 text-sm text-white">{company.typeOfOffer}</td>
-                        <td className="p-3 text-sm text-white">{company.branchesAllowed}</td>
-                        <td className="p-3 text-sm text-white">{company.eligibilityCGPA}</td>
-                        <td className="p-3 text-sm text-white">{company.jobRoles}</td>
-                        <td className="p-3 text-sm text-white">{company.ctcStipend}</td>
-                        <td className="p-3 text-sm text-center font-medium text-white">{company.studentsSelected}</td>
+                      <tr key={company.id} className="hover:bg-gray-900">
+                        <td className="px-6 py-3 text-sm text-white">{index + 1}</td>
+                        <td className="px-6 py-3 text-sm text-white">{company.notificationDate}</td>
+                        <td className="px-6 py-3 text-sm font-medium text-white">{company.companyName}</td>
+                        <td className="px-6 py-3 text-sm text-white">{company.typeOfOffer}</td>
+                        <td className="px-6 py-3 text-sm text-white">{company.branchesAllowed}</td>
+                        <td className="px-6 py-3 text-sm text-white">{company.eligibilityCGPA}</td>
+                        <td className="px-6 py-3 text-sm text-white">{company.jobRoles}</td>
+                        <td className="px-6 py-3 text-sm text-white">{company.ctcStipend}</td>
+                        <td className="px-6 py-3 text-sm text-center font-medium text-white">{company.studentsSelected}</td>
                       </tr>
                     ))}
                   </tbody>

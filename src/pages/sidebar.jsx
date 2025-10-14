@@ -3,17 +3,16 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import { API_ENDPOINTS } from '../config';
 import { 
-  Home, 
   User, 
   MessageSquare, 
   BookOpen, 
-  Settings, 
+  LayoutDashboard,
+  FolderOpen,
+  Settings,
   HelpCircle,
   LogOut,
   Menu,
-  LayoutDashboard,
-  GraduationCap,
-  FolderOpen
+  GraduationCap
 } from 'lucide-react';
 
 const Sidebar = ({ isCollapsed, setIsCollapsed, isDarkMode = false }) => {
@@ -61,7 +60,6 @@ const Sidebar = ({ isCollapsed, setIsCollapsed, isDarkMode = false }) => {
 
   // Navigation items with functional routes
   const sidebarItems = [
-    { icon: Home, label: 'Home', path: '/carevo-homepage', active: location.pathname === '/carevo-homepage' },
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', active: location.pathname === '/dashboard' },
     { icon: User, label: 'Quiz', path: '/quiz', active: location.pathname === '/quiz' },
     { icon: MessageSquare, label: 'Chat', path: '/chat', active: location.pathname === '/chat' },
@@ -70,10 +68,6 @@ const Sidebar = ({ isCollapsed, setIsCollapsed, isDarkMode = false }) => {
     { icon: FolderOpen, label: 'Inventory', path: '/inventory', active: location.pathname === '/inventory' || location.pathname === '/inventory-dark' }
   ];
 
-  const settingsItems = [
-    { icon: Settings, label: 'Settings', path: '#' },
-    { icon: HelpCircle, label: 'Help', path: '#' }
-  ];
 
 
   // Handle navigation
@@ -161,29 +155,6 @@ const Sidebar = ({ isCollapsed, setIsCollapsed, isDarkMode = false }) => {
           </nav>
         </div>
 
-        {!isCollapsed && (
-          <div>
-            <h3 className={`text-xs font-medium uppercase tracking-wider mb-4 ${
-              isDarkMode ? 'text-gray-400' : 'text-gray-500'
-            }`}>Settings & Help</h3>
-            <nav className="space-y-2">
-              {settingsItems.map((item, index) => (
-                <button
-                  key={index}
-                  onClick={() => handleNavigation(item.path)}
-                  className={`w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors text-left ${
-                    isDarkMode ? 'text-gray-300 hover:text-white hover:bg-gray-700' : 'text-gray-600 hover:text-white hover:bg-gray-600'
-                  }`}
-                >
-                  <item.icon className={`w-5 h-5 mr-3 flex-shrink-0 ${
-                    isDarkMode ? 'text-white' : ''
-                  }`} />
-                  <span>{item.label}</span>
-                </button>
-              ))}
-            </nav>
-          </div>
-        )}
       </div>
 
       {/* User Profile */}
