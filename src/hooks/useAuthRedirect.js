@@ -45,7 +45,7 @@ export const useAuthRedirect = () => {
           clearAuthData();
           
           // If user is not authenticated and on protected routes, redirect to login
-          const protectedRoutes = ['/dashboard', '/quiz', '/chat', '/study-plan', '/onboarding'];
+          const protectedRoutes = ['/dashboard', '/quiz', '/chat', '/study-plan'];
           const isProtectedRoute = protectedRoutes.some(route => 
             location.pathname.startsWith(route)
           );
@@ -60,7 +60,7 @@ export const useAuthRedirect = () => {
         clearAuthData();
         
         // If there's an error, assume user is not authenticated
-        const protectedRoutes = ['/dashboard', '/quiz', '/chat', '/study-plan', '/onboarding'];
+        const protectedRoutes = ['/dashboard', '/quiz', '/chat', '/study-plan'];
         const isProtectedRoute = protectedRoutes.some(route => 
           location.pathname.startsWith(route)
         );

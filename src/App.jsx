@@ -13,7 +13,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_ENDPOINTS } from './config';
 import { useAuthRedirect } from './hooks/useAuthRedirect';
-import StudentOnboardingForm from './pages/onboarding';
+import OnboardingFlow from './pages/onboading';
 import { setupAxiosInterceptors } from './utils/axiosConfig';
 import Classroom from './pages/classroom';
 import ClassroomLight from './pages/classroom_light';
@@ -35,6 +35,10 @@ import QuizCollegeLight from './pages/quiz_college_light';
 import QuizCollegeDark from './pages/quiz_college_dark';
 import ResumeCollegeLight from './pages/resume_college_light';
 import ResumeCollegeDark from './pages/resume_college_dark';
+import CarevoLanding from './pages/landing_page';
+import Pricing from './pages/pricing';
+import AboutTeam from './pages/about_team';
+import Product from './pages/product';
 
 function UserIcon() {
   return (
@@ -178,8 +182,7 @@ function DashboardSelector() {
 }
 
 // 🚨 UPDATED PUBLIC ROUTE COMPONENT
-function PublicRoute({ children }) {
-  const [isAuthenticated, setIsAuthenticated] = useState(null);
+function PublicRoute({ children, allowAuthenticated = false }) {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -188,7 +191,6 @@ function PublicRoute({ children }) {
       const token = localStorage.getItem('authToken');
       
       if (!token) {
-        setIsAuthenticated(false);
         setLoading(false);
         return;
       }
@@ -198,11 +200,11 @@ function PublicRoute({ children }) {
         const response = await axios.get(API_ENDPOINTS.AUTH_STATUS);
         
         if (response.data.authenticated) {
-          setIsAuthenticated(true);
-          // If authenticated, redirect to dashboard
-          navigate('/dashboard', { replace: true });
+          // If authenticated, redirect to dashboard unless explicitly allowed
+          if (!allowAuthenticated) {
+            navigate('/dashboard', { replace: true });
+          }
         } else {
-          setIsAuthenticated(false);
           // Clear token if not valid
           localStorage.removeItem('authToken');
           localStorage.removeItem('userEmail');
@@ -211,7 +213,6 @@ function PublicRoute({ children }) {
         }
       } catch (error) {
         console.error('Public route auth check failed:', error);
-        setIsAuthenticated(false);
         // Clear token on error
         localStorage.removeItem('authToken');
         localStorage.removeItem('userEmail');
@@ -223,7 +224,7 @@ function PublicRoute({ children }) {
     };
 
     checkAuth();
-  }, [navigate]);
+  }, [navigate, allowAuthenticated]);
 
   if (loading) {
     return (
@@ -257,7 +258,11 @@ function AppRoutes() {
   useAuthRedirect();
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/" element={
+        <PublicRoute>
+          <CarevoLanding />
+        </PublicRoute>
+      } />
       
       {/* Public routes - redirect authenticated users to dashboard */}
       <Route path="/login" element={
@@ -268,6 +273,21 @@ function AppRoutes() {
       <Route path="/signup" element={
         <PublicRoute>
           <Signup />
+        </PublicRoute>
+      } />
+      <Route path="/about-team" element={
+        <PublicRoute>
+          <AboutTeam />
+        </PublicRoute>
+      } />
+      <Route path="/product" element={
+        <PublicRoute>
+          <Product />
+        </PublicRoute>
+      } />
+      <Route path="/pricing" element={
+        <PublicRoute>
+          <Pricing />
         </PublicRoute>
       } />
       
@@ -321,11 +341,11 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       
-      {/* Onboarding route - no sidebar */}
+      {/* Onboarding route - public for development, accessible even when authenticated */}
       <Route path="/onboarding" element={
-        <ProtectedRoute>
-          <StudentOnboardingForm />
-        </ProtectedRoute>
+        <PublicRoute allowAuthenticated={true}>
+          <OnboardingFlow />
+        </PublicRoute>
       } />
       
       {/* Classroom routes - have their own sidebars */}
