@@ -1,5 +1,6 @@
 import { Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import pulkitImg from '../assets/Gemini_Generated_Image_id2hceid2hceid2h.png';
 
 export default function AboutTeam() {
   const navigate = useNavigate();
@@ -8,15 +9,17 @@ export default function AboutTeam() {
       name: "Pulkit Jhamb",
       role: "CEO",
       bio: "Leads product vision and strategy at Carevo.",
-      img: "https://i.pravatar.cc/300?img=12",
-      linkedin: "#",
+      img: "src/assets/pulkit.png",
+      style: { transform: 'scale(1.15)' },
+      linkedin: "https://www.linkedin.com/in/pulkit-jhamb-7766ab2b3/",
       instagram: "#",
     },
     {
       name: "Kartik Malik",
       role: "CTO",
       bio: "Oversees engineering and AI systems.",
-      img: "https://i.pravatar.cc/300?img=32",
+      img: "src/assets/kartik_dp.jpg",
+
       linkedin: "#",
       instagram: "#",
     },
@@ -24,7 +27,7 @@ export default function AboutTeam() {
       name: "Harshit Dua",
       role: "CMO and Design Head",
       bio: "Drives growth, brand and design.",
-      img: "https://i.pravatar.cc/300?img=58",
+      img: "src/assets/harshit1.png",
       linkedin: "#",
       instagram: "#",
     },
@@ -89,12 +92,15 @@ export default function AboutTeam() {
                 key={i}
                 className="bg-white rounded-xl shadow-sm border border-gray-100 p-8 flex flex-col items-center text-center hover:shadow-md transition-shadow"
               >
-                <img
-                  src={m.img}
-                  alt={m.name}
-                  className="w-24 h-24 rounded-full object-cover shadow mb-5"
-                  loading="lazy"
-                />
+                <div className="w-24 h-24 rounded-full overflow-hidden shadow mb-5 ring-1 ring-black/5">
+                  <img
+                    src={m.img}
+                    alt={m.name}
+                    className="w-full h-full object-cover object-center"
+                    style={m.style}
+                    loading="lazy"
+                  />
+                </div>
                 <h3 className="text-[17px] font-semibold text-gray-900">{m.name}</h3>
                 <p className="text-gray-600 text-sm mt-2">{m.role}</p>
                 <p className="text-gray-500 text-sm mt-4 leading-relaxed max-w-[230px]">{m.bio}</p>
