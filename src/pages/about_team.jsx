@@ -1,6 +1,8 @@
 import { Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import pulkitImg from '../assets/Gemini_Generated_Image_id2hceid2hceid2h.png';
+import pulkitImg from '../assets/pulkit.png';
+import kartikImg from '../assets/kartik_dp.jpg';
+import harshitImg from '../assets/harshit1.png';
 
 export default function AboutTeam() {
   const navigate = useNavigate();
@@ -9,7 +11,7 @@ export default function AboutTeam() {
       name: "Pulkit Jhamb",
       role: "CEO",
       bio: "Leads product vision and strategy at Carevo.",
-      img: "src/assets/pulkit.png",
+      img: pulkitImg,
       style: { transform: 'scale(1.15)' },
       linkedin: "https://www.linkedin.com/in/pulkit-jhamb-7766ab2b3/",
       instagram: "#",
@@ -18,7 +20,7 @@ export default function AboutTeam() {
       name: "Kartik Malik",
       role: "CTO",
       bio: "Oversees engineering and AI systems.",
-      img: "src/assets/kartik_dp.jpg",
+      img: kartikImg,
 
       linkedin: "#",
       instagram: "#",
@@ -27,7 +29,7 @@ export default function AboutTeam() {
       name: "Harshit Dua",
       role: "CMO and Design Head",
       bio: "Drives growth, brand and design.",
-      img: "src/assets/harshit1.png",
+      img: harshitImg,
       linkedin: "#",
       instagram: "#",
     },

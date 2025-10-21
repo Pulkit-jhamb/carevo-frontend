@@ -8,6 +8,11 @@ import landingVideo2 from '../assets/landingpagevideo2.mp4';
 import bgVideo from '../assets/bgVideo.mp4';
 import bgVideo2 from '../assets/bgVideo2.mp4';
 import bgVideo3 from '../assets/bgVideo3.mp4';
+import dashboardImg from '../assets/ui_ux/dashboard.png';
+import chatbotImg from '../assets/ui_ux/chatbot.jpeg';
+import placementImg from '../assets/ui_ux/placement.png';
+import communityImg from '../assets/ui_ux/community.jpeg';
+import notabilityImg from '../assets/ui_ux/notability.jpeg';
 
 
 
@@ -206,7 +211,7 @@ export default function CarevoLanding() {
               </p>
                <div className="h-[480px] w-full mt-6">
                <div className="bg-white shadow-md rounded-lg overflow-hidden">
-                 <img src="/src/assets/ui_ux/dashboard.png" alt="Visualization" className="w-full h-auto" />
+                 <img src={dashboardImg} alt="Visualization" className="w-full h-auto" />
                </div>
                </div>
              </div>
@@ -220,7 +225,7 @@ export default function CarevoLanding() {
               </p>
                <div className="h-[480px] w-full mt-6">
                <div className="bg-white shadow-md rounded-lg overflow-hidden">
-                 <img src="/src/assets/ui_ux/chatbot.jpeg" alt="Visualization" className="w-full h-auto" />
+                 <img src={chatbotImg} alt="Visualization" className="w-full h-auto" />
                </div>
                </div>
                
@@ -422,7 +427,7 @@ export default function CarevoLanding() {
                     <span className="w-2 h-2 rounded-full bg-gray-300"></span>
                     <span>Placement</span>
                   </div>
-                  <img src="/src/assets/ui_ux/placement.png" alt="Academic Companion" className="w-full h-full object-cover" />
+                  <img src={placementImg} alt="Academic Companion" className="w-full h-full object-cover" />
                 </div>
               </Card>
               <Card customClass="w-[520px] h-[360px] shadow-2xl border-white/20 overflow-hidden bg-black">
@@ -431,7 +436,7 @@ export default function CarevoLanding() {
                     <span className="w-2 h-2 rounded-full bg-gray-300"></span>
                     <span>Community</span>
                   </div>
-                  <img src="/src/assets/ui_ux/community.jpeg" alt="Academic Companion" className="w-full h-full object-cover" />
+                  <img src={communityImg} alt="Academic Companion" className="w-full h-full object-cover" />
                 </div>
               </Card>
               <Card customClass="w-[520px] h-[360px] shadow-2xl border-white/20 overflow-hidden bg-black">
@@ -440,7 +445,7 @@ export default function CarevoLanding() {
                     <span className="w-2 h-2 rounded-full bg-gray-300"></span>
                     <span>Notability</span>
                   </div>
-                  <img src="/src/assets/ui_ux/notability.jpeg" alt="Academic Companion" className="w-full h-full object-cover" />
+                  <img src={notabilityImg} alt="Academic Companion" className="w-full h-full object-cover" />
                 </div>
               </Card>
             </CardSwap>
