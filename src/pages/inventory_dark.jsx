@@ -1,11 +1,43 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "./sidebar_dark.jsx";
 import { Search, Settings, Bell, ChevronDown, FileText, Plus } from "lucide-react";
+import { API_ENDPOINTS } from "../config";
+import axios from "axios";
 
 export default function InventoryDark() {
-  const userName = "Harshit Dua";
+  const [userName, setUserName] = useState("Student"); // Default fallback
   const navigate = useNavigate();
+
+  // Fetch user name from backend
+  useEffect(() => {
+    const getUserInfo = async () => {
+      try {
+        // First try to get from localStorage
+        const storedUserName = localStorage.getItem("userName");
+        if (storedUserName) {
+          setUserName(storedUserName);
+        }
+
+        // Then fetch from API for most up-to-date info
+        const response = await axios.get(API_ENDPOINTS.AUTH_STATUS, {
+          withCredentials: true
+        });
+        if (response.data.authenticated && response.data.user) {
+          const name = response.data.user.name || storedUserName || "Student";
+          setUserName(name);
+        }
+      } catch (error) {
+        console.error("Failed to get user info:", error);
+        // Keep the localStorage value or default
+        const storedUserName = localStorage.getItem("userName");
+        if (storedUserName) {
+          setUserName(storedUserName);
+        }
+      }
+    };
+    getUserInfo();
+  }, []);
 
   // Theme toggle handler
   const handleToggleTheme = () => {

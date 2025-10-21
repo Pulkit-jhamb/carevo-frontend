@@ -19,64 +19,21 @@ export const useAuthRedirect = () => {
   }, []);
 
   useEffect(() => {
-    const checkAuthAndRedirect = async () => {
-      const token = localStorage.getItem('authToken');
-      
-      console.log('🔍 Checking auth status...');
-      console.log('📍 Current path:', location.pathname);
-      console.log('🔐 Token exists:', !!token);
-
-      try {
-        // The axios interceptor will automatically add the token header
-        const response = await axios.get(API_ENDPOINTS.AUTH_STATUS);
-        
-        if (response.data.authenticated) {
-          console.log('✅ User is authenticated');
-          
-          // If user is authenticated and on public routes, redirect to dashboard
-          const publicRoutes = ['/login', '/signup', '/'];
-          
-          if (publicRoutes.includes(location.pathname)) {
-            console.log('🔄 Redirecting authenticated user from public route');
-            navigate('/dashboard', { replace: true });
-          }
-        } else {
-          console.log('❌ User is not authenticated');
-          clearAuthData();
-          
-          // If user is not authenticated and on protected routes, redirect to login
-          const protectedRoutes = ['/dashboard', '/quiz', '/chat', '/study-plan'];
-          const isProtectedRoute = protectedRoutes.some(route => 
-            location.pathname.startsWith(route)
-          );
-          
-          if (isProtectedRoute) {
-            console.log('🔄 Redirecting unauthenticated user from protected route');
-            navigate('/login', { replace: true });
-          }
-        }
-      } catch (error) {
-        console.error('🚨 Auth check failed:', error);
-        clearAuthData();
-        
-        // If there's an error, assume user is not authenticated
-        const protectedRoutes = ['/dashboard', '/quiz', '/chat', '/study-plan'];
-        const isProtectedRoute = protectedRoutes.some(route => 
-          location.pathname.startsWith(route)
-        );
-        
-        if (isProtectedRoute) {
-          console.log('🔄 Redirecting after auth error');
-          navigate('/login', { replace: true });
-        }
-      }
-    };
-
-    // Small delay to prevent conflicts
-    const timeoutId = setTimeout(() => {
-      checkAuthAndRedirect();
-    }, 100);
-
-    return () => clearTimeout(timeoutId);
+    // Temporarily disable useAuthRedirect to debug login issues
+    console.log('🔍 useAuthRedirect disabled for debugging');
+    console.log('📍 Current path:', location.pathname);
+    console.log('🔐 Token exists:', !!localStorage.getItem('authToken'));
+    
+    // Only redirect if we're on a protected route without a token
+    const token = localStorage.getItem('authToken');
+    const protectedRoutes = ['/dashboard', '/quiz', '/chat', '/study-plan'];
+    const isProtectedRoute = protectedRoutes.some(route => 
+      location.pathname.startsWith(route)
+    );
+    
+    if (isProtectedRoute && !token) {
+      console.log('🔄 No token on protected route, redirecting to login');
+      navigate('/login', { replace: true });
+    }
   }, [navigate, location.pathname, clearAuthData]);
 };

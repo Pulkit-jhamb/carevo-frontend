@@ -1,14 +1,17 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { API_ENDPOINTS } from "../config";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!email || !password) {
@@ -16,9 +19,72 @@ export default function Login() {
       return;
     }
 
-    // Your existing login logic would go here
-    console.log("Login attempt:", { email, password });
+    setIsLoading(true);
     setError("");
+
+    try {
+      const response = await axios.post(API_ENDPOINTS.LOGIN, {
+        email,
+        password,
+      });
+
+      console.log("🔍 Full login response:", response.data);
+
+      // Check for different possible success indicators
+      if (response.data.success || response.data.token || response.status === 200) {
+        // Store authentication data
+        const token = response.data.token || response.data.authToken || response.data.access_token;
+        const user = response.data.user || response.data;
+        
+        if (token) {
+          localStorage.setItem("authToken", token);
+        }
+        if (user.email) {
+          localStorage.setItem("userEmail", user.email);
+        }
+        if (user.name) {
+          localStorage.setItem("userName", user.name);
+        }
+        localStorage.setItem("userType", user.studentType || user.userType || user.user_type || "school");
+
+        console.log("✅ Login successful!");
+        console.log("📧 User email:", user.email);
+        console.log("👤 User name:", user.name);
+        console.log("🎓 User type:", user.studentType || user.userType || user.user_type || "school");
+        console.log("🔐 Token stored:", !!token);
+        console.log("📋 Onboarding complete:", user.isOnboardingComplete);
+        
+        // Use the backend's isOnboardingComplete flag to determine routing
+        const needsOnboarding = !user.isOnboardingComplete;
+        
+        if (needsOnboarding) {
+          console.log("🎯 New user detected (onboarding incomplete) - redirecting to onboarding...");
+          // Add a small delay to ensure localStorage is updated
+          setTimeout(() => {
+            window.location.href = "/onboarding";
+          }, 100);
+        } else {
+          console.log("🔄 Existing user (onboarding complete) - redirecting to dashboard...");
+          // Add a small delay to ensure localStorage is updated
+          setTimeout(() => {
+            window.location.href = "/dashboard";
+          }, 100);
+        }
+      } else {
+        setError(response.data.message || "Login failed");
+      }
+    } catch (error) {
+      console.error("❌ Login error:", error);
+      if (error.response?.data?.message) {
+        setError(error.response.data.message);
+      } else if (error.response?.status === 401) {
+        setError("Invalid email or password");
+      } else {
+        setError("Login failed. Please try again.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSocialLogin = (provider) => {
@@ -67,7 +133,7 @@ export default function Login() {
         </div>
 
         {/* Login Form */}
-        <div className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* Email Input */}
           <div>
             <input
@@ -122,13 +188,15 @@ export default function Login() {
           {/* Sign In Button */}
           <div className="pt-6">
             <button
+              type="submit"
               onClick={handleSubmit}
-              className="w-full bg-gray-800 text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-900 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2"
+              disabled={isLoading}
+              className="w-full bg-gray-800 text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-900 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-800 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Sign in
+              {isLoading ? "Signing in..." : "Sign in"}
             </button>
           </div>
-        </div>
+        </form>
 
         {/* Sign Up Link */}
         <div className="text-center mt-6" >

@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { API_ENDPOINTS } from '../config';
 
 const SplashScreen = ({ onAnimationComplete }) => {
   const [isVisible, setIsVisible] = useState(false);
@@ -35,6 +38,7 @@ const SplashScreen = ({ onAnimationComplete }) => {
 };
 
 const OnboardingFlow = () => {
+  const navigate = useNavigate();
   const [showSplash, setShowSplash] = useState(true);
   const [currentStep, setCurrentStep] = useState(1);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -44,14 +48,151 @@ const OnboardingFlow = () => {
   const [selectedCategory, setSelectedCategory] = useState('');
   const [userInfo, setUserInfo] = useState({
     name: '',
-    day: '',
-    month: '',
+    instituteName: '',
     year: '',
     language: 'English'
   });
   const [selectedPlan, setSelectedPlan] = useState('');
+  const [isCompleting, setIsCompleting] = useState(false);
 
   const totalSteps = selectedInstitution === 'college' ? 6 : 5;
+
+  // Handle onboarding completion
+  const handleCompleteOnboarding = async () => {
+    setIsCompleting(true);
+    
+    try {
+      const email = localStorage.getItem("signupEmail");
+      
+      if (!email) {
+        console.error("No email found for onboarding completion");
+        navigate("/login");
+        return;
+      }
+
+      // Prepare comprehensive profile data with new fields
+      const profileData = {
+        email: email,
+        preferred_theme: selectedTheme || "light",
+        name: userInfo.name || "",
+        instituteName: userInfo.instituteName || "",
+        year: userInfo.year || "",
+        preferred_language: userInfo.language || "English",
+        school_or_college: selectedInstitution || "school",
+        course: selectedCategory || "",
+        // Add additional fields for proper dashboard routing
+        studentType: selectedInstitution || "school",
+        institute: userInfo.instituteName || (selectedInstitution === "college" ? "College" : "School"),
+        // Add specific fields based on institution type
+        ...(selectedInstitution === "college" ? {
+          major: selectedCategory || "",
+          year: userInfo.year || "1st Year"
+        } : {
+          class: userInfo.year || "10th"
+        })
+      };
+
+      console.log("🚀 Saving onboarding data:", profileData);
+
+      // Save profile data to database
+      const response = await axios.patch(API_ENDPOINTS.USER_UPDATE, profileData);
+      
+      console.log("✅ Onboarding data saved successfully:", response.data);
+      
+      // Now authenticate the user with proper JWT token
+      try {
+        const authResponse = await axios.post(`${API_ENDPOINTS.BASE_URL}/auth/onboarding-complete`, {
+          email: email
+        });
+        
+        console.log("✅ Authentication successful:", authResponse.data);
+        
+        // Store the proper JWT token and user data
+        localStorage.setItem("authToken", authResponse.data.token);
+        localStorage.setItem("userEmail", authResponse.data.user.email);
+        localStorage.setItem("userName", authResponse.data.user.name || "");
+        localStorage.setItem("userType", authResponse.data.user.studentType);
+        
+        // Clear signup email from localStorage
+        localStorage.removeItem("signupEmail");
+        
+        console.log("🎯 Authentication complete, redirecting to dashboard...");
+        window.location.href = "/dashboard";
+        
+      } catch (authError) {
+        console.error("❌ Authentication error:", authError);
+        // Clear signup email and redirect anyway
+        localStorage.removeItem("signupEmail");
+        window.location.href = "/dashboard";
+      }
+      
+    } catch (error) {
+      console.error("❌ Error saving onboarding data:", error);
+      // Still redirect to dashboard even if save fails
+      navigate("/dashboard");
+    } finally {
+      setIsCompleting(false);
+    }
+  };
+
+  // Handle skipping onboarding
+  const handleSkipOnboarding = async () => {
+    setIsCompleting(true);
+    
+    try {
+      const email = localStorage.getItem("signupEmail");
+      
+      if (email) {
+        // Save minimal profile data with proper fields for dashboard routing
+        const minimalData = {
+          email: email,
+          preferred_theme: "light",
+          name: "",
+          instituteName: "",
+          year: "",
+          preferred_language: "English",
+          school_or_college: "school",
+          course: "",
+          studentType: "school",
+          institute: "School",
+          class: "10th" // Default class for school students
+        };
+
+        await axios.patch(API_ENDPOINTS.USER_UPDATE, minimalData);
+        console.log("✅ Minimal profile data saved");
+        
+        // Authenticate the user with proper JWT token
+        try {
+          const authResponse = await axios.post(`${API_ENDPOINTS.BASE_URL}/auth/onboarding-complete`, {
+            email: email
+          });
+          
+          console.log("✅ Authentication successful:", authResponse.data);
+          
+          // Store the proper JWT token and user data
+          localStorage.setItem("authToken", authResponse.data.token);
+          localStorage.setItem("userEmail", authResponse.data.user.email);
+          localStorage.setItem("userName", authResponse.data.user.name || "");
+          localStorage.setItem("userType", authResponse.data.user.studentType);
+          
+        } catch (authError) {
+          console.error("❌ Authentication error:", authError);
+        }
+      }
+      
+      // Clear signup email from localStorage
+      localStorage.removeItem("signupEmail");
+      
+      console.log("🎯 Onboarding skipped, redirecting to dashboard...");
+      window.location.href = "/dashboard";
+      
+    } catch (error) {
+      console.error("❌ Error saving minimal data:", error);
+      navigate("/dashboard");
+    } finally {
+      setIsCompleting(false);
+    }
+  };
 
   const nextStep = () => {
     if (isAnimating) return;
@@ -353,110 +494,95 @@ const OnboardingFlow = () => {
   );
 
   // Step 3: User Info
-  const UserInfoStep = () => (
-    <div className={`transition-all duration-300 ${getTransitionClass()}`}>
-      <div className="text-center max-w-lg mx-auto">
-        <h1 className={`text-2xl md:text-3xl font-bold mb-10 ${getTextColor()}`}>Help us personalize your experience</h1>
-        
-        <div className="space-y-8 mb-10">
-          <div className="text-left">
-            <label className={`block text-base font-medium mb-3 ${getTextColor()}`}>
-              What's your name?
-            </label>
-            <input
-              type="text"
-              className={`w-full px-4 py-3.5 rounded-lg border outline-none transition-all ${getInputColors()}`}
-              placeholder="pulkit"
-            />
-          </div>
-
-          <div className="text-left">
-            <label className={`block text-base font-medium mb-3 ${getTextColor()}`}>
-              What's your date of birth?
-            </label>
-            <div className="flex gap-3">
+  const UserInfoStep = () => {
+    return (
+      <div className="transition-all duration-300 opacity-100 translate-x-0">
+        <div className="text-center max-w-lg mx-auto">
+          <h1 className="text-2xl md:text-3xl font-bold mb-10 text-white">Help us personalize your experience</h1>
+          
+          <div className="space-y-8 mb-10">
+            <div className="text-left">
+              <label className="block text-base font-medium mb-3 text-white">
+                What's your name?
+              </label>
               <input
                 type="text"
-                className={`w-20 px-4 py-3.5 rounded-lg border outline-none transition-all text-center ${getInputColors()}`}
-                placeholder="23"
-                maxLength="2"
+                value={userInfo.name}
+                onChange={(e) => setUserInfo({...userInfo, name: e.target.value})}
+                className="w-full px-4 py-3.5 rounded-lg border border-gray-600 bg-gray-800 text-white placeholder-gray-400 focus:border-white focus:ring-1 focus:ring-white outline-none"
+                placeholder="Enter your full name"
+                autoComplete="name"
               />
+            </div>
 
+            <div className="text-left">
+              <label className="block text-base font-medium mb-3 text-white">
+                {selectedInstitution === 'college' ? "What's your university/college name?" : "What's your school name?"}
+              </label>
+              <input
+                type="text"
+                value={userInfo.instituteName}
+                onChange={(e) => setUserInfo({...userInfo, instituteName: e.target.value})}
+                className="w-full px-4 py-3.5 rounded-lg border border-gray-600 bg-gray-800 text-white placeholder-gray-400 focus:border-white focus:ring-1 focus:ring-white outline-none"
+                placeholder={selectedInstitution === 'college' ? "Enter your university/college name" : "Enter your school name"}
+                autoComplete="organization"
+              />
+            </div>
+
+            <div className="text-left">
+              <label className="block text-base font-medium mb-3 text-white">
+                {selectedInstitution === 'college' ? "What year are you in?" : "What class/grade are you in?"}
+              </label>
+              <input
+                type="text"
+                value={userInfo.year}
+                onChange={(e) => setUserInfo({...userInfo, year: e.target.value})}
+                className="w-full px-4 py-3.5 rounded-lg border border-gray-600 bg-gray-800 text-white placeholder-gray-400 focus:border-white focus:ring-1 focus:ring-white outline-none"
+                placeholder={selectedInstitution === 'college' ? "e.g., 1st Year, 2nd Year, Final Year" : "e.g., 9th, 10th, 11th, 12th"}
+              />
+            </div>
+
+            <div className="text-left">
+              <label className="block text-base font-medium mb-3 text-white">
+                What's your preferred language?
+              </label>
               <select
-                className={`flex-1 px-4 py-3.5 rounded-lg border outline-none transition-all ${getInputColors()}`}
+                value={userInfo.language}
+                onChange={(e) => setUserInfo({...userInfo, language: e.target.value})}
+                className="w-full px-4 py-3.5 rounded-lg border border-gray-600 bg-gray-800 text-white focus:border-white focus:ring-1 focus:ring-white outline-none"
               >
-                <option value="">July</option>
-                <option value="January">January</option>
-                <option value="February">February</option>
-                <option value="March">March</option>
-                <option value="April">April</option>
-                <option value="May">May</option>
-                <option value="June">June</option>
-                <option value="July">July</option>
-                <option value="August">August</option>
-                <option value="September">September</option>
-                <option value="October">October</option>
-                <option value="November">November</option>
-                <option value="December">December</option>
+                <option value="English">🇺🇸 English</option>
+                <option value="Spanish">🇪🇸 Spanish</option>
+                <option value="French">🇫🇷 French</option>
+                <option value="German">🇩🇪 German</option>
+                <option value="Hindi">🇮🇳 Hindi</option>
+                <option value="Chinese">🇨🇳 Chinese</option>
+                <option value="Japanese">🇯🇵 Japanese</option>
               </select>
-
-              <input
-                type="text"
-                className={`w-28 px-4 py-3.5 rounded-lg border outline-none transition-all text-center ${getInputColors()}`}
-                placeholder="2004"
-                maxLength="4"
-              />
             </div>
           </div>
 
-          <div className="text-left">
-            <label className={`block text-base font-medium mb-3 ${getTextColor()}`}>
-              What's your preferred language?
-            </label>
-            <select
-              className={`w-full px-4 py-3.5 rounded-lg border outline-none transition-all ${getInputColors()}`}
+          <div className="flex gap-4 justify-center">
+            <button
+              onClick={prevStep}
+              disabled={isAnimating}
+              className="px-8 py-3 rounded-full font-medium bg-gray-800 text-white hover:bg-gray-700 border border-gray-600"
             >
-              <option value="English">🇺🇸 English</option>
-              <option value="Spanish">🇪🇸 Spanish</option>
-              <option value="French">🇫🇷 French</option>
-              <option value="German">🇩🇪 German</option>
-              <option value="Hindi">🇮🇳 Hindi</option>
-              <option value="Chinese">🇨🇳 Chinese</option>
-              <option value="Japanese">🇯🇵 Japanese</option>
-            </select>
+              Back
+            </button>
+
+            <button
+              onClick={nextStep}
+              disabled={isAnimating}
+              className="px-8 py-3 rounded-full font-medium bg-white text-black hover:bg-gray-100"
+            >
+              Next
+            </button>
           </div>
         </div>
-
-        <div className="flex gap-4 justify-center">
-          <button
-            onClick={prevStep}
-            disabled={isAnimating}
-            className={`px-8 py-3 rounded-full font-medium transition-all duration-200 ${
-              selectedTheme === 'light'
-                ? 'bg-white text-black hover:bg-gray-100'
-                : 'bg-[#1a1a1a] text-white hover:bg-[#2a2a2a]'
-            }`}
-          >
-            Back
-          </button>
-
-          <button
-            onClick={nextStep}
-            disabled={isAnimating}
-            className={`px-8 py-3 rounded-full font-medium transition-all duration-200 ${
-              !isAnimating
-                ? `${getButtonColors()} hover:scale-105 cursor-pointer`
-                : selectedTheme === 'light'
-                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : 'bg-gray-700 text-gray-500 cursor-not-allowed'
-            }`}
-          >
-            Next
-          </button>
-        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   // Step 4a: Category Selection for College (Engineering, Medical, etc.)
   const CollegeCategoryStep = () => (
@@ -723,29 +849,27 @@ const OnboardingFlow = () => {
 
         <div className="flex items-center justify-center gap-4">
           <button
-            onClick={() => {
-              alert('Onboarding completed! Welcome to Carevo!');
-            }}
-            className={`px-6 py-2.5 rounded-full font-medium transition-all duration-200 ${
+            onClick={handleSkipOnboarding}
+            disabled={isCompleting}
+            className={`px-6 py-2.5 rounded-full font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
               selectedTheme === 'light'
                 ? 'bg-white text-black border border-gray-300 hover:bg-gray-50'
                 : 'bg-[#1a1a1a] text-white border border-gray-800 hover:bg-[#222]'
             }`}
           >
-            Skip for now
+            {isCompleting ? 'Saving...' : 'Skip for now'}
           </button>
 
           <button
-            onClick={() => {
-              alert('Onboarding completed! Welcome to Carevo!');
-            }}
-            className={`px-6 py-2.5 rounded-full font-medium transition-all duration-200 ${
+            onClick={handleCompleteOnboarding}
+            disabled={isCompleting}
+            className={`px-6 py-2.5 rounded-full font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
               selectedTheme === 'light'
                 ? 'bg-black text-white hover:bg-gray-900'
                 : 'bg-white text-black hover:bg-gray-100'
             }`}
           >
-            Continue
+            {isCompleting ? 'Saving...' : 'Continue'}
           </button>
         </div>
       </div>

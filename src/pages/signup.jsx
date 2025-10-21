@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { API_ENDPOINTS } from "../config";
 
 export default function Signup() {
   const [form, setForm] = useState({
@@ -9,31 +11,74 @@ export default function Signup() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    console.log(`📝 Field updated: ${e.target.name} = "${e.target.value}"`);
+    console.log("📋 Current form state:", { email: form.email, password: form.password });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
+    setIsLoading(true);
 
-    if (!form.email || !form.password) {
-      setError("Please fill in all fields.");
-      return;
+    console.log("🚀 Form submitted!");
+    console.log("📋 Form data at submit:", form);
+
+    try {
+      console.log("🚀 Attempting signup with:", { email: form.email, password: "***hidden***" });
+      console.log("🔗 API Endpoint:", API_ENDPOINTS.SIGNUP);
+      console.log("📤 Request payload:", JSON.stringify({
+        email: form.email,
+        password: form.password ? "***filled***" : "empty"
+      }));
+      
+      // Send only email and password - all other data will be collected in onboarding
+      const response = await axios.post(API_ENDPOINTS.SIGNUP, {
+        email: form.email,
+        password: form.password
+      });
+
+      console.log("✅ Signup successful:", response.data);
+      
+      setSuccess("Account created successfully! Setting up your profile...");
+      
+      // Store email for onboarding process
+      localStorage.setItem("signupEmail", form.email);
+      
+      // Redirect directly to onboarding after 1 second
+      setTimeout(() => {
+        navigate("/onboarding");
+      }, 1000);
+
+    } catch (error) {
+      console.error("❌ Signup error:", error);
+      console.error("❌ Error response:", error.response?.data);
+      console.error("❌ Error status:", error.response?.status);
+      
+      if (error.response?.data?.message) {
+        setError(error.response.data.message);
+      } else if (error.response?.data?.error) {
+        setError(error.response.data.error);
+      } else {
+        setError(`Signup failed: ${error.message || 'Unknown error'}`);
+      }
+    } finally {
+      setIsLoading(false);
     }
-
-    // Your existing API call logic would go here
-    setSuccess("Signed up successfully!");
-    console.log("Signup attempt:", form);
   };
 
-  const handleGoogleSignup = () => {
-    console.log("Google signup clicked");
-    // Implement Google OAuth logic
-  };
+  // Google signup handler - COMMENTED OUT
+  // const handleGoogleSignup = (e) => {
+  //   e.preventDefault();
+  //   e.stopPropagation();
+  //   console.log("Google signup clicked");
+  //   alert("Google signup coming soon! Please use email signup for now.");
+  // };
 
   const handleNavigateToLogin = () => {
     console.log("Navigate to login");
@@ -60,7 +105,8 @@ export default function Signup() {
           <div className="w-full max-w-sm">
             <br /><br />
             <h2 className="text-2xl font-bold text-black text-center mb-8">Create an account</h2>
-            {/* Google Sign Up */}
+            {/* Google Sign Up - COMMENTED OUT TO FIX FORM VALIDATION ISSUES */}
+            {/*
             <button
               onClick={handleGoogleSignup}
               className="w-full flex items-center justify-center px-4 py-3 border border-gray-300 rounded-xl bg-white hover:bg-gray-50 transition-colors mb-6"
@@ -74,10 +120,10 @@ export default function Signup() {
               </svg>
               <span className="text-gray-700 font-medium">Sign up with Google</span>
             </button>
-            {/* Divider */}
             <div className="border-t border-gray-200 mb-6"></div>
+            */}
             {/* Form */}
-            <div className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                 <input
@@ -124,13 +170,33 @@ export default function Signup() {
               </div>
               {error && <div className="text-red-500 text-sm text-center">{error}</div>}
               {success && <div className="text-green-600 text-sm text-center">{success}</div>}
+              
+              {/* Debug section - Remove after testing */}
+              {process.env.NODE_ENV === 'development' && (
+                <div className="text-xs bg-gray-100 p-2 rounded">
+                  <div>Debug: Email="{form.email}" ({form.email?.length || 0} chars)</div>
+                  <div>Debug: Password="{form.password ? '***filled***' : 'empty'}" ({form.password?.length || 0} chars)</div>
+                  <button 
+                    type="button"
+                    onClick={() => {
+                      console.log("🧪 Test form data:", form);
+                      setError("");
+                      setSuccess("Test: Form data captured successfully!");
+                    }}
+                    className="mt-1 px-2 py-1 bg-blue-500 text-white text-xs rounded"
+                  >
+                    Test Form Data
+                  </button>
+                </div>
+              )}
               <button
-                onClick={handleSubmit}
-                className="w-full bg-black text-white py-3 rounded-xl font-semibold mt-2 hover:bg-gray-800 transition-colors"
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-black text-white py-3 rounded-xl font-semibold mt-2 hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Sign up
+                {isLoading ? "Creating Account..." : "Sign up"}
               </button>
-            </div>
+            </form>
             <div className="text-center mt-6 text-sm">
               <span className="text-gray-600">Already registered? </span>
               <button
