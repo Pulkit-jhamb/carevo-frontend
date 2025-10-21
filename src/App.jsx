@@ -13,7 +13,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { API_ENDPOINTS } from './config';
 import { useAuthRedirect } from './hooks/useAuthRedirect';
-import OnboardingFlow from './pages/onboading';
 import { setupAxiosInterceptors } from './utils/axiosConfig';
 import Classroom from './pages/classroom';
 import ClassroomLight from './pages/classroom_light';
@@ -190,7 +189,13 @@ function DashboardSelector() {
         // Determine user type based on database fields
         let determinedUserType = "school"; // default
         
-        if (userData.year && !userData.class) {
+        // PRIORITY 1: Check studentType field (set during signup)
+        if (userData.studentType) {
+          determinedUserType = userData.studentType;
+          console.log(`✅ Using studentType from database: ${userData.studentType}`);
+        }
+        // PRIORITY 2: Fallback checks for legacy users without studentType
+        else if (userData.year && !userData.class) {
           // Has year but no class = college student
           determinedUserType = "college";
           console.log("🎓 Detected college user (has year, no class)");
@@ -415,12 +420,7 @@ function AppRoutes() {
         </ProtectedRoute>
       } />
       
-      {/* Onboarding route - public for development, accessible even when authenticated */}
-      <Route path="/onboarding" element={
-        <PublicRoute allowAuthenticated={true}>
-          <OnboardingFlow />
-        </PublicRoute>
-      } />
+      {/* Onboarding removed - profile data collected during signup */}
       
       {/* Classroom routes - have their own sidebars */}
       <Route path="/classroom" element={

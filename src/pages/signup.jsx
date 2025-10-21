@@ -7,6 +7,9 @@ export default function Signup() {
   const [form, setForm] = useState({
     email: "",
     password: "",
+    name: "",
+    institutionType: "school",
+    institutionName: "",
   });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -37,23 +40,36 @@ export default function Signup() {
         password: form.password ? "***filled***" : "empty"
       }));
       
-      // Send only email and password - all other data will be collected in onboarding
+      // Send all signup data including profile information
       const response = await axios.post(API_ENDPOINTS.SIGNUP, {
         email: form.email,
-        password: form.password
+        password: form.password,
+        name: form.name,
+        institutionType: form.institutionType,
+        institutionName: form.institutionName
       });
 
       console.log("✅ Signup successful:", response.data);
       
-      setSuccess("Account created successfully! Setting up your profile...");
-      
-      // Store email for onboarding process
-      localStorage.setItem("signupEmail", form.email);
-      
-      // Redirect directly to onboarding after 1 second
-      setTimeout(() => {
-        navigate("/onboarding");
-      }, 1000);
+      // Signup response includes token, so store it and redirect to dashboard
+      if (response.data.token) {
+        localStorage.setItem("authToken", response.data.token);
+        localStorage.setItem("userEmail", response.data.user.email);
+        localStorage.setItem("userName", response.data.user.name || "");
+        localStorage.setItem("userType", response.data.user.studentType);
+        
+        setSuccess("Account created successfully! Redirecting to dashboard...");
+        
+        // Redirect to dashboard after brief delay
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 1000);
+      } else {
+        setError("Signup successful but authentication failed. Please login.");
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
+      }
 
     } catch (error) {
       console.error("❌ Signup error:", error);
@@ -125,6 +141,21 @@ export default function Signup() {
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  value={form.name}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
+                  placeholder="Enter your full name"
+                  autoComplete="name"
+                  required
+                />
+              </div>
+              
+              <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                 <input
                   id="email"
@@ -135,8 +166,42 @@ export default function Signup() {
                   className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
                   placeholder="Email"
                   autoComplete="email"
+                  required
                 />
               </div>
+              
+              <div>
+                <label htmlFor="institutionType" className="block text-sm font-medium text-gray-700 mb-1">Institution Type</label>
+                <select
+                  id="institutionType"
+                  name="institutionType"
+                  value={form.institutionType}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-black focus:ring-1 focus:ring-black bg-white"
+                  required
+                >
+                  <option value="school">School</option>
+                  <option value="college">College</option>
+                </select>
+              </div>
+              
+              <div>
+                <label htmlFor="institutionName" className="block text-sm font-medium text-gray-700 mb-1">
+                  {form.institutionType === 'college' ? 'College/University Name' : 'School Name'}
+                </label>
+                <input
+                  id="institutionName"
+                  name="institutionName"
+                  type="text"
+                  value={form.institutionName}
+                  onChange={handleChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:border-black focus:ring-1 focus:ring-black"
+                  placeholder={form.institutionType === 'college' ? 'Enter your college/university name' : 'Enter your school name'}
+                  autoComplete="organization"
+                  required
+                />
+              </div>
+              
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Password</label>
                 <div className="relative">
@@ -171,24 +236,6 @@ export default function Signup() {
               {error && <div className="text-red-500 text-sm text-center">{error}</div>}
               {success && <div className="text-green-600 text-sm text-center">{success}</div>}
               
-              {/* Debug section - Remove after testing */}
-              {process.env.NODE_ENV === 'development' && (
-                <div className="text-xs bg-gray-100 p-2 rounded">
-                  <div>Debug: Email="{form.email}" ({form.email?.length || 0} chars)</div>
-                  <div>Debug: Password="{form.password ? '***filled***' : 'empty'}" ({form.password?.length || 0} chars)</div>
-                  <button 
-                    type="button"
-                    onClick={() => {
-                      console.log("🧪 Test form data:", form);
-                      setError("");
-                      setSuccess("Test: Form data captured successfully!");
-                    }}
-                    className="mt-1 px-2 py-1 bg-blue-500 text-white text-xs rounded"
-                  >
-                    Test Form Data
-                  </button>
-                </div>
-              )}
               <button
                 type="submit"
                 disabled={isLoading}
