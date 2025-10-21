@@ -1,5 +1,7 @@
 import { Calendar } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import landingVideo1 from '../assets/landingpagevideo1.mp4';
+import landingVideo2 from '../assets/landingpagevideo2.mp4';
 
 export default function ProductPage() {
   const navigate = useNavigate();
@@ -119,7 +121,7 @@ export default function ProductPage() {
               className="w-full h-full object-cover"
               style={{ minHeight: '520px' }}
             >
-              <source src="/src/assets/landingpagevideo2.mp4" type="video/mp4" />
+              <source src={landingVideo2} type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           </div>
@@ -164,7 +166,7 @@ export default function ProductPage() {
               className="w-full h-full object-cover"
               style={{ minHeight: '520px' }}
             >
-              <source src="/src/assets/landingpagevideo1.mp4" type="video/mp4" />
+              <source src={landingVideo1} type="video/mp4" />
               Your browser does not support the video tag.
             </video>
           </div>

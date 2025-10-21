@@ -3,6 +3,12 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CardSwap , {Card} from '../components/card_swap';
 
+import landingVideo1 from '../assets/landingpagevideo1.mp4';
+import landingVideo2 from '../assets/landingpagevideo2.mp4';
+import bgVideo from '../assets/bgVideo.mp4';
+import bgVideo2 from '../assets/bgVideo2.mp4';
+import bgVideo3 from '../assets/bgVideo3.mp4';
+
 
 
 
@@ -176,7 +182,7 @@ export default function CarevoLanding() {
                className="w-full h-full object-cover"
                style={{ minHeight: '600px' }}
                >
-               <source src="/src/assets/landingpagevideo1.mp4" type="video/mp4" />
+               <source src={landingVideo1} type="video/mp4" />
                Your browser does not support the video tag.
              </video>
            </div>
@@ -269,7 +275,7 @@ export default function CarevoLanding() {
                          objectFit: 'cover'
                        }}
                      >
-                       <source src="/src/assets/bgVideo.mp4" type="video/mp4" />
+                       <source src={bgVideo} type="video/mp4" />
                      </video>
                    </foreignObject>
                  </svg>
@@ -316,7 +322,7 @@ export default function CarevoLanding() {
                          objectFit: 'cover'
                        }}
                      >
-                       <source src="/src/assets/bgVideo2.mp4" type="video/mp4" />
+                       <source src={bgVideo2} type="video/mp4" />
                      </video>
                    </foreignObject>
                  </svg>
@@ -363,7 +369,7 @@ export default function CarevoLanding() {
                          objectFit: 'cover'
                        }}
                      >
-                       <source src="/src/assets/bgVideo3.mp4" type="video/mp4" />
+                       <source src={bgVideo3} type="video/mp4" />
                      </video>
                    </foreignObject>
                  </svg>
@@ -477,7 +483,7 @@ export default function CarevoLanding() {
                className="w-full h-full object-cover"
                style={{ minHeight: '460px' }}
              >
-               <source src="/src/assets/landingpagevideo2.mp4" type="video/mp4" />
+               <source src={landingVideo2} type="video/mp4" />
                Your browser does not support the video tag.
              </video>
            </div>
