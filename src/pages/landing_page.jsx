@@ -102,12 +102,6 @@ export default function CarevoLanding() {
            {/* Navigation Links */}
            <div className="flex items-center space-x-8">
              <a
-               onClick={() => navigate('/about-team')}
-               className="text-gray-900 text-sm hover:text-black transition-colors cursor-pointer"
-             >
-               About Team
-             </a>
-             <a
               onClick={() => navigate('/product')}
               className="text-gray-900 text-sm hover:text-black transition-colors cursor-pointer"
             >
