@@ -26,7 +26,17 @@ export const useAuthRedirect = () => {
     
     // Only redirect if we're on a protected route without a token
     const token = localStorage.getItem('authToken');
-    const protectedRoutes = ['/dashboard', '/quiz', '/chat', '/study-plan'];
+    const protectedRoutes = [
+      '/dashboard',
+      '/college-dashboard',
+      '/quiz-college',
+      '/mental-health-college',
+      '/community',
+      '/notability',
+      '/placement',
+      '/resume',
+      '/chat'
+    ];
     const isProtectedRoute = protectedRoutes.some(route => 
       location.pathname.startsWith(route)
     );
