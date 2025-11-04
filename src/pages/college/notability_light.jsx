@@ -3,36 +3,36 @@ import { useNavigate } from 'react-router-dom';
 import { API_ENDPOINTS } from '../../config';
 import axios from 'axios';
 import CollegeSidebarLight from './sidebar_college_light';
-import CollegeSidebarDark from './sidebar_college_dark';
 import { 
   Search, 
   Settings, 
   Bell, 
   ChevronDown, 
+  Plus,
   Upload,
   Download,
   Eye,
   Star,
   Calendar,
   User,
+  BookOpen,
   FileText,
   Image,
   Video,
   File
 } from 'lucide-react';
 
-export default function Notability() {
+export default function NotabilityLight() {
   const [user, setUser] = useState(null);
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const navigate = useNavigate();
 
   // Theme toggle handler
   const handleToggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
+    navigate("/notability-dark");
   };
 
   useEffect(() => {
@@ -56,14 +56,14 @@ export default function Notability() {
   const driveFileMapping = {
     'Circuit Analysis': '1VG8bqShVweH1rSY1q3IRt-H7-kGjSPSB',
     'Data Structures': '1kf2KKV8LIvBaFkwMFUg6d_BDRAwsj1so',
-    'Algorithms': '1ADaNtXO8N5_igylfFFblDUf32BIF9tuk',
-    'Digital Electronics': '1ijsiMiRs1uqPcBx5sxynrRc5JCtM1IjV',
+    'Algorithms': '1ADaNtXO8N5_igylfFFblDUf32BIF9tuk', // dynamic programming
+    'Digital Electronics': '1ijsiMiRs1uqPcBx5sxynrRc5JCtM1IjV', // logic gates
     'Mathematics II': '1TgBOd_RvD-_pswrEpNEDptoSnT-2Ln4-',
-    'Machine Learning': '1Zr93aNQctJC576_TQ02gx7DldyT0rLsy',
+    'Machine Learning': '1Zr93aNQctJC576_TQ02gx7DldyT0rLsy', // deep learning
     'Operating Systems': '1yc5VnMfVVRxV02L2wwAcv1RD7AV4x6Xe',
-    'Robotics Dynamics': '1fzvZpsBaWAKRILfbzqFH5gdynotAiBk8',
+    'Robotics Dynamics': '1fzvZpsBaWAKRILfbzqFH5gdynotAiBk8', // robotics
     'Software Engineering': '19ZL8vlx0_F9j61Y1J7U_0l_687IlTYYv',
-    'Database Systems': '1QU04OGbTfmHK6K2o0XpsXinMU76Q6P7p',
+    'Database Systems': '1QU04OGbTfmHK6K2o0XpsXinMU76Q6P7p', // sql
     'Stress Analysis': '15_lvKD92wwOe_ZipMgzUju_Ao8Tp9zd7',
     'Thermodynamics': '1ZzTxcg-f36M7HGU_WEQ9mGXUqu6M6fEM',
     'UI/UX Design': '1xkIcIpbCp4IlM39RRL-SNPVZDWsc_ypO'
@@ -244,8 +244,8 @@ export default function Notability() {
   };
 
   const NoteCard = ({ note, showUploadDate = false, showBranch = false }) => (
-    <div className={`${isDarkMode ? 'bg-gray-900 border-gray-800 hover:border-gray-700' : 'bg-white border-gray-200'} rounded-lg border overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group`}>
-      <div className={`aspect-[3/4] ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'} relative overflow-hidden`}>
+    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden hover:shadow-lg transition-all duration-300 cursor-pointer group">
+      <div className="aspect-[3/4] bg-gray-100 relative overflow-hidden">
         <img 
           src={note.thumbnail} 
           alt={note.title}
@@ -255,43 +255,43 @@ export default function Notability() {
             e.target.nextSibling.style.display = 'flex';
           }}
         />
-        <div className={`absolute inset-0 bg-gradient-to-b from-transparent via-transparent ${isDarkMode ? 'to-black/80' : 'to-black/60'}`}></div>
-        <div className={`absolute inset-0 hidden items-center justify-center ${isDarkMode ? 'bg-gray-800' : 'bg-gray-200'}`}>
-          <div className={`w-16 h-20 ${isDarkMode ? 'bg-gray-700' : 'bg-gray-300'} rounded-lg flex items-center justify-center flex-col gap-2`}>
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60"></div>
+        <div className="absolute inset-0 hidden items-center justify-center bg-gray-200">
+          <div className="w-16 h-20 bg-gray-300 rounded-lg flex items-center justify-center flex-col gap-2">
             <span className="text-2xl">{note.icon}</span>
             {getFileIcon(note.type)}
           </div>
         </div>
         <div className="absolute top-3 right-3">
-          <button className={`p-2 ${isDarkMode ? 'bg-black/60 hover:bg-black/80' : 'bg-white/80 hover:bg-white'} rounded-full transition-colors`}>
-            <Star className={`w-4 h-4 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`} />
+          <button className="p-2 bg-white/80 rounded-full hover:bg-white transition-colors">
+            <Star className="w-4 h-4 text-gray-600" />
           </button>
         </div>
         <div className="absolute bottom-3 left-3 right-3">
           <h3 className="text-white font-semibold text-sm mb-1 line-clamp-2 drop-shadow-lg">{note.title}</h3>
-          <p className={`${isDarkMode ? 'text-gray-200' : 'text-white/90'} text-xs line-clamp-2 drop-shadow-md`}>{note.subtitle}</p>
+          <p className="text-white/90 text-xs line-clamp-2 drop-shadow-md">{note.subtitle}</p>
         </div>
       </div>
       <div className="p-4">
-        <div className={`flex items-center justify-between text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-2`}>
+        <div className="flex items-center justify-between text-xs text-gray-600 mb-2">
           <div className="flex items-center gap-1">
             <User className="w-3 h-3" />
             <span>{note.author}</span>
           </div>
           {note.tag && (
-            <span className={`${isDarkMode ? 'bg-blue-900 text-blue-300' : 'bg-blue-100 text-blue-800'} px-2 py-1 rounded-full text-xs font-medium`}>
+            <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-xs font-medium">
               {note.tag}
             </span>
           )}
         </div>
         {showUploadDate && (
-          <div className={`flex items-center gap-1 text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-500'} mb-2`}>
+          <div className="flex items-center gap-1 text-xs text-gray-500 mb-2">
             <Calendar className="w-3 h-3" />
             <span>{note.uploadDate}</span>
           </div>
         )}
         {showBranch && (
-          <div className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-500'} mb-2`}>
+          <div className="text-xs text-gray-500 mb-2">
             <span>{note.branch} • {note.semester}</span>
           </div>
         )}
@@ -305,7 +305,7 @@ export default function Notability() {
           </button>
           <button 
             onClick={() => openDriveFile(note.title)}
-            className={`flex items-center justify-center gap-1 px-3 py-2 ${isDarkMode ? 'bg-gray-800 text-gray-300 hover:bg-gray-700' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'} rounded-lg text-xs font-medium transition-colors`}
+            className="flex items-center justify-center gap-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-200 transition-colors"
           >
             <Download className="w-3 h-3" />
           </button>
@@ -315,25 +315,17 @@ export default function Notability() {
   );
 
   return (
-    <div className={`flex ${isDarkMode ? 'bg-black' : 'bg-white'} min-h-screen`}>
-      {isDarkMode ? (
-        <CollegeSidebarDark isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
-      ) : (
-        <CollegeSidebarLight isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
-      )}
+    <div className="flex bg-white min-h-screen">
+      <CollegeSidebarLight isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
       
       <div className={`flex-1 flex flex-col transition-all duration-300 ${isCollapsed ? 'ml-16' : 'ml-64'}`}>
         {/* Header */}
-        <div className={`${isDarkMode ? 'bg-black border-gray-800' : 'bg-white border-gray-200'} border-b px-8 py-5 flex items-center justify-between`}>
+        <div className="bg-white border-b border-gray-200 px-8 py-5 flex items-center justify-between">
           <div className="relative flex-1 max-w-md">
             <input
               type="text"
               placeholder="Search anything"
-              className={`w-full pl-10 pr-4 py-2.5 rounded-lg ${
-                isDarkMode 
-                  ? 'bg-gray-800 border-gray-700 text-white placeholder-gray-400' 
-                  : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-500'
-              } border focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm`}
+              className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm text-gray-900 placeholder-gray-500"
             />
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
           </div>
@@ -341,28 +333,18 @@ export default function Notability() {
             {/* Theme toggle button */}
             <button
               onClick={handleToggleTheme}
-              className={`p-2 rounded-full ${
-                isDarkMode 
-                  ? 'bg-gray-800 text-white hover:bg-gray-700' 
-                  : 'bg-gray-100 text-black hover:bg-gray-200'
-              } transition-colors`}
-              title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              className="p-2 rounded-full bg-gray-100 text-black hover:bg-gray-200 transition-colors"
+              title="Switch to Dark Mode"
             >
-              {isDarkMode ? (
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clipRule="evenodd" />
-                </svg>
-              ) : (
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
-                </svg>
-              )}
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+              </svg>
             </button>
-            <button className={`p-2 rounded-lg ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} transition-colors`}>
-              <Settings className={`w-5 h-5 ${isDarkMode ? 'text-white' : 'text-gray-600'}`} />
+            <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+              <Settings className="w-5 h-5 text-gray-600" />
             </button>
-            <button className={`p-2 rounded-lg ${isDarkMode ? 'hover:bg-gray-800' : 'hover:bg-gray-100'} transition-colors relative`}>
-              <Bell className={`w-5 h-5 ${isDarkMode ? 'text-white' : 'text-gray-600'}`} />
+            <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors relative">
+              <Bell className="w-5 h-5 text-gray-600" />
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
             <button 
@@ -372,27 +354,25 @@ export default function Notability() {
               <Upload className="w-4 h-4" />
               Upload Notes
             </button>
-            <div className={`flex items-center gap-2 px-3 py-2 ${
-              isDarkMode ? 'bg-black hover:bg-gray-900' : 'bg-gray-50 border border-gray-200 hover:bg-gray-100'
-            } rounded-lg cursor-pointer`}>
-              <div className={`w-8 h-8 rounded-full ${isDarkMode ? 'bg-gray-700' : 'bg-gray-300'} flex items-center justify-center`}>
-                <span className={`${isDarkMode ? 'text-white' : 'text-gray-600'} text-sm font-medium`}>
+            <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-100">
+              <div className="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center">
+                <span className="text-gray-600 text-sm font-medium">
                   {userName.charAt(0).toUpperCase()}
                 </span>
               </div>
-              <span className={`text-sm font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{userName || 'Harshit Dua'}</span>
-              <ChevronDown className={`w-4 h-4 ${isDarkMode ? 'text-white' : 'text-gray-500'}`} />
+              <span className="text-sm font-medium text-gray-900">{userName || 'Harshit Dua'}</span>
+              <ChevronDown className="w-4 h-4 text-gray-500" />
             </div>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className={`flex-1 p-6 overflow-y-auto ${isDarkMode ? 'bg-black' : 'bg-white'}`}>
+        <div className="flex-1 p-6 overflow-y-auto bg-white">
           <div className="max-w-7xl mx-auto space-y-8">
             
             {/* Trending Notes */}
             <section>
-              <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-6`}>Trending Notes</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Trending Notes</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                 {trendingNotes.map((note) => (
                   <NoteCard key={note.id} note={note} />
@@ -402,7 +382,7 @@ export default function Notability() {
 
             {/* Recently Uploaded Notes */}
             <section>
-              <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-6`}>Recently Uploaded Notes</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Recently Uploaded Notes</h2>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                 {recentlyUploaded.map((note) => (
                   <NoteCard key={note.id} note={note} showUploadDate={true} />
@@ -412,8 +392,8 @@ export default function Notability() {
 
             {/* Recommended For You */}
             <section>
-              <h2 className={`text-2xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'} mb-2`}>Recommended For You</h2>
-              <p className={`${isDarkMode ? 'text-gray-400' : 'text-gray-600'} text-sm mb-6`}>(based on your branch or semester)</p>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Recommended For You</h2>
+              <p className="text-gray-600 text-sm mb-6">(based on your branch or semester)</p>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {recommendedNotes.map((note) => (
                   <NoteCard key={note.id} note={note} showBranch={true} />
@@ -427,12 +407,12 @@ export default function Notability() {
       {/* Upload Modal */}
       {showUploadModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className={`${isDarkMode ? 'bg-gray-900 border-gray-700' : 'bg-white'} rounded-lg p-6 w-full max-w-md mx-4 ${isDarkMode ? 'border' : ''}`}>
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
             <div className="flex items-center justify-between mb-4">
-              <h3 className={`text-lg font-semibold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Upload Notes</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Upload Notes</h3>
               <button 
                 onClick={() => setShowUploadModal(false)}
-                className={`${isDarkMode ? 'text-gray-400 hover:text-gray-300' : 'text-gray-400 hover:text-gray-600'}`}
+                className="text-gray-400 hover:text-gray-600"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -442,44 +422,34 @@ export default function Notability() {
             
             <div className="space-y-4">
               <div>
-                <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Note Title
                 </label>
                 <input
                   type="text"
-                  className={`w-full px-3 py-2 border ${
-                    isDarkMode 
-                      ? 'border-gray-600 bg-gray-800 text-white' 
-                      : 'border-gray-300 bg-white text-gray-900'
-                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="Enter note title"
                 />
               </div>
               
               <div>
-                <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   Subject/Topic
                 </label>
                 <input
                   type="text"
-                  className={`w-full px-3 py-2 border ${
-                    isDarkMode 
-                      ? 'border-gray-600 bg-gray-800 text-white' 
-                      : 'border-gray-300 bg-white text-gray-900'
-                  } rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   placeholder="e.g., Machine Learning, Data Structures"
                 />
               </div>
               
               <div>
-                <label className={`block text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} mb-2`}>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
                   File Upload
                 </label>
-                <div className={`border-2 border-dashed ${
-                  isDarkMode ? 'border-gray-600' : 'border-gray-300'
-                } rounded-lg p-6 text-center hover:border-blue-400 transition-colors`}>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors">
                   <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                  <p className={`text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'} mb-2`}>
+                  <p className="text-sm text-gray-600 mb-2">
                     Drag and drop your files here, or click to browse
                   </p>
                   <input
@@ -504,16 +474,13 @@ export default function Notability() {
               <div className="flex gap-3 pt-4">
                 <button
                   onClick={() => setShowUploadModal(false)}
-                  className={`flex-1 px-4 py-2 border ${
-                    isDarkMode 
-                      ? 'border-gray-600 text-gray-300 hover:bg-gray-800' 
-                      : 'border-gray-300 text-gray-700 hover:bg-gray-50'
-                  } rounded-lg transition-colors`}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={() => {
+                    // Handle upload logic here
                     alert('Upload functionality would be implemented here!');
                     setShowUploadModal(false);
                   }}
